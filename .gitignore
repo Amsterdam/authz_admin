@@ -2,3 +2,6 @@
 # IntelliJ stuff:
 /.idea/
 /*.iml
+
+# Python virtual environement:
+/venv/
