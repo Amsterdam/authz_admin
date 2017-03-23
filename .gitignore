@@ -1,7 +1,17 @@
+# Python ephemerals:
+__pycache__
+*.egg-info
 
 # IntelliJ stuff:
 /.idea/
 /*.iml
+#/.editorconfig
 
 # Python virtual environement:
-/venv/
+/venv
+.venv
+
+# Generated documentation:
+/docs/_build/
+# Downloaded intersphinx inventory files:
+/docs/*.inv

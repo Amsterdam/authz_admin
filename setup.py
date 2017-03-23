@@ -1,9 +1,11 @@
+""" See <https://setuptools.readthedocs.io/en/latest/>.
+"""
 from setuptools import setup
 setup(
     version='0.1',
     name='datapunt-oauth2',
     description="Permission Management and OAuth2 Authorization Service",
-    #long_description="",
+    # long_description="",
     url='https://github.com/DatapuntAmsterdam/oauth2',
     author='Amsterdam Datapunt',
     author_email='datapunt.ois@amsterdam.nl',
@@ -13,11 +15,24 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
     ],
-    #cmdclass={'test': PyTest},
-    packages=['admin', 'common', 'oauth2'],
-    install_requires=[],
+    # cmdclass={'test': PyTest},
+    packages=[
+        'admin_service',
+        'shared',
+        'oauth2_service',
+    ],
+    install_requires=[
+        'jsonschema',
+        'psycopg2',
+        'pyyaml',
+        'sqlalchemy',
+    ],
     extras_require={
-        'doc': ['sphinx', 'sphinx_rtd_theme']
+        'doc': [
+            'sphinx',
+            'sphinx_rtd_theme'
+        ],
+        'dev': [],
     },
     tests_require=[],
 )
