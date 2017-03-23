@@ -5,3 +5,6 @@
 
 # Python virtual environement:
 /venv/
+
+# Generated documentation:
+/docs/_build/
