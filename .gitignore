@@ -1,7 +1,10 @@
+# Python ephemerals:
+__pycache__
 
 # IntelliJ stuff:
 /.idea/
 /*.iml
+/.editorconfig
 
 # Python virtual environement:
 /venv/

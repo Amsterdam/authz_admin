@@ -20,9 +20,8 @@ import sphinx_rtd_theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../admin'))
-sys.path.insert(0, os.path.abspath('../common'))
-sys.path.insert(0, os.path.abspath('../oauth2'))
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../venv/lib/python3.6/site-packages'))
 
 
 # -- General configuration ------------------------------------------------
@@ -176,7 +175,4 @@ texinfo_documents = [
 #intersphinx_mapping = {'https://docs.python.org/': None}
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6/', None),
-    'requests': ('http://docs.python-requests.org/en/master/', None),
-    'flask': ('https://flask.readthedocs.io/en/latest/', None),
-    'jwt': ('https://pyjwt.readthedocs.io/en/latest/', None)
 }

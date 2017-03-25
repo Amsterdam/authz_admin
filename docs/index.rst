@@ -1,15 +1,13 @@
-.. Datapunt OAuth2 documentation master file, created by
-   sphinx-quickstart on Thu Mar 23 21:26:24 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Datapunt OAuth2's documentation!
-===========================================
+Datapunt Permission Management and OAuth2 Authorization Services
+================================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   oauth2_service
+   admin_service
+   shared_database
 
 
 Indices and tables

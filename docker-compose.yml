@@ -1,0 +1,8 @@
+database:
+  image: postgres:9.5
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_DB=authz
+    - POSTGRES_USER=authuser
+    - POSTGRES_PASSWORD=authpassword
