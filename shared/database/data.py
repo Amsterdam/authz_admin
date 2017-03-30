@@ -1,5 +1,4 @@
-"""
-This module contains semi-dynamic data.
+""" Semi-dynamic data.
 
 :data:`IDENTITY_PROVIDERS` contains a dict of all supported Identity Providers,
 indexed by unique id (an integer >= 1).
@@ -35,7 +34,9 @@ DATASETS = {
     2: _Dataset("Handelsregister")
 }
 
+###############
+# PERMISSIONS #
+###############
 
 if __name__ == '__main__':
     print(IDENTITY_PROVIDERS)
-

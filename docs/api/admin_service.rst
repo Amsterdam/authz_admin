@@ -3,8 +3,8 @@
 Datapunt Permission Administration Service
 ==========================================
 
-API Docs
---------
+Package admin_service
+---------------------
 
 .. automodule:: admin_service
    :members:

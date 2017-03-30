@@ -85,6 +85,8 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+add_module_names = False
+default_role = 'py:obj'
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -175,4 +177,5 @@ texinfo_documents = [
 #intersphinx_mapping = {'https://docs.python.org/': None}
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6/', None),
+    'sphinx': ('http://www.sphinx-doc.org/en/stable/', None)
 }
