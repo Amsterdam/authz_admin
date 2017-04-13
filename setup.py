@@ -26,6 +26,7 @@ setup(
         'psycopg2',
         'pyyaml',
         'sqlalchemy',
+        'Flask==0.12'
     ],
     extras_require={
         'doc': [

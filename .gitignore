@@ -15,3 +15,7 @@ __pycache__
 /docs/_build/
 # Downloaded intersphinx inventory files:
 /docs/*.inv
+
+# PyDev
+.project
+.pydevproject
