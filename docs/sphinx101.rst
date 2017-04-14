@@ -63,15 +63,15 @@ Generic cross-referencing:
 Python cross-referencing:
     .. code-block:: rst
 
-        :py:mod:
-        :py:func:
-        :py:data:
-        :py:const:
-        :py:class:
-        :py:meth:
-        :py:attr:
-        :py:exc:
-        :py:obj:
+        :mod:
+        :func:
+        :data:
+        :const:
+        :class:
+        :meth:
+        :attr:
+        :exc:
+        :obj:
 
 
 Directives
