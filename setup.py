@@ -2,7 +2,7 @@
 """
 from setuptools import setup
 setup(
-    version='0.1',
+    version='0.1.1',
     name='datapunt-oauth2',
     description="Permission Management and OAuth2 Authorization Service",
     # long_description="",
@@ -16,11 +16,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     # cmdclass={'test': PyTest},
-    packages=[
-        'admin_service',
-        'shared',
-        'oauth2_service',
-    ],
+    packages=['oauth2'],
     install_requires=[
         'jsonschema',
         'psycopg2',
