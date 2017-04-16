@@ -1,13 +1,30 @@
 """
-    oauth2.requesthandlers
-    ~~~~~~~~~~~~~~~~~~~~~~
+    oauth2.authorization_service.requesthandlers
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-from aiohttp import web, web_exceptions
+import urllib
+
+from aiohttp import web_exceptions
 
 from oauth2 import clientregistry
+from . import responses
 
-GRANT_CODE = 'code'
-GRANT_IMPLICIT = 'token'
+GRANT_FLOWS = {
+    'token': responses.authorization_implicit_grant
+}
+
+QUERY_INVALID_REQUEST = urllib.parse.urlencode({
+    'error': 'invalid_request',
+    'error_description': 'The request is missing a required parameter, includes'
+                         ' an invalid parameter value, includes a parameter more'
+                         ' than once, or is otherwise malformed.'
+})
+
+QUERY_UNSUPPORTED_RESPONSE_TYPE = urllib.parse.urlencode({
+    'error': 'unsupported_response_type',
+    'error_description': 'The authorization server does not support obtaining'
+                         ' an access token using this method.'
+})
 
 
 async def authorization_request(request):
@@ -50,30 +67,48 @@ async def authorization_request(request):
         authorization server SHOULD inform the resource owner of the error and
         MUST NOT automatically redirect the user-agent to the invalid
         redirection URI.
+
+        All other errors are communicated back to the client using the redirect
+        URI. See Section 4.2.2.1 for details.
     """
+
     # Step 1: Make sure the client identifier is present and valid
     # TODO: once the client identifier format has been decided on we could do
     #       more validity checks before querying the clientregistry.
-    client_id = request.query.get('client_id')
+    client_id = request.query.get('client_id').encode('ascii')
     client = client_id and clientregistry.get(client_id)
     if not client:
         raise web_exceptions.HTTPBadRequest(
-            reason='invalid client_id'
+            body='invalid client_id'
         )
+
     # Step 2: Make sure we redirect the user to a valid redirect_uri
     redirect_uri = request.query.get('redirect_uri')
-    if redirect_uri:
+    if redirect_uri:  # found: check validity
         redirect_uri = redirect_uri in client.redirect_uris and redirect_uri
-    else:
+    else:  # not found, grab the registered URI if only one has been registered
         redirect_uri = len(client.redirect_uris) == 1 and client.redirect_uris[0]
     if not redirect_uri:
         raise web_exceptions.HTTPBadRequest(
-            reason='invalid redirect_uri'
+            body='invalid redirect_uri'
         )
 
+    # NOTE: from here on every error will be returned to the client through the
+    #       redirect URI.
+
+    # Step 3: prepare redirect_uri query string
+    if redirect_uri.find('?') == -1:
+        redirect_uri += '?'
+
+    # Step 4: check required params state and response_type
     state = request.query.get('state')
-    if not state:
-        ...
     response_type = request.query.get('response_type')
-    if response_type not in (GRANT_CODE, GRANT_IMPLICIT):
-        ...
+    if not state or not response_type:
+        raise web_exceptions.HTTPSeeOther(redirect_uri + QUERY_INVALID_REQUEST)
+    if response_type not in set(GRANT_FLOWS.keys()):
+        raise web_exceptions.HTTPSeeOther(redirect_uri + QUERY_UNSUPPORTED_RESPONSE_TYPE)
+
+    # TODO: Step 5: check scopes
+
+    # Step 6: Handle request
+    return GRANT_FLOWS[response_type](client_id, redirect_uri, None, state)
