@@ -2,18 +2,18 @@
     oauth2.authorization_service.requesthandlers
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-from . import responses, requests
+from . import responses
+from .decorators import authorizationrequest
 
 GRANT_FLOWS = {
     'token': responses.authorization_implicit_grant
 }
 
 
-@requests.authorization(*GRANT_FLOWS.keys())
-async def authorization_request(request):
+@authorizationrequest(*GRANT_FLOWS.keys())
+async def authorizationrequest(request):
     """
     MUST use TLS.
     MUST support GET, MAY support POST.
     """
-    # Step 6: Handle request
     return GRANT_FLOWS[request.response_type](request)

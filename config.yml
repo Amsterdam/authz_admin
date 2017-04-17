@@ -1,8 +1,9 @@
-services:
-  authorization_service:
-    host: localhost
-    port: 8110
-    root: /oauth2/
+server:
+  root: /oauth2
+  host: localhost
+  port: 8110
+  subapps:
+    authorization_service: /
 
 jwt:
   refreshtokens:

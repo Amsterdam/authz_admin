@@ -2,14 +2,31 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "config_schema_v1.json",
   "type": "object",
-  "required": ["services", "jwt", "postgres"],
+  "required": ["server", "jwt", "postgres"],
 
   "properties": {
-    "services": {
+    "server": {
       "type": "object",
+      "required": ["host", "port", "root"],
 
-      "patternProperties": {
-        "^[a-zA-Z0-9._-]+$": {"$ref": "#/definitions/service"}
+      "properties": {
+        "host": {"type": "string"},
+
+        "port": {"type": "integer"},
+
+        "root": {"type": "string"},
+
+        "subapps": {
+          "type": "object",
+
+          "properties": {
+            "authorization_service": {"type": "string"},
+
+            "client_admin_service": {"type": "string"},
+
+            "scope_admin_service": {"type": "string"}
+          }
+        }
       }
     },
 
@@ -69,22 +86,6 @@
           "enum": ["HS256"]
         }
       }
-    },
-
-    "service": {
-      "id": "#/definitions/service",
-      "type": "object",
-      "required": ["host", "port", "root"],
-
-      "properties": {
-        "host": {"type": "string"},
-
-        "port": {"type": "integer"},
-
-        "root": {"type": "string"}
-      },
-
-      "additionalProperties": true
     },
 
     "logging.dictconfig": {

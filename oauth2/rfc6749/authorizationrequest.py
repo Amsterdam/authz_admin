@@ -1,42 +1,30 @@
 """
-    oauth2.authorization_service.authorizationrequest
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    oauth2.authorization_service.rfc6749.authorization
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This module implements the OAuth2 authorization request as defined in
-    RFC6749. Specifically, it deals with:
+    RFC6749. It extends aiohttp.web.Request with the authorization request
+    properties related to the Authorization request, including input validation.
+    It implements sections:
 
     * `3.1. Authorization Endpoint
        <https://tools.ietf.org/html/rfc6749#section-3.1>`_
-    * `4.1.  Authorization Code Grant
-       <https://tools.ietf.org/html/rfc6749#section-4.1>`_
-    * `4.2.  Implicit Grant
-       <https://tools.ietf.org/html/rfc6749#section-4.2>`_
+    * `4.1.1. / 4.2.1  Authorization Request
+       <https://tools.ietf.org/html/rfc6749#section-4.1.1>`_
+
+    Usage:
+
+        from rfc6749.authorization import AuthorizationRequest
+
+        async def my_aiohttp_view(request):
+            request.__class__ = AuthorizationRequest
+            request.supported_response_types = ['token', 'code']
+            request.clientregistry = clientregistry
+            request.state, request.redirect_uri, ... # etc
 """
-import functools
 import urllib
 
 from aiohttp import web, web_exceptions
-
-from oauth2 import clientregistry
-
-
-def authorization(*supported_flows):
-    """ Returns a decorator that can be used to turn a view into one that
-    supports an OAuth2 authorization request.
-
-    :param supported_flows: the flows that this view supports (token, code, ..)
-    """
-    def decorator(f):
-        """ Any view function decorated with this decorator will be called with
-        an AuthorizationRequest instance as its single argument.
-        """
-        @functools.wraps(f)
-        def wrapper(request):
-            request.__class__ = AuthorizationRequest
-            request._supported_flows = set(supported_flows)
-            return f(request)
-        return wrapper
-    return decorator
 
 
 class AuthorizationRequest(web.Request):
@@ -84,8 +72,8 @@ class AuthorizationRequest(web.Request):
     })
 
     @property
-    def client(self):
-        """ Lazy property that returns the OAuth2 Client that made this request.
+    def client_id(self):
+        """ Lazy property that returns the client_id included in the request.
 
         From RFC6749 section 4.1.1 and 4.2.1:
 
@@ -93,23 +81,21 @@ class AuthorizationRequest(web.Request):
             2.2.
 
         :raises aiohttp.web_exceptions.HTTPBadRequest: if the client_id query
-            parameter is not present, invalid, or unknown in the client
-            registry.
+            parameter is not present or invalid
 
         :todo
             Once we have settled on a format for the client identifier we can
             do more extensive checks.
         """
         try:
-            return self._client
+            return self._client_id
         except AttributeError:
             pass
         client_id = self.query.get('client_id')
-        client = client_id and clientregistry.get(client_id.encode('ascii'))
-        if not client:
-            raise web_exceptions.HTTPBadRequest(body='invalid client_id')
-        self._client = client
-        return client
+        if not client_id:
+            raise web_exceptions.HTTPBadRequest(body='missing client_id')
+        self._client_id = client_id
+        return client_id
 
     @property
     def redirect_uri(self):
@@ -188,7 +174,7 @@ class AuthorizationRequest(web.Request):
         if not response_type:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_REQUEST)
-        if response_type not in self.supported_flows:
+        if response_type not in self.supported_response_types:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
         self._response_type = response_type
@@ -206,8 +192,37 @@ class AuthorizationRequest(web.Request):
         raise NotImplementedError()
 
     @property
-    def supported_flows(self):
+    def supported_response_types(self):
+        """ The flows (response_types) supported by the implementation.
+        """
         try:
             return self._supported_flows
         except AttributeError:
-            return set()
+            raise AttributeError('Must provide supported response types')
+
+    @supported_response_types.setter
+    def supported_response_types(self, *flows):
+        self._supported_flows = set(*flows)
+
+    @property
+    def client(self):
+        try:
+            return self._client
+        except AttributeError:
+            pass
+        client = self.clientregistry.get(self.client_id.encode('ascii'))
+        if not client:
+            raise web_exceptions.HTTPBadRequest(body='unknown client id')
+        self._client = client
+        return client
+
+    @property
+    def clientregistry(self):
+        try:
+            return self._clientregistry
+        except AttributeError:
+            raise AttributeError('Must provide a clientregistry')
+
+    @clientregistry.setter
+    def clientregistry(self, registry):
+        self._clientregistry = registry
