@@ -34,12 +34,12 @@
 """
 from aiohttp import web
 
-from . import requesthandlers
+from . import views
 from oauth2 import config
 
 
 def setup_routes(app):
-    app.router.add_get('/authorize', requesthandlers.authorization_request)
+    app.router.add_get('/authorize', views.authorization_request)
 
 if __name__ == '__main__':
     conf = config.load()

@@ -5,5 +5,5 @@
 from aiohttp import web
 
 
-def authorization_implicit_grant(client_id, redirect_uri, scope, state):
-    return web.HTTPSeeOther(redirect_uri)
+def authorization_implicit_grant(request):
+    return web.HTTPSeeOther(request.redirect_uri)
