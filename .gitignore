@@ -7,15 +7,17 @@ __pycache__
 /*.iml
 #/.editorconfig
 
+# PyDev/Eclipse
+.project
+.pydevproject
+
 # Python virtual environement:
+# PvB:
 /venv
+# EL:
 .venv
 
 # Generated documentation:
 /docs/_build/
 # Downloaded intersphinx inventory files:
 /docs/*.inv
-
-# PyDev
-.project
-.pydevproject
