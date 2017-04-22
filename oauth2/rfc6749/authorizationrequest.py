@@ -1,6 +1,6 @@
 """
-    oauth2.authorization_service.rfc6749.authorization
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    oauth2.rfc6749.authorizationrequest
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This module implements the OAuth2 authorization request as defined in
     RFC6749. It extends aiohttp.web.Request with the authorization request
@@ -14,17 +14,37 @@
 
     Usage:
 
-        from rfc6749.authorization import AuthorizationRequest
+        from rfc6749 import authorizationrequest
 
+        @authorizationrequest(flows=['token', 'code'], clientregistry=registry)
         async def my_aiohttp_view(request):
-            request.__class__ = AuthorizationRequest
-            request.supported_response_types = ['token', 'code']
-            request.clientregistry = clientregistry
             request.state, request.redirect_uri, ... # etc
 """
+import functools
 import urllib
 
 from aiohttp import web, web_exceptions
+
+from . import exceptions, GrantFlow
+
+
+def authorizationrequest(clientregistry=None, scoperegistry=None):
+    """ Returns a decorator that can be used to turn a view into one that
+    supports an OAuth2 authorization request.
+
+    :param flows: the flows that this view supports (token, code, ..)
+    """
+    def decorator(f):
+        """ Any view function decorated with this decorator will be called with
+        an AuthorizationRequest instance as its single argument.
+        """
+        @functools.wraps(f)
+        def wrapper(request):
+            request.__class__ = AuthorizationRequest
+            request.clientregistry = clientregistry
+            return f(request)
+        return wrapper
+    return decorator
 
 
 class AuthorizationRequest(web.Request):
@@ -115,16 +135,13 @@ class AuthorizationRequest(web.Request):
             pass
         client_redirects = self.client.redirect_uris
         redirect_uri = self.query.get('redirect_uri')
-        if redirect_uri:  # found: check validity
-            redirect_uri = redirect_uri in client_redirects and redirect_uri
-        else:  # not found, grab the registered URI if only one has been registered
-            redirect_uri = len(client_redirects) == 1 and client_redirects[0]
-        if not redirect_uri:
+        # The below condition is valid but pretty tricky... treat with care
+        if not redirect_uri and len(client_redirects) == 1:
+            redirect_uri = client_redirects[0]
+        elif redirect_uri not in client_redirects:
             raise web_exceptions.HTTPBadRequest(
-                body='invalid redirect_uri'
+                body='must provide valid redirect_uri'
             )
-        if redirect_uri.find('?') == -1:
-            redirect_uri += '?'
         self._redirect_uri = redirect_uri
         return redirect_uri
 
@@ -163,6 +180,9 @@ class AuthorizationRequest(web.Request):
             response_type: REQUIRED. Value MUST be set to "token" for an
             implicit grant, or to "code" for an authorization code grant.
 
+        Note that only presence is valudated here. The semantics are validated
+        in AuthorizationRequest.grant_flow.
+
         :raises aiohttp.web_exceptions.HTTPSeeOther:
             If the response_type is missing or not supported.
         """
@@ -174,9 +194,6 @@ class AuthorizationRequest(web.Request):
         if not response_type:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_REQUEST)
-        if response_type not in self.supported_response_types:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
         self._response_type = response_type
         return response_type
 
@@ -192,20 +209,9 @@ class AuthorizationRequest(web.Request):
         raise NotImplementedError()
 
     @property
-    def supported_response_types(self):
-        """ The flows (response_types) supported by the implementation.
-        """
-        try:
-            return self._supported_flows
-        except AttributeError:
-            raise AttributeError('Must provide supported response types')
-
-    @supported_response_types.setter
-    def supported_response_types(self, *flows):
-        self._supported_flows = set(*flows)
-
-    @property
     def client(self):
+        """ Lazy property that returns the client that made this request.
+        """
         try:
             return self._client
         except AttributeError:
@@ -218,6 +224,14 @@ class AuthorizationRequest(web.Request):
 
     @property
     def clientregistry(self):
+        """ Placeholder for the client registry. An implementation must provide
+        one using the setter for this property:
+
+            request.clientregistry = my_clientregistry
+
+        A client registry must be a mapping of client_identifier ->
+        oauth2.rfc6749.client.Client
+        """
         try:
             return self._clientregistry
         except AttributeError:
@@ -226,3 +240,19 @@ class AuthorizationRequest(web.Request):
     @clientregistry.setter
     def clientregistry(self, registry):
         self._clientregistry = registry
+
+    @property
+    def grant_flow(self):
+        """ Lazy property that returns the grant flow related to this request.
+        """
+        try:
+            return self._grant_flow
+        except AttributeError:
+            pass
+        try:
+            grant_flow = GrantFlow.for_response_type(self.response_type)
+        except exceptions.UnknownResponseTypeError:
+            raise web_exceptions.HTTPSeeOther(
+                self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
+        self._grant_flow = grant_flow
+        return grant_flow
