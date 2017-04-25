@@ -6,10 +6,8 @@
 """
 from .authorizationrequest import authorizationrequest
 from .client import Client
-from .grantflow import GrantFlow
 
 __all__ = (
     'authorizationrequest',
     'Client',
-    'GrantFlow'
 )

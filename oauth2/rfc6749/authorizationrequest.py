@@ -25,7 +25,7 @@ import urllib
 
 from aiohttp import web, web_exceptions
 
-from . import exceptions, GrantFlow
+RESPONSE_TYPES = {'code', 'flow'}
 
 
 def authorizationrequest(clientregistry=None, scoperegistry=None):
@@ -180,9 +180,6 @@ class AuthorizationRequest(web.Request):
             response_type: REQUIRED. Value MUST be set to "token" for an
             implicit grant, or to "code" for an authorization code grant.
 
-        Note that only presence is valudated here. The semantics are validated
-        in AuthorizationRequest.grant_flow.
-
         :raises aiohttp.web_exceptions.HTTPSeeOther:
             If the response_type is missing or not supported.
         """
@@ -194,6 +191,9 @@ class AuthorizationRequest(web.Request):
         if not response_type:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_REQUEST)
+        if response_type not in RESPONSE_TYPES:
+            raise web_exceptions.HTTPSeeOther(
+                self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
         self._response_type = response_type
         return response_type
 
@@ -240,19 +240,3 @@ class AuthorizationRequest(web.Request):
     @clientregistry.setter
     def clientregistry(self, registry):
         self._clientregistry = registry
-
-    @property
-    def grant_flow(self):
-        """ Lazy property that returns the grant flow related to this request.
-        """
-        try:
-            return self._grant_flow
-        except AttributeError:
-            pass
-        try:
-            grant_flow = GrantFlow.for_response_type(self.response_type)
-        except exceptions.UnknownResponseTypeError:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
-        self._grant_flow = grant_flow
-        return grant_flow
