@@ -2,11 +2,12 @@
     oauth2.authorization_service.requesthandlers
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-from oauth2.rfc6749 import authorizationrequest
-from oauth2 import clientregistry
+import oauth2.rfc6749
+from oauth2 import clientregistry, scoperegistry
 
 
-@authorizationrequest(clientregistry=clientregistry)
+@oauth2.rfc6749.authorizationrequest(
+    clientregistry=clientregistry.get(), known_scopes=scoperegistry.get())
 async def authorizationrequest(request):
     """
     MUST use TLS.

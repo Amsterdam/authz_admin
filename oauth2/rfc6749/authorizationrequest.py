@@ -25,10 +25,12 @@ import urllib
 
 from aiohttp import web, web_exceptions
 
+from . import types
+
 RESPONSE_TYPES = {'code', 'flow'}
 
 
-def authorizationrequest(clientregistry=None, scoperegistry=None):
+def authorizationrequest(clientregistry=None, known_scopes=None):
     """ Returns a decorator that can be used to turn a view into one that
     supports an OAuth2 authorization request.
 
@@ -42,6 +44,7 @@ def authorizationrequest(clientregistry=None, scoperegistry=None):
         def wrapper(request):
             request.__class__ = AuthorizationRequest
             request.clientregistry = clientregistry
+            request.known_scopes = known_scopes
             return f(request)
         return wrapper
     return decorator
@@ -91,6 +94,13 @@ class AuthorizationRequest(web.Request):
                              ' obtaining an access token using this method.'
     })
 
+    # See RFC6749 section 4.1.2.1 and 4.2.2.1
+    QUERY_INVALID_SCOPE = urllib.parse.urlencode({
+        'error': 'invalid_scope',
+        'error_description': 'The requested scope is invalid, unknown, or'
+                             ' malformed.'
+    })
+
     @property
     def client_id(self):
         """ Lazy property that returns the client_id included in the request.
@@ -114,7 +124,9 @@ class AuthorizationRequest(web.Request):
         client_id = self.query.get('client_id')
         if not client_id:
             raise web_exceptions.HTTPBadRequest(body='missing client_id')
-        self._client_id = client_id
+        if client_id not in self.clientregistry:
+            raise web_exceptions.HTTPBadRequest(body='unknown client id')
+        self._client_id = client_id.encode('ascii')
         return client_id
 
     @property
@@ -206,21 +218,20 @@ class AuthorizationRequest(web.Request):
             scope: OPTIONAL. The scope of the access request as described by
             Section 3.3.
         """
-        raise NotImplementedError()
-
-    @property
-    def client(self):
-        """ Lazy property that returns the client that made this request.
-        """
         try:
-            return self._client
+            return self._scope
         except AttributeError:
             pass
-        client = self.clientregistry.get(self.client_id.encode('ascii'))
-        if not client:
-            raise web_exceptions.HTTPBadRequest(body='unknown client id')
-        self._client = client
-        return client
+        try:
+            scope = types.ScopeTokenSet(self.query.get('scope', ''))
+        except ValueError:  # raised when malformed
+            raise web_exceptions.HTTPSeeOther(
+                self.redirect_uri + self.QUERY_INVALID_SCOPE)
+        if not scope <= self.scoperegistry.keys():
+            raise web_exceptions.HTTPSeeOther(
+                self.redirect_uri + self.QUERY_INVALID_SCOPE)
+        self._scope = scope
+        return scope
 
     @property
     def clientregistry(self):
@@ -229,8 +240,7 @@ class AuthorizationRequest(web.Request):
 
             request.clientregistry = my_clientregistry
 
-        A client registry must be a mapping of client_identifier ->
-        oauth2.rfc6749.client.Client
+        A client registry must be a mapping of client_identifiers as keys
         """
         try:
             return self._clientregistry
@@ -240,3 +250,21 @@ class AuthorizationRequest(web.Request):
     @clientregistry.setter
     def clientregistry(self, registry):
         self._clientregistry = registry
+
+    @property
+    def known_scopes(self):
+        """ Placeholder for the scope registry. An implementation must provide
+        one using the setter for this property:
+
+            request.scoperegistry = my_scoperegistry
+
+        A scope registry must be a mapping with scope names as keys
+        """
+        try:
+            return self._scoperegistry
+        except AttributeError:
+            raise AttributeError('Must provide a clientregistry')
+
+    @known_scopes.setter
+    def known_scopes(self, registry):
+        self._scoperegistry = registry
