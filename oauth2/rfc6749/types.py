@@ -6,8 +6,8 @@ import collections
 
 
 class ScopeTokenSet(frozenset):
-    """ A frozenset that parses a space delimited string into an immutable
-    sequence of scope-tokens.
+    """ A frozenset that takes an iterable or a space delimited string and turns
+    it into an immutable sequence of syntax-validated scope-tokens.
 
     Per RFC 6749, section 3.3:
 
@@ -26,15 +26,14 @@ class ScopeTokenSet(frozenset):
     )
 
     def __new__(cls, scope):
-        if not isinstance(scope, str):
-            raise ValueError(
-                "ScopeTokenSet can only be created from a space delimited str"
-            )
-        scope_tokens = scope.split()
-        if not all(set(s) <= cls.allowed_charset for s in scope_tokens):
-            raise ValueError('scope-token can only contain {}'.format(
-                set(cls.allowed_charset)
-            ))
+        scope_tokens = (isinstance(scope, str) and scope.split()) or scope
+        try:
+            if not all(set(s) <= cls.allowed_charset for s in scope_tokens):
+                raise ValueError('scope-token can only contain {}'.format(
+                    set(cls.allowed_charset)
+                ))
+        except TypeError:
+            raise ValueError('ScopeTokenSet needs a str or iterable')
         return super().__new__(ScopeTokenSet, scope_tokens)
 
 
