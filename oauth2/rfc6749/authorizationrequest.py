@@ -121,12 +121,10 @@ class AuthorizationRequest(web.Request):
             return self._client_id
         except AttributeError:
             pass
-        client_id = self.query.get('client_id')
+        client_id = self.query.get('client_id', '').encode('ascii')
         if not client_id:
             raise web_exceptions.HTTPBadRequest(body='missing client_id')
-        if client_id not in self.clientregistry:
-            raise web_exceptions.HTTPBadRequest(body='unknown client id')
-        self._client_id = client_id.encode('ascii')
+        self._client_id = client_id
         return client_id
 
     @property
@@ -173,14 +171,14 @@ class AuthorizationRequest(web.Request):
             missing.
         """
         try:
-            return self._state
+            return self._requeststate  # < self._state already exists in parent
         except AttributeError:
             pass
         state = self.query.get('state')
         if not state:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_REQUEST)
-        self._state = state
+        self._requeststate = state
         return state
 
     @property
@@ -227,11 +225,24 @@ class AuthorizationRequest(web.Request):
         except ValueError:  # raised when malformed
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_SCOPE)
-        if not scope <= self.scoperegistry.keys():
+        if not scope <= self.known_scopes:
             raise web_exceptions.HTTPSeeOther(
                 self.redirect_uri + self.QUERY_INVALID_SCOPE)
         self._scope = scope
         return scope
+
+    @property
+    def client(self):
+        """ Lazy property that returns the client that made this request.
+        """
+        try:
+            return self._client
+        except AttributeError:
+            pass
+        if self.client_id not in self.clientregistry:
+            raise web_exceptions.HTTPBadRequest(body='unknown client id')
+        self._client = self.clientregistry[self.client_id]
+        return self._client
 
     @property
     def clientregistry(self):
