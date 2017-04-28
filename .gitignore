@@ -4,6 +4,7 @@
 # Python ephemerals:
 __pycache__
 *.egg-info
+.eggs
 
 # IntelliJ stuff:
 /.idea/
