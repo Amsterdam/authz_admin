@@ -22,7 +22,7 @@ class ScopeTokenSet(frozenset):
     """
 
     allowed_charset = frozenset(
-        chr(c) for c in (0x21, *range(0x23, 0x5B+1), *range(0x5D, 0x7D+1))
+        chr(c) for c in (0x21, *range(0x23, 0x5B+1), *range(0x5D, 0x7E+1))
     )
 
     def __new__(cls, scope):
