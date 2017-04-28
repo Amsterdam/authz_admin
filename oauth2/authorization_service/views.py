@@ -11,7 +11,8 @@ from oauth2 import clientregistry, scoperegistry
 @oauth2.rfc6749.authorizationrequest(
     clientregistry=clientregistry.get(), known_scopes=scoperegistry.get())
 async def authorizationrequest(request):
-    """
+    """ OAuth 2.0 Authorization Request
+
     MUST use TLS.
     MUST support GET, MAY support POST.
     """
@@ -22,3 +23,7 @@ async def authorizationrequest(request):
     return Response(body='{} {} {} {}'.format(
         scope, state, client_id, redirect_uri
     ))
+
+async def postauthn_callback(request):
+    """ Post-authentication callback resource
+    """
