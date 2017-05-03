@@ -54,7 +54,7 @@ def authorizationrequest(clientregistry=None, known_scopes=None):
     return decorator
 
 
-class ErrorResponse(web_exceptions.HTTPSeeOther):
+class ErrorResponse(web_exceptions.HTTPFound):
     """ Base class for error responses.
 
     From RFC6749 section 4.1.2.1 and 4.2.2.1:
