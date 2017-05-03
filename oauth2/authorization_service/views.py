@@ -24,6 +24,6 @@ async def authorizationrequest(request):
         scope, state, client_id, redirect_uri
     ))
 
-async def postauthn_callback(request):
+async def confirm_authorization(request):
     """ Post-authentication callback resource
     """
