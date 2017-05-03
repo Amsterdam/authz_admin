@@ -11,12 +11,16 @@
        <https://tools.ietf.org/html/rfc6749#section-3.1>`_
     * `4.1.1. / 4.2.1  Authorization Request
        <https://tools.ietf.org/html/rfc6749#section-4.1.1>`_
+    * `4.1.2.1 / 4.2.2.1 Error Response
+       <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>`_
 
     Usage:
 
         from rfc6749 import authorizationrequest
 
-        @authorizationrequest(flows=['token', 'code'], clientregistry=registry)
+        @authorizationrequest(
+            clientregistry=clientregistry, known_scopes=scoperegistry
+        )
         async def my_aiohttp_view(request):
             request.state, request.redirect_uri, ... # etc
 """
@@ -27,7 +31,7 @@ from aiohttp import web, web_exceptions
 
 from . import types
 
-RESPONSE_TYPES = {'code', 'flow'}
+SUPPORTED_RESPONSE_TYPES = {'code', 'flow'}
 
 
 def authorizationrequest(clientregistry=None, known_scopes=None):
@@ -50,6 +54,139 @@ def authorizationrequest(clientregistry=None, known_scopes=None):
     return decorator
 
 
+class ErrorResponse(web_exceptions.HTTPSeeOther):
+    """ Base class for error responses.
+
+    From RFC6749 section 4.1.2.1 and 4.2.2.1:
+
+        If the request fails due to a missing, invalid, or mismatching
+        redirection URI, or if the client identifier is missing or invalid,
+        the authorization server SHOULD inform the resource owner of the
+        error and MUST NOT automatically redirect the user-agent to the
+        invalid redirection URI.
+
+        If the resource owner denies the access request or if the request
+        fails for reasons other than a missing or invalid redirection URI,
+        the authorization server informs the client by adding the following
+        parameters to the fragment component of the redirection URI using the
+        "application/x-www-form-urlencoded" format, per Appendix B:
+
+        error
+            REQUIRED.  A single ASCII [USASCII] error code from the
+            following:
+
+            invalid_request [...]
+            unauthorized_client [...]
+            access_denied [...]
+            unsupported_response_type [...]
+            invalid_scope [...]
+            server_error [...]
+            temporarily_unavailable
+
+            Values for the "error" parameter MUST NOT include characters
+            outside the set %x20-21 / %x23-5B / %x5D-7E.
+
+        error_description
+            OPTIONAL.  Human-readable ASCII [USASCII] text providing
+            additional information, used to assist the client developer in
+            understanding the error that occurred.
+            Values for the "error_description" parameter MUST NOT include
+            characters outside the set %x20-21 / %x23-5B / %x5D-7E.
+
+        error_uri
+            OPTIONAL.  A URI identifying a human-readable web page with
+            information about the error, used to provide the client
+            developer with additional information about the error.
+            Values for the "error_uri" parameter MUST conform to the
+            URI-reference syntax and thus MUST NOT include characters
+            outside the set %x21 / %x23-5B / %x5D-7E.
+
+        state
+            REQUIRED if a "state" parameter was present in the client
+            authorization request.  The exact value received from the
+            client.
+
+    We use the RFC's error code description as the value for error_description,
+    and for now we don't include an error_uri.
+    """
+
+    def __init__(self, request, params):
+        """ Creates a new error response, including the state parameter if it
+        was present in the request.
+        """
+        redir_uri = request.redirect_uri
+        if request.state is not None:
+            params['state'] = request.state
+        super().__init__(redir_uri + '#' + urllib.parse.urlencode(params))
+
+    @classmethod
+    def invalid_request(cls, request):
+        params = {
+            'error': 'invalid_request',
+            'error_description': 'The request is missing a required parameter,'
+                                 ' includes an invalid parameter value,'
+                                 ' includes a parameter more than once, or is'
+                                 ' otherwise malformed.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def unauthorized_client(cls, request):
+        params = {
+            'error': 'unauthorized_client',
+            'error_description': 'The client is not authorized to request an'
+                                 ' authorization code using this method.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def access_denied(cls, request):
+        params = {
+            'error': 'access_denied',
+            'error_description': 'The resource owner or authorization server'
+                                 ' denied the request.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def unsupported_response_type(cls, request):
+        params = {
+            'error': 'unsupported_response_type',
+            'error_description': 'The authorization server does not support'
+                                 ' obtaining an access token using this method.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def invalid_scope(cls, request):
+        params = {
+            'error': 'invalid_scope',
+            'error_description': 'The requested scope is invalid, unknown, or'
+                                 ' malformed.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def server_error(cls, request):
+        params = {
+            'error': 'server_error',
+            'error_description': 'The authorization server encountered an'
+                                 ' unexpected condition that prevented it from'
+                                 ' fulfilling the request.'
+        }
+        return cls(request, params)
+
+    @classmethod
+    def temporarily_unavailable(cls, request):
+        params = {
+            'error': 'temporarily_unavailable',
+            'error_description': 'The authorization server is currently unable'
+                                 ' to handle the request due to a temporary'
+                                 ' overloading or maintenance of the server.'
+        }
+        return cls(request, params)
+
+
 class AuthorizationRequest(web.Request):
     """ Provides request parsing for an authorization request.
 
@@ -65,41 +202,7 @@ class AuthorizationRequest(web.Request):
     :todo
         How can we check whether a request parameter was included more than
         once? (point 3 above)
-
-
-    On error handling, from section 4.1.2.1 and 4.2.2.1:
-
-    * If the request fails due to a missing,
-        invalid, or mismatching redirection URI, or if the client identifier is
-        missing or invalid, the authorization server SHOULD inform the resource
-        owner of the error and MUST NOT automatically redirect the user-agent
-        to the invalid redirection URI.
-    * All other errors are communicated back to the client using the redirect
-        URI.
     """
-
-    # See RFC6749 section 4.1.2.1 and 4.2.2.1
-    QUERY_INVALID_REQUEST = urllib.parse.urlencode({
-        'error': 'invalid_request',
-        'error_description': 'The request is missing a required parameter,'
-                             ' includes an invalid parameter value, includes a'
-                             ' parameter more than once, or is otherwise'
-                             ' malformed.'
-    })
-
-    # See RFC6749 section 4.1.2.1 and 4.2.2.1
-    QUERY_UNSUPPORTED_RESPONSE_TYPE = urllib.parse.urlencode({
-        'error': 'unsupported_response_type',
-        'error_description': 'The authorization server does not support'
-                             ' obtaining an access token using this method.'
-    })
-
-    # See RFC6749 section 4.1.2.1 and 4.2.2.1
-    QUERY_INVALID_SCOPE = urllib.parse.urlencode({
-        'error': 'invalid_scope',
-        'error_description': 'The requested scope is invalid, unknown, or'
-                             ' malformed.'
-    })
 
     @property
     def client_id(self):
@@ -157,29 +260,18 @@ class AuthorizationRequest(web.Request):
 
     @property
     def state(self):
-        """ Lazy property that returns the state parameter for this request.
+        """ Property that returns the state parameter for this request.
 
         From RFC6749 section 4.1.1 and 4.2.1:
 
-            state: REQUIRED (RECOMMENDED by RFC).  An opaque value used by the
+            state: RECOMMENDED.  An opaque value used by the
             client to maintain state between the request and callback. The
             authorization server includes this value when redirecting the user-
             agent back to the client.  The parameter SHOULD be used for
             preventing cross-site request forgery as described in Section 10.12.
 
-        :raises aiohttp.web_exceptions.HTTPSeeOther: if the state parameter is
-            missing.
         """
-        try:
-            return self._requeststate  # < self._state already exists in parent
-        except AttributeError:
-            pass
-        state = self.query.get('state')
-        if not state:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_INVALID_REQUEST)
-        self._requeststate = state
-        return state
+        return self.query.get('state')
 
     @property
     def response_type(self):
@@ -190,7 +282,7 @@ class AuthorizationRequest(web.Request):
             response_type: REQUIRED. Value MUST be set to "token" for an
             implicit grant, or to "code" for an authorization code grant.
 
-        :raises aiohttp.web_exceptions.HTTPSeeOther:
+        :raises ErrorResponse:
             If the response_type is missing or not supported.
         """
         try:
@@ -199,11 +291,9 @@ class AuthorizationRequest(web.Request):
             pass
         response_type = self.query.get('response_type')
         if not response_type:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_INVALID_REQUEST)
-        if response_type not in RESPONSE_TYPES:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_UNSUPPORTED_RESPONSE_TYPE)
+            raise ErrorResponse.invalid_request(self)
+        if response_type not in SUPPORTED_RESPONSE_TYPES:
+            raise ErrorResponse.unsupported_response_type(self)
         self._response_type = response_type
         return response_type
 
@@ -215,6 +305,9 @@ class AuthorizationRequest(web.Request):
 
             scope: OPTIONAL. The scope of the access request as described by
             Section 3.3.
+
+        :raises ErrorResponse:
+            If the scope is invalid
         """
         try:
             return self._scope
@@ -223,11 +316,9 @@ class AuthorizationRequest(web.Request):
         try:
             scope = types.ScopeTokenSet(self.query.get('scope', ''))
         except ValueError:  # raised when malformed
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_INVALID_SCOPE)
+            raise ErrorResponse.invalid_scope(self)
         if not scope <= self.known_scopes:
-            raise web_exceptions.HTTPSeeOther(
-                self.redirect_uri + self.QUERY_INVALID_SCOPE)
+            raise ErrorResponse.invalid_scope(self)
         self._scope = scope
         return scope
 
