@@ -4,6 +4,10 @@
 
     Some decisions:
 
+    * STATE
+
+      The state parameter is optional in the RFC, but we require it.
+
     * TOKEN TYPE
 
       For now we use the bearer token type. I've seen two alternatives; MAC
