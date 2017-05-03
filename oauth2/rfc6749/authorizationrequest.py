@@ -18,9 +18,7 @@
 
         from rfc6749 import authorizationrequest
 
-        @authorizationrequest(
-            clientregistry=clientregistry, known_scopes=scoperegistry
-        )
+        @authorizationrequest(clientregistry, scoperegistry)
         async def my_aiohttp_view(request):
             request.state, request.redirect_uri, ... # etc
 """
@@ -34,11 +32,13 @@ from . import types
 SUPPORTED_RESPONSE_TYPES = {'code', 'flow'}
 
 
-def authorizationrequest(clientregistry=None, known_scopes=None):
+def authorizationrequest(clientregistry, scoperegistry):
     """ Returns a decorator that can be used to turn a view into one that
     supports an OAuth2 authorization request.
 
-    :param flows: the flows that this view supports (token, code, ..)
+    :param clientregistry: a dict-like object mapping client id's to client
+        objects
+    :param scoperegistry: a dict-like object mapping scope id's to scope objects
     """
     def decorator(f):
         """ Any view function decorated with this decorator will be called with
@@ -48,7 +48,7 @@ def authorizationrequest(clientregistry=None, known_scopes=None):
         def wrapper(request):
             request.__class__ = AuthorizationRequest
             request.clientregistry = clientregistry
-            request.known_scopes = known_scopes
+            request.scoperegistry = scoperegistry
             return f(request)
         return wrapper
     return decorator
@@ -317,7 +317,7 @@ class AuthorizationRequest(web.Request):
             scope = types.ScopeTokenSet(self.query.get('scope', ''))
         except ValueError:  # raised when malformed
             raise ErrorResponse.invalid_scope(self)
-        if not scope <= self.known_scopes:
+        if not scope <= self.scoperegistry:
             raise ErrorResponse.invalid_scope(self)
         self._scope = scope
         return scope
@@ -354,7 +354,7 @@ class AuthorizationRequest(web.Request):
         self._clientregistry = registry
 
     @property
-    def known_scopes(self):
+    def scoperegistry(self):
         """ Placeholder for the scope registry. An implementation must provide
         one using the setter for this property:
 
@@ -367,6 +367,6 @@ class AuthorizationRequest(web.Request):
         except AttributeError:
             raise AttributeError('Must provide a clientregistry')
 
-    @known_scopes.setter
-    def known_scopes(self, registry):
+    @scoperegistry.setter
+    def scoperegistry(self, registry):
         self._scoperegistry = registry

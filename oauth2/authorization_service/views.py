@@ -5,11 +5,14 @@
 from aiohttp.web import Response
 
 import oauth2.rfc6749
-from oauth2 import clientregistry, scoperegistry
+import oauth2.clientregistry
+import oauth2.scoperegistry
+
+clientregistry = oauth2.clientregistry.get()
+scoperegistry = oauth2.scoperegistry.get()
 
 
-@oauth2.rfc6749.authorizationrequest(
-    clientregistry=clientregistry.get(), known_scopes=scoperegistry.get())
+@oauth2.rfc6749.authorizationrequest(clientregistry, scoperegistry)
 async def authorizationrequest(request):
     """ OAuth 2.0 Authorization Request
 
