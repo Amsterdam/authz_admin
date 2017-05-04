@@ -98,10 +98,12 @@ class _AuthorizationResponse(web_exceptions.HTTPFound):
             self.params['state'] = state
         # For now, skip url parsing. urllib.parse isn't very reliable and the
         # spec requires only string comparison for the request_uri request
-        # paramater. So instead of parsing this as a URL, I'll just check
-        # whether it already includes a question mark to decide what separator
-        # to use.
-        separator = (redirect_uri.split('/')[-1].find('?') >= 0 and '&') or '?'
+        # parameter. Instead of parsing this as a URL, I'll only check whether
+        # redirect_uri already includes a question mark to decide what separator
+        # to use. Note that at this point we don't have to check whether the
+        # q-mark is part of a fragment; fragments aren't allowed in
+        # redirect_uris and should be disallowed during client registration.
+        separator = (redirect_uri.find('?') >= 0 and '&') or '?'
         location = '{}{}{}'.format(
             redirect_uri, separator, urllib.parse.urlencode(self.params)
         )
