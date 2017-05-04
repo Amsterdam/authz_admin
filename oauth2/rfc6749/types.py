@@ -3,6 +3,7 @@
     ~~~~~~~~~~~~~~~~~~~~
 """
 import collections
+import secrets
 
 
 class ScopeTokenSet(frozenset):
@@ -35,6 +36,19 @@ class ScopeTokenSet(frozenset):
         except TypeError:
             raise ValueError('ScopeTokenSet needs a str or iterable')
         return super().__new__(ScopeTokenSet, scope_tokens)
+
+
+class AuthorizationCode(str):
+    """ A wrapper around a urlsafe secret token of 160 bits / 20 bytes.
+
+    From RFC6749, Section 10.10.  Credentials-Guessing Attacks:
+
+        The probability of an attacker guessing generated tokens (and other
+        credentials not intended for handling by end-users) MUST be less than
+        or equal to 2^(-128) and SHOULD be less than or equal to 2^(-160).
+    """
+    def __new__(cls):
+        return super().__new__(cls, secrets.token_urlsafe(nbytes=20))
 
 
 class Client(collections.namedtuple(
