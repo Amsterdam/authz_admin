@@ -96,7 +96,16 @@ class _AuthorizationResponse(web_exceptions.HTTPFound):
         """
         if state is not None:
             self.params['state'] = state
-        super().__init__(redirect_uri + '?' + urllib.parse.urlencode(self.params))
+        # For now, skip url parsing. urllib.parse isn't very reliable and the
+        # spec requires only string comparison for the request_uri request
+        # paramater. So instead of parsing this as a URL, I'll just check
+        # whether it already includes a question mark to decide what separator
+        # to use.
+        separator = (redirect_uri.split('/')[-1].find('?') >= 0 and '&') or '?'
+        location = '{}{}{}'.format(
+            redirect_uri, separator, urllib.parse.urlencode(self.params)
+        )
+        super().__init__(location)
 
     @property
     def params(self):
