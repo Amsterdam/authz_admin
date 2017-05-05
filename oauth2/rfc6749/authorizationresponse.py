@@ -116,7 +116,7 @@ class _AuthorizationResponse(web_exceptions.HTTPFound):
         raise NotImplementedError
 
 
-class Success(_AuthorizationResponse):
+class AuthorizationCode(_AuthorizationResponse):
     """ A successful authorization response for the “authorization grant” flow.
     """
 

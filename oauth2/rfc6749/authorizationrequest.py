@@ -43,24 +43,26 @@ from aiohttp import web_exceptions
 
 from . import authorizationresponse, types
 
-SUPPORTED_RESPONSE_TYPES = {'code', 'flow'}
+SUPPORTED_RESPONSE_TYPES = {'code', 'token'}
 
-_AuthorizationRequestParams = collections.namedtuple(
-    'AuthorizationRequestParams', 'client_id redirect_uri state scope'
+AuthorizationRequestParams = collections.namedtuple(
+    'AuthorizationRequestParams',
+    'client_id redirect_uri response_type state scope'
 )
 
 
-def parse(request, clientregistry, scoperegistry):
-    paramparser = _ParamParser(request, clientregistry, scoperegistry)
-    return _AuthorizationRequestParams(
+def params(request, clientregistry, scoperegistry):
+    paramparser = ParamParser(request, clientregistry, scoperegistry)
+    return AuthorizationRequestParams(
         client_id=paramparser.client_id,
         redirect_uri=paramparser.redirect_uri,
         state=paramparser.state,
-        scope=paramparser.scope
+        scope=paramparser.scope,
+        response_type=paramparser.response_type
     )
 
 
-class _ParamParser:
+class ParamParser:
     """ Provides request parsing for an authorization request.
 
     Notes from RFC6749 section 3.1:

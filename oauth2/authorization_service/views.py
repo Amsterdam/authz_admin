@@ -17,7 +17,7 @@ cache = dict()  # <- placeholder for Redis, memcached, or something else
 async def authorizationrequest(request):
     """ OAuth 2.0 Authorization Request
     """
-    authorizationrequestparams = oauth2.rfc6749.authorizationrequest.parse(
+    authorizationrequestparams = oauth2.rfc6749.authorizationrequest.params(
         request, clientregistry, scoperegistry
     )
 
@@ -30,11 +30,14 @@ async def authorizationrequest(request):
 
     cache[authorization_code] = authorizationrequestparams
 
-    return oauth2.rfc6749.authorizationresponse.Success(
-        authorization_code,
-        authorizationrequestparams.redirect_uri,
-        authorizationrequestparams.state
-    )
+    if authorizationrequestparams.response_type == 'code':
+        return oauth2.rfc6749.authorizationresponse.AuthorizationCode(
+            authorization_code,
+            authorizationrequestparams.redirect_uri,
+            authorizationrequestparams.state
+        )
+    elif authorizationrequestparams.response_type == 'token':
+        ...  # return accesstoken
 
 async def accesstoken(request):
     """ Accesstoken endpoint
