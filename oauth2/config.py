@@ -128,7 +128,7 @@ def _validate(config, schemafile):
     ``schemafile``.
 
     :param config: configuration mapping
-    :param str schemafile: path
+    :param schemafile: path
     """
     try:
         with pathlib.Path(schemafile).open() as f:
