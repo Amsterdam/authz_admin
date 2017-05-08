@@ -15,7 +15,7 @@ cache = dict()  # <- placeholder for Redis, memcached, or something else
 
 
 async def authorizationrequest(request):
-    """ OAuth 2.0 Authorization Request
+    """ Authorization endpoint (RFC6749 section 3.1)
     """
     authorizationrequestparams = oauth2.rfc6749.authorizationrequest.params(
         request, clientregistry, scoperegistry
@@ -39,6 +39,14 @@ async def authorizationrequest(request):
     elif authorizationrequestparams.response_type == 'token':
         ...  # return accesstoken
 
-async def accesstoken(request):
-    """ Accesstoken endpoint
+
+async def idp_code(request):
+    """ Authorization code IdP callback endpoint
     """
+    idp_identifier = request.match_info['idp']
+
+
+async def idp_token(request):
+    """ Access token IdP callback endpoint
+    """
+    idp_identifier = request.match_info['idp']

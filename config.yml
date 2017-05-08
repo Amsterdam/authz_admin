@@ -22,6 +22,11 @@ postgres:
   password: ${DB_PASS:-oauthpassword}
   dbname: ${DB_DATABASE:-oauth}
 
+idp:
+  oauth2.idp.tma_oauth2:
+    client_id: ${TMA_OAUTH2_CLIENT_ID}
+    authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
+
 logging:
   version: 1
   formatters:

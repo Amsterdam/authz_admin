@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "config_schema_v1.json",
   "type": "object",
-  "required": ["server", "jwt", "postgres"],
+  "required": ["server", "jwt", "postgres", "idp"],
 
   "properties": {
     "server": {
@@ -25,9 +25,13 @@
             "client_admin_service": {"type": "string"},
 
             "scope_admin_service": {"type": "string"}
-          }
+          },
+
+      	  "additionalProperties": false
         }
-      }
+      },
+
+      "additionalProperties": false
     },
 
     "jwt": {
@@ -57,8 +61,20 @@
         "password": {"type": "string"},
 
         "dbname": {"type": "string"}
-      }
+      },
 
+      "additionalProperties": false
+
+    },
+
+    "idp": {
+      "type": "object",
+ 
+      "patternProperties": {
+        "^[a-zA-Z0-9._-]+$": {
+          "type": "object"
+        }
+      }
     },
 
     "logging": {"$ref": "#/definitions/logging.dictconfig"}

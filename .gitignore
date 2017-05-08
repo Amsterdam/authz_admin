@@ -1,3 +1,6 @@
+# secret config
+tma.env
+
 # Python
 *.pyc
 

@@ -3,6 +3,10 @@
 RM = rm -rf
 PYTHON = python3
 
+run-local:
+	@. tma.env; \
+	$(PYTHON) -m oauth2.server
+
 test: clean
 	$(PYTHON) setup.py test -a "-p no:cacheprovider --verbose --capture=no ."
 

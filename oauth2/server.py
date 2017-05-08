@@ -5,7 +5,7 @@ from aiohttp import web
 from oauth2 import config
 
 
-if __name__ == '__main__':
+def start_server():
     conf = config.load()
     server_conf = conf['server']
     # create main application
@@ -18,3 +18,6 @@ if __name__ == '__main__':
         app.add_subapp('{}{}'.format(server_conf['root'], prefix), subapp)
     # run server
     web.run_app(app, host=server_conf['host'], port=server_conf['port'])
+
+if __name__ == '__main__':
+    start_server()
