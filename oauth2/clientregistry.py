@@ -19,6 +19,9 @@ _registry = (
         redirect_uris=(
             'http://localhost',
         ),
+        idps=(
+            'tma_oauth2',
+        ),
     ),
 )
 

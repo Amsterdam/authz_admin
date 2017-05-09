@@ -9,9 +9,10 @@ from . import handler
 def register_routes(app, root, requesthandler):
     """ Register all resources.
     """
-    app.router.add_get(root + '/authorize', requesthandler.authorization)
-    app.router.add_get(root + '/idps/{idp}/token', requesthandler.idp_token)
-    app.router.add_get(root + '/idps/{idp}/code', requesthandler.idp_code)
+    app.router.add_get(
+        root + '/authorize', requesthandler.authorization)
+    app.router.add_get(
+        root + '/idps/{idp}', requesthandler.idp_callback, name='idp-callback')
 
 
 def idpregistry(conf):
@@ -38,7 +39,8 @@ def start():
     requesthandler = handler.RequestHandler(
         idpregistry(conf),
         clientregistry.get(),
-        scoperegistry.get()
+        scoperegistry.get(),
+        service_conf
     )
     # register routes
     register_routes(app, service_conf['root'], requesthandler)

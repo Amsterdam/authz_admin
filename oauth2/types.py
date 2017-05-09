@@ -52,7 +52,7 @@ class AuthorizationCode(str):
 
 
 class Client(collections.namedtuple(
-    'ClientRegistrationInfo', 'identifier name secret redirect_uris owner_id'
+    'ClientRegistrationInfo', 'identifier name secret redirect_uris owner_id idps'
 )):
     """ The registration information for a client.
 
@@ -87,7 +87,9 @@ class Client(collections.namedtuple(
     In addition to RFC 6749, our implementation requires:
 
     - name: the application name
-    - user id of client owner. Note that this implies the owner must be a
-      person. What this looks like depends on our user registration. For now,
-      remains undecided.
+    - owner_id: user id of client owner. Note that this implies the owner must
+      be a person. What this looks like depends on our user registration. For
+      now, remains undecided.
+    - idps: a list of IdP identifiers. May be empty, in which case all
+      authorization requests MUST specify an IdP.
     """

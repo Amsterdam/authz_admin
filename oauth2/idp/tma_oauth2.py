@@ -7,6 +7,11 @@
     - client_id: The client identifier
     - authorization_uri: The OAuth 2.0 authorization endpoint
 """
+import secrets
+import urllib.parse
+
+from aiohttp import web
+
 
 IDP_ID = 'tma_oauth2'
 """ Identifier of the TMA Oauth 2.0 interface
@@ -31,8 +36,24 @@ def get(config):
         raise Exception('To use the TMA Oauth 2.0-based IdP you must provide'
                         ' a client_id and authorization_uri')
 
-    def authentication_redirect(uuid):
-        ...
+    queryparams = {'client_id': config['client_id']}
+    separator = (config['authorization_uri'].find('?') < 0 and '?') or '&'
+    authn_redirect_base = config['authorization_uri'] + separator
+
+    def authentication_redirect(_, callback_base_uri):
+        """ Create the authentication redirect and identifier.
+
+        :param _: ignore the given uuid; we don't return a ``value`` so the
+            uuid will be stored.
+        :param callback_base_uri: the callback base URI
+        """
+        state = secrets.token_urlsafe(nbytes=20)
+        queryparams['state'] = state
+        queryparams['redirect_uri'] = callback_base_uri
+        response = web.HTTPSeeOther(
+            authn_redirect_base + urllib.parse.urlencode(queryparams)
+        )
+        return response, state
 
     def validate_authentication(request, get_and_delete):
         ...
