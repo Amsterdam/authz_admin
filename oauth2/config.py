@@ -39,7 +39,7 @@ import yaml
 _module_path = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 
 DEFAULT_CONFIG_PATHS = [
-    pathlib.Path('/etc') / 'datapuntauth' / 'config.yml',
+    pathlib.Path('/etc') / 'datapunt' / 'config.yml',
     _module_path.parent / 'config.yml',
 ]
 

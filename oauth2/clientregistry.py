@@ -6,7 +6,7 @@
     (database?) backend down the road.
 """
 import collections.abc
-from oauth2.rfc6749 import types
+from . import types
 
 
 # A registry to loop over (O(N) lookups)
@@ -18,6 +18,9 @@ _registry = (
         owner_id='datapunt',
         redirect_uris=(
             'http://localhost',
+        ),
+        idps=(
+            'tma_oauth2',
         ),
     ),
 )

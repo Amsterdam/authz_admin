@@ -41,7 +41,8 @@ import collections
 
 from aiohttp import web_exceptions
 
-from . import authorizationresponse, types
+from . import authorizationresponse
+from oauth2 import types
 
 SUPPORTED_RESPONSE_TYPES = {'code', 'token'}
 
@@ -153,6 +154,9 @@ class ParamParser:
             raise authorizationresponse.InvalidRequest(self.redirect_uri, self.state)
         if response_type not in SUPPORTED_RESPONSE_TYPES:
             raise authorizationresponse.UnsupportedResponseType(self.redirect_uri, self.state)
+        untrusted_client = self.clientregistry[self.client_id].secret is None
+        if untrusted_client and response_type != 'token':
+            raise authorizationresponse.UnauthorizedClient(self.redirect_uri, self.state)
         self._response_type = response_type
         return response_type
 

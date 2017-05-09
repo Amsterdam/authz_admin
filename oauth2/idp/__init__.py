@@ -22,11 +22,13 @@
 
     ::
 
-        def authentication_redirect(uuid):
+        def authentication_redirect(uuid, callback_base_uri):
             \""" Redirect to the login page of the IdP
 
             :param uuid:
                 An opaque identifier
+            :param callback_base_uri:
+                The callback URI where the IdP can send the client to
             :return Response, [key, [value=uuid]]:
                 An aiohttp HTTP Response object, an optional key and an optional
                 value. If given, the ``key`` and ``value`` will be stored for
