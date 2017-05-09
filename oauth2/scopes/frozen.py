@@ -2,7 +2,7 @@ from collections import Hashable
 import logging
 from types import MappingProxyType
 
-from . import scoperegistry
+from oauth2 import scopes
 
 _logger = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ def _freeze(thing):
                     (type(thing), thing))
 
 
-_SCOPES_PER_DATASET = _freeze(scoperegistry.scopes_per_dataset())
-_DATASETS = _freeze(scoperegistry.datasets())
+_SCOPES_PER_DATASET = _freeze(scopes.scopes_per_dataset())
+_DATASETS = _freeze(scopes.datasets())
 
 
 def scopes_per_dataset():

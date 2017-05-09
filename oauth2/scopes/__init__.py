@@ -7,6 +7,10 @@
 """
 from types import MappingProxyType
 
+
+
+# Old stuff from Evert ;-)
+
 _registry = frozenset({
     'default',
     'employee',
@@ -17,16 +21,13 @@ _registry = frozenset({
 def get():
     return _registry
 
-# Nieuwe opzet van scope registry. Work in progress. --PvB
-
-
 _SCOPES_PER_DATASET = {
     'TEST': {
         ('READ', 'WRITE'),
         ('GRANT',)
     }
 }
-_DATASETS = list(_SCOPES_PER_DATASET.keys())
+_DATASETS = tuple(_SCOPES_PER_DATASET.keys())
 
 
 def scopes_per_dataset():

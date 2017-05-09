@@ -2,7 +2,7 @@ import importlib
 
 from aiohttp import web
 
-from oauth2 import config, clientregistry, scoperegistry
+from oauth2 import config, clientregistry, scopes
 from . import handler
 
 
@@ -39,7 +39,7 @@ def start():
     requesthandler = handler.RequestHandler(
         idpregistry(conf),
         clientregistry.get(),
-        scoperegistry.get(),
+        scopes.get(),
         service_conf
     )
     # register routes

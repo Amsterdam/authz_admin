@@ -1,4 +1,4 @@
-.. _oauth2_service:
+.. _authorization_service:
 
 Datapunt OAuth2 Authorization Service
 =====================================
@@ -6,6 +6,6 @@ Datapunt OAuth2 Authorization Service
 API Docs
 --------
 
-.. automodule:: oauth2_service
+.. automodule:: oauth2.authorization_service
    :members:
    :private-members:

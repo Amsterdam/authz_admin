@@ -7,7 +7,7 @@ Sphinx 101
 ReST formatting
 ---------------
 
-For details on basic rST foramtting, see the :ref:`sphinx:rst-primer`
+For details on basic rST formatting, see the :ref:`sphinx:rst-primer`
 
 *   *emphasis*, **strong empasis**, ``code``
 *   *``nesting``* ``*won’t*`` ````work````

@@ -5,8 +5,8 @@ Datapunt Permission Management and OAuth2 Authorization Services
    :maxdepth: 2
    :caption: Contents:
 
-   api/oauth2_service
-   api/admin_service
+   api/authorization_service
+   api/scope_admin_service
    api/shared
    sphinx101
    todo_list

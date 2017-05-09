@@ -65,3 +65,8 @@ logging:
   root:
     level: ${LOGLEVEL:-DEBUG}
     handlers: [root]
+
+scopes:
+  test:
+    - grant
+    - [ read, write ]

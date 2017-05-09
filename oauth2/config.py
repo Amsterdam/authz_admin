@@ -1,9 +1,4 @@
 """
-    .. _auth-config:
-
-    auth.config
-    ~~~~~~~~~~~
-
     Module that loads configuration settings from a yaml file.
 
     **Features**
@@ -23,17 +18,18 @@
 
     ::
 
-        from auth.config import load
-        settings = config.load()
+        from oauth2.config import get as get_config
+        config = get_config()
 
 """
 import json
 import os
 import pathlib
 import string
-
 import jsonschema
 import yaml
+
+from .decorators import memoized
 
 
 _module_path = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
@@ -51,6 +47,18 @@ class ConfigError(Exception):
     """
 
 
+@memoized
+def get():
+    """
+    Memoized version of `load()`.
+
+    .. todo::
+
+        Don't know how to test this.
+    """
+    return load()
+
+
 def load(configpath=None):
     """ Load, parse and validate a configuration file from the given
     ``configpath`` or one of the :ref:`default locations <default-config-locations>`
@@ -63,7 +71,7 @@ def load(configpath=None):
     return config
 
 
-def _load_yaml(configpath=None):
+def _load_yaml(configpath):
     """ Read a yaml file from the given ``configpath`` or one of the
     :ref:`default locations <default-config-locations>`
 

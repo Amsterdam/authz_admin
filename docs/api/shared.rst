@@ -1,45 +1,20 @@
 .. _shared:
 
 
-Shared Package
+Shared Modules
 ==============
 
-.. automodule:: shared
-   :members:
-
-
-shared.config
+oauth2.config
 -------------
 
-.. automodule:: shared.config
+.. automodule:: oauth2.config
    :members:
 
 
-shared.database
----------------
-
-.. automodule:: shared.database
-   :members:
-
-
-shared.database.data
---------------------
-
-.. automodule:: shared.database.data
-   :members:
-
-
-shared.database.schema
-----------------------
-
-.. automodule:: shared.database.schema
-   :members:
-
-
-shared.decorators
+oauth2.decorators
 -----------------
 
-.. automodule:: shared.decorators
+.. automodule:: oauth2.decorators
    :members:
 
 

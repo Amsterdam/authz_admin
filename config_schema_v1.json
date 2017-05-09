@@ -5,6 +5,23 @@
   "required": ["jwt", "postgres", "idp"],
 
   "properties": {
+    "scopes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "pattern": "^[a-z]+$",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+$"
+          }
+        }
+      }
+    },
     "authorization_service": {
       "type": "object",
       "required": ["host", "port", "root"],
