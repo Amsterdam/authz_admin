@@ -30,13 +30,6 @@ class RequestHandler:
             request, self.clientregistry, self.scoperegistry
         )
 
-        untrusted_client = self.clientregistry[authzreqparams.client_id].secret is None
-        if untrusted_client and authzreqparams.response_type != 'code':
-            return authorizationresponse.UnauthorizedClient(
-                authzreqparams.redirect_uri,
-                authzreqparams.state
-            )
-
         authorization_code = types.AuthorizationCode()
         if authorization_code in cache:  # <- probability of 2^(-160)
             return authorizationresponse.ServerError(
