@@ -8,10 +8,10 @@ run-local:
 	$(PYTHON) -m oauth2.server
 
 test: clean
-	$(PYTHON) setup.py test -a "-p no:cacheprovider --verbose --capture=no ."
+	$(PYTHON) -m pytest -p no:cacheprovider --verbose --capture=no .
 
 coverage: clean
-	$(PYTHON) setup.py test -a "-p no:cacheprovider --verbose --cov=oauth2 --cov-report=term --cov-config .coveragerc --capture=no ."
+	$(PYTHON) -m pytest -p no:cacheprovider --verbose --cov=oauth2 --cov-report=term --cov-config .coveragerc --capture=no .
 
 clean:
 	@$(RM) build/ *.egg-info/ .eggs/ dist/
