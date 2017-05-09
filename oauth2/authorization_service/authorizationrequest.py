@@ -41,7 +41,8 @@ import collections
 
 from aiohttp import web_exceptions
 
-from . import authorizationresponse, types
+from . import authorizationresponse
+from oauth2 import types
 
 SUPPORTED_RESPONSE_TYPES = {'code', 'token'}
 
