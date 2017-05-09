@@ -12,7 +12,8 @@ __pycache__
 # IntelliJ stuff:
 /.idea/
 /*.iml
-#/.editorconfig
+/.editorconfig
+/.requirements_intellij.txt
 
 # PyDev/Eclipse
 .project

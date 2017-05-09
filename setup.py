@@ -38,8 +38,8 @@ setup(
     entry_points={
         'console_scripts': [
             'authorization_service = oauth2.authorization_service.server:start',
-            'client_admin_service = oauth2.authorization_service.server:start',
-            'scope_admin_service = oauth2.authorization_service.server:start',
+            'client_admin_service = oauth2.client_admin_service.server:start',
+            'scope_admin_service = oauth2.scope_admin_service.main:start',
         ],
     },
 )
