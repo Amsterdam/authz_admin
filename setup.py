@@ -35,4 +35,11 @@ setup(
             'pytest-cov==2.4.0'
         ],
     },
+    entry_points={
+        'console_scripts': [
+            'authorization_service = oauth2.authorization_service.server:start',
+            'client_admin_service = oauth2.authorization_service.server:start',
+            'scope_admin_service = oauth2.authorization_service.server:start',
+        ],
+    },
 )

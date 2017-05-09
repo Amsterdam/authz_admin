@@ -3,9 +3,9 @@
 RM = rm -rf
 PYTHON = python3
 
-run-local:
+authorization_service:
 	@. tma.env; \
-	$(PYTHON) -m oauth2.server
+	authorization_service
 
 test: clean
 	$(PYTHON) -m pytest -p no:cacheprovider --verbose --capture=no .

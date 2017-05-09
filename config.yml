@@ -1,9 +1,17 @@
-server:
+authorization_service:
   root: /oauth2
   host: localhost
   port: 8110
-  subapps:
-    authorization_service: /
+
+client_admin_service:
+  root: /oauth2clients
+  host: localhost
+  port: 8111
+
+scope_admin_service:
+  root: /oauth2scopes
+  host: localhost
+  port: 8112
 
 jwt:
   refreshtokens:

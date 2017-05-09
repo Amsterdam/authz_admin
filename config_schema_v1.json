@@ -2,10 +2,10 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "config_schema_v1.json",
   "type": "object",
-  "required": ["server", "jwt", "postgres", "idp"],
+  "required": ["jwt", "postgres", "idp"],
 
   "properties": {
-    "server": {
+    "authorization_service": {
       "type": "object",
       "required": ["host", "port", "root"],
 
@@ -14,21 +14,37 @@
 
         "port": {"type": "integer"},
 
-        "root": {"type": "string"},
+        "root": {"type": "string"}
+      },
 
-        "subapps": {
-          "type": "object",
+      "additionalProperties": false
+    },
 
-          "properties": {
-            "authorization_service": {"type": "string"},
+    "client_admin_service": {
+      "type": "object",
+      "required": ["host", "port", "root"],
 
-            "client_admin_service": {"type": "string"},
+      "properties": {
+        "host": {"type": "string"},
 
-            "scope_admin_service": {"type": "string"}
-          },
+        "port": {"type": "integer"},
 
-      	  "additionalProperties": false
-        }
+        "root": {"type": "string"}
+      },
+
+      "additionalProperties": false
+    },
+
+    "scope_admin_service": {
+      "type": "object",
+      "required": ["host", "port", "root"],
+
+      "properties": {
+        "host": {"type": "string"},
+
+        "port": {"type": "integer"},
+
+        "root": {"type": "string"}
       },
 
       "additionalProperties": false
@@ -69,7 +85,7 @@
 
     "idp": {
       "type": "object",
- 
+
       "patternProperties": {
         "^[a-zA-Z0-9._-]+$": {
           "type": "object"
