@@ -18,7 +18,7 @@ For details on basic rST formatting, see the :ref:`sphinx:rst-primer`
 
     #.  Numbered lists look like this
 
-        #.  or like this, and can be nested,
+        1.  or like this, and can be nested,
         2.  as long as there is
 
     #.  an empty line between the lists.

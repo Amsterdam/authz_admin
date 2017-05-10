@@ -1,26 +1,26 @@
 """
-    Module that loads configuration settings from a yaml file.
+Module that loads configuration settings from a yaml file.
 
-    **Features**
+**Features**
 
-    - Environment interpolation with defaults
-    - JSON schema validation
+- Environment interpolation with defaults
+- JSON schema validation
 
-    .. _default-config-locations:
+.. _default-config-locations:
 
-    **Default config file locations**
+**Default config file locations**
 
-    - ``/etc/datapuntauth/config.yml``
-    - ``$PROJECT/config.yml``, where ``$PROJECT`` is the parent directory of
-       :mod:`auth`, which is useful during development
+- ``/etc/datapunt-oauth2.yml``
+- ``$PROJECT/config.yml``, where ``$PROJECT`` is the parent directory of
+   :mod:`oauth2`, which is useful during development.
 
-    **Example usage**
+**Example usage**
 
-    ::
+.. code-block::
 
-        from oauth2.config import get as get_config
-        config = get_config()
-
+    from oauth2 import config
+    CONFIG = config.get()
+    
 """
 import functools
 import json
@@ -33,15 +33,13 @@ import yaml
 
 _module_path = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 
-_ENVVAR_CONFFILE = 'CONFIGPATH'
-
 DEFAULT_CONFIG_PATHS = [
-    pathlib.Path('/etc') / 'datapunt' / 'config.yml',
+    pathlib.Path('/etc') / 'datapunt-oauth2.yml',
     _module_path.parent / 'config.yml',
 ]
 
 CONFIG_SCHEMA_V1_PATH = _module_path.parent / 'config_schema_v1.json'
-
+CONFIG_PATH = os.environ.get('CONFIG_PATH', None)
 
 class ConfigError(Exception):
     """ Configuration errors
@@ -50,10 +48,13 @@ class ConfigError(Exception):
 
 @functools.lru_cache(maxsize=1)
 def get():
-    """ Load, parse and validate a configuration file from the given
-    ``configpath`` or one of the :ref:`default locations <default-config-locations>`
-
-    :param configpath: path to the configuration file to load (optional)
+    """
+    Load, parse and validate the configuration file from one of the
+    :ref:`default locations <default-config-locations>` or from the location
+    given in the `CONFIG_PATH` environment variable.
+    
+    :returns: the configuration dictionary
+    :rtype: dict 
     """
     config = _load_yaml()
     config = _interpolate_environment(config)
@@ -66,9 +67,9 @@ def _load_yaml():
     <default-config-locations>`. If an environment variable is given then that
     will be checked first.
 
-    :return dict: the config
+    :returns: the “raw” config as read from file.
     """
-    envpath = list(filter(None, [os.getenv(_ENVVAR_CONFFILE)]))
+    envpath = list(filter(None, [os.getenv('CONFIG_PATH')]))
     for path in envpath + DEFAULT_CONFIG_PATHS:
         if path.exists() and path.is_file():
             conffile = path
