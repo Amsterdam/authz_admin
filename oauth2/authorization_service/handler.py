@@ -51,7 +51,7 @@ class RequestHandler:
 
         # create a UUID and the callback URI
         request_uuid = uuid.uuid4().hex
-        callback_base_uri = routes.idp_callback_uri(request.app, idp_id)
+        callback_base_uri = routes.idp_callback_uri(request, idp_id)
 
         # grab the response from the IdP plugin
         response, *keyvalue = authentication_redirect(request_uuid, callback_base_uri)
