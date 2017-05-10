@@ -20,7 +20,6 @@ Module that loads configuration settings from a yaml file.
 
     from oauth2 import config
     CONFIG = config.get()
-    
 """
 import functools
 import json
@@ -33,13 +32,16 @@ import yaml
 
 _module_path = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 
-DEFAULT_CONFIG_PATHS = [
+_CONFIG_PATHS = [
     pathlib.Path('/etc') / 'datapunt-oauth2.yml',
     _module_path.parent / 'config.yml',
 ]
 
+if os.getenv('CONFIGPATH') is not None:
+    _CONFIG_PATHS.insert(0, pathlib.Path(os.getenv('CONFIG_PATH')))
+
 CONFIG_SCHEMA_V1_PATH = _module_path.parent / 'config_schema_v1.json'
-CONFIG_PATH = os.environ.get('CONFIG_PATH', None)
+
 
 class ConfigError(Exception):
     """ Configuration errors
@@ -52,9 +54,9 @@ def get():
     Load, parse and validate the configuration file from one of the
     :ref:`default locations <default-config-locations>` or from the location
     given in the `CONFIG_PATH` environment variable.
-    
+
     :returns: the configuration dictionary
-    :rtype: dict 
+    :rtype: dict
     """
     config = _load_yaml()
     config = _interpolate_environment(config)
@@ -69,14 +71,13 @@ def _load_yaml():
 
     :returns: the “raw” config as read from file.
     """
-    envpath = list(filter(None, [os.getenv('CONFIG_PATH')]))
-    for path in envpath + DEFAULT_CONFIG_PATHS:
+    for path in _CONFIG_PATHS:
         if path.exists() and path.is_file():
             conffile = path
             break
     else:
         error_msg = 'No configfile found (none found at {})'
-        paths_as_string = ', '.join(str(p) for p in DEFAULT_CONFIG_PATHS)
+        paths_as_string = ', '.join(str(p) for p in _CONFIG_PATHS)
         raise ConfigError(error_msg.format(paths_as_string))
     with conffile.open() as f:
         parsed = yaml.load(f)
