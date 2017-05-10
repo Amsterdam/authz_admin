@@ -4,8 +4,7 @@
 """
 import uuid
 
-from . import authorizationrequest, authorizationresponse
-from oauth2 import types
+from . import authorizationrequest, authorizationresponse, routes
 
 authz_cache = dict()  # <- placeholder for Redis, memcached, or something else
 idp_cache = dict()
@@ -15,7 +14,7 @@ class RequestHandler:
     """ Async handlers for all endpoints.
     """
 
-    def __init__(self, idpregistry, clientregistry, scoperegistry, service_conf):
+    def __init__(self, idpregistry, clientregistry, scoperegistry):
         """ Constructor.
 
         :param idp:
@@ -25,7 +24,6 @@ class RequestHandler:
         self.idpregistry = idpregistry
         self.clientregistry = clientregistry
         self.scoperegistry = scoperegistry
-        self.service_conf = service_conf
 
     async def authorization(self, request):
         """ Authorization endpoint (RFC6749 section 3.1)
@@ -53,9 +51,7 @@ class RequestHandler:
 
         # create a UUID and the callback URI
         request_uuid = uuid.uuid4().hex
-        callback_path = request.app.router['idp-callback'].url_for(idp=idp_id)
-        host, port = self.service_conf['host'], self.service_conf['port']
-        callback_base_uri = 'https://'
+        callback_base_uri = routes.idp_callback_uri(request.app, idp_id)
 
         # grab the response from the IdP plugin
         response, *keyvalue = authentication_redirect(request_uuid, callback_base_uri)

@@ -3,16 +3,7 @@ import importlib
 from aiohttp import web
 
 from oauth2 import config, clientregistry, scopes
-from . import handler
-
-
-def register_routes(app, root, requesthandler):
-    """ Register all resources.
-    """
-    app.router.add_get(
-        root + '/authorize', requesthandler.authorization)
-    app.router.add_get(
-        root + '/idps/{idp}', requesthandler.idp_callback, name='idp-callback')
+from . import handler, routes
 
 
 def idpregistry(conf):
@@ -43,7 +34,7 @@ def start():
         service_conf
     )
     # register routes
-    register_routes(app, service_conf['root'], requesthandler)
+    routes.register_routes(app, service_conf['root'], requesthandler)
     # run server
     web.run_app(
         app,

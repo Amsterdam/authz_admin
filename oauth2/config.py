@@ -22,6 +22,7 @@
         config = get_config()
 
 """
+import functools
 import json
 import os
 import pathlib
@@ -29,10 +30,10 @@ import string
 import jsonschema
 import yaml
 
-from .decorators import memoized
-
 
 _module_path = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
+
+_ENVVAR_CONFFILE = 'CONFIGPATH'
 
 DEFAULT_CONFIG_PATHS = [
     pathlib.Path('/etc') / 'datapunt' / 'config.yml',
@@ -47,51 +48,35 @@ class ConfigError(Exception):
     """
 
 
-@memoized
+@functools.lru_cache(maxsize=1)
 def get():
-    """
-    Memoized version of `load()`.
-
-    .. todo::
-
-        Don't know how to test this.
-    """
-    return load()
-
-
-def load(configpath=None):
     """ Load, parse and validate a configuration file from the given
     ``configpath`` or one of the :ref:`default locations <default-config-locations>`
 
     :param configpath: path to the configuration file to load (optional)
     """
-    config = _load_yaml(configpath)
+    config = _load_yaml()
     config = _interpolate_environment(config)
     _validate(config, CONFIG_SCHEMA_V1_PATH)
     return config
 
 
-def _load_yaml(configpath):
-    """ Read a yaml file from the given ``configpath`` or one of the
-    :ref:`default locations <default-config-locations>`
+def _load_yaml():
+    """ Read the config file from one of the :ref:`default locations
+    <default-config-locations>`. If an environment variable is given then that
+    will be checked first.
 
-    :param configpath: path to the yaml file to load (optional)
+    :return dict: the config
     """
-    if not configpath:
-        for path in DEFAULT_CONFIG_PATHS:
-            if path.exists() and path.is_file():
-                conffile = path
-                break
-        else:
-            error_msg = 'No configfile found (none given and none found at {})'
-            paths_as_string = ', '.join(str(p) for p in DEFAULT_CONFIG_PATHS)
-            raise ConfigError(error_msg.format(paths_as_string))
-    else:
-        path = pathlib.Path(configpath)
+    envpath = list(filter(None, [os.getenv(_ENVVAR_CONFFILE)]))
+    for path in envpath + DEFAULT_CONFIG_PATHS:
         if path.exists() and path.is_file():
             conffile = path
-        else:
-            raise ConfigError('Cannot read config from {}'.format(configpath))
+            break
+    else:
+        error_msg = 'No configfile found (none found at {})'
+        paths_as_string = ', '.join(str(p) for p in DEFAULT_CONFIG_PATHS)
+        raise ConfigError(error_msg.format(paths_as_string))
     with conffile.open() as f:
         parsed = yaml.load(f)
     return parsed
