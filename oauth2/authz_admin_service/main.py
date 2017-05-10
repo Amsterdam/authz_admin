@@ -5,7 +5,7 @@ from oauth2.config import load as load_config
 
 def start():
     config = load_config()
-    service_config = config['scope_admin_service']
+    service_config = config['authz_admin_service']
     # create application
     app = web.Application()
     # run server

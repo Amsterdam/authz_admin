@@ -8,7 +8,7 @@ client_admin_service:
   host: localhost
   port: 8111
 
-scope_admin_service:
+authz_admin_service:
   root: /oauth2scopes
   host: localhost
   port: 8112
