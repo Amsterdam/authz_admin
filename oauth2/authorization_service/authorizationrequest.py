@@ -42,7 +42,7 @@ import collections
 from aiohttp import web_exceptions
 
 from . import authorizationresponse
-from oauth2 import types
+from oauth2 import types, decorators
 
 SUPPORTED_RESPONSE_TYPES = {'code', 'token'}
 
@@ -83,7 +83,7 @@ class ParamParser:
         self.clientregistry = clientregistry
         self.scoperegistry = scoperegistry
 
-    @property
+    @decorators.reify
     def client_id(self):
         """ The client_id included in the request. (REQUIRED)
 
@@ -94,29 +94,20 @@ class ParamParser:
             Once we have settled on a format for the client identifier we can
             do more extensive checks.
         """
-        try:
-            return self._client_id
-        except AttributeError:
-            pass
         client_id = self.request.query.get('client_id', '').encode('ascii')
         if not client_id:
             raise web_exceptions.HTTPBadRequest(body='missing client_id')
         if client_id not in self.clientregistry:
             raise web_exceptions.HTTPBadRequest(body='unknown client id')
-        self._client_id = client_id
         return client_id
 
-    @property
+    @decorators.reify
     def redirect_uri(self):
         """ The redirect_uri for this request. (OPTIONAL)
 
         :raises aiohttp.web_exceptions.HTTPBadRequest: if the redirect_uri
             parameter is not present, invalid, or mismatching.
         """
-        try:
-            return self._redirect_uri
-        except AttributeError:
-            pass
         client_redirects = self.clientregistry[self.client_id].redirect_uris
         redirect_uri = self.request.query.get('redirect_uri')
         # The below condition is valid but pretty tricky... treat with care
@@ -126,16 +117,15 @@ class ParamParser:
             raise web_exceptions.HTTPBadRequest(
                 body='must provide valid redirect_uri'
             )
-        self._redirect_uri = redirect_uri
         return redirect_uri
 
-    @property
+    @decorators.reify
     def state(self):
         """ The state parameter for this request. (RECOMMENDED)
         """
         return self.request.query.get('state')
 
-    @property
+    @decorators.reify
     def response_type(self):
         """ The response_type for this request. (REQUIRED)
 
@@ -145,10 +135,6 @@ class ParamParser:
         :raises authorizationresponse.UnsupportedResponseType:
             If the response_type is not supported
         """
-        try:
-            return self._response_type
-        except AttributeError:
-            pass
         response_type = self.request.query.get('response_type')
         if not response_type:
             raise authorizationresponse.InvalidRequest(self.redirect_uri, self.state)
@@ -157,10 +143,9 @@ class ParamParser:
         untrusted_client = self.clientregistry[self.client_id].secret is None
         if untrusted_client and response_type != 'token':
             raise authorizationresponse.UnauthorizedClient(self.redirect_uri, self.state)
-        self._response_type = response_type
         return response_type
 
-    @property
+    @decorators.reify
     def scope(self):
         """ The scope for this request. (OPTIONAL)
 
@@ -168,14 +153,9 @@ class ParamParser:
             If the scope is invalid
         """
         try:
-            return self._scope
-        except AttributeError:
-            pass
-        try:
             scopes = types.ScopeTokenSet(self.request.query.get('scope', ''))
         except ValueError:  # raised when malformed
             raise authorizationresponse.InvalidScope(self.redirect_uri, self.state)
         if not scopes <= self.scoperegistry:
             raise authorizationresponse.InvalidScope(self.redirect_uri, self.state)
-        self._scope = scopes
         return scopes
