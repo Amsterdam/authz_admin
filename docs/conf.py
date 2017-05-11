@@ -179,3 +179,8 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6/', None),
     'sphinx': ('http://www.sphinx-doc.org/en/stable/', None)
 }
+
+
+autodoc_default_flags = [
+    'members', 'private-members', 'special-members'
+]

@@ -1,11 +1,9 @@
-.. _admin_service:
+.. _authz_admin_service:
 
-Datapunt Permission Administration Service
-==========================================
+Datapunt Authorization Administration Service
+=============================================
 
-Package admin_service
----------------------
+Package authz_admin_service
+---------------------------
 
 .. automodule:: oauth2.authz_admin_service
-   :members:
-   :private-members:

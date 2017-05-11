@@ -22,7 +22,7 @@ def idpregistry(conf):
 def start():
     """ Loads the config and start the server
     """
-    conf = config.load()
+    conf = config.get()
     service_conf = conf['authorization_service']
     # create application
     app = web.Application()
@@ -30,8 +30,7 @@ def start():
     requesthandler = handler.RequestHandler(
         idpregistry(conf),
         clientregistry.get(),
-        scopes.get(),
-        service_conf
+        scopes.get()
     )
     # register routes
     routes.register_routes(app, service_conf['root'], requesthandler)
