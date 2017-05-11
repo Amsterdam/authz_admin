@@ -23,7 +23,7 @@ setup(
         'psycopg2',
         'pyyaml',
         'sqlalchemy',
-        'aiohttp==2.0.7'
+        'aiohttp'
     ],
     extras_require={
         'doc': [

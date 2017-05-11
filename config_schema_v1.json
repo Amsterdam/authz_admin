@@ -52,7 +52,7 @@
       "additionalProperties": false
     },
 
-    "scope_admin_service": {
+    "authz_admin_service": {
       "type": "object",
       "required": ["host", "port", "root"],
 

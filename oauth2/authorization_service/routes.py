@@ -13,7 +13,7 @@ def register_routes(app, root, requesthandler):
 
 
 def idp_callback_uri(request, for_idp):
-    """
+    """ Try to figure out what the callback URL for the given idp is
     """
     path = request.app.router[_IDP_CALLBACK].url_for(idp=for_idp)
     current_url = request.url
