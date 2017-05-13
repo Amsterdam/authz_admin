@@ -1,20 +1,34 @@
 .. _shared:
 
 
-Shared Modules
-==============
+Shared Modules and Packages
+===========================
+
+oauth2.client_registry
+----------------------
+
+.. automodule:: oauth2.client_registry
+
 
 oauth2.config
 -------------
 
 .. automodule:: oauth2.config
-   :members:
 
 
-oauth2.decorators
------------------
+oauth2.config.config_loader
+---------------------------
 
-.. automodule:: oauth2.decorators
-   :members:
+.. automodule:: oauth2.config.config_loader
 
 
+oauth2.prototype
+----------------
+
+.. automodule:: oauth2.prototype
+
+
+oauth2.types
+------------
+
+.. automodule:: oauth2.types

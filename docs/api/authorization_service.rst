@@ -3,9 +3,7 @@
 Datapunt OAuth2 Authorization Service
 =====================================
 
-API Docs
---------
+Package oauth2.authorization_service
+------------------------------------
 
 .. automodule:: oauth2.authorization_service
-   :members:
-   :private-members:
