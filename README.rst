@@ -1,5 +1,5 @@
-Datapunt Permission Management and OAuth2 Authorization Services
-================================================================
+Datapunt OAuth2 Services
+========================
 
 .. image:: https://img.shields.io/badge/python-3.6-blue.svg
    :target: https://www.python.org/
@@ -10,4 +10,5 @@ Datapunt Permission Management and OAuth2 Authorization Services
 The latest published documentation for this project can be found *here*.
 
 .. todo::
+
    Publish the documentation somewhere and insert a link in the sentence above.

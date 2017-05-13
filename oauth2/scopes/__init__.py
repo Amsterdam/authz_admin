@@ -1,17 +1,19 @@
 """
-    oauth2.scoperegistry
-    ~~~~~~~~~~~~~~~~~~~~
+Convenient placeholder during developement.
 
-    Convenient placeholder during developement. Will be replaced by an actual
-    (database?) backend down the road.
+Will be replaced by an actual (database?) backend down the road.
+
 """
-from types import MappingProxyType
 
+import types
+import functools
+
+from .. import config, frozen
 
 
 # Old stuff from Evert ;-)
 
-_registry = frozenset({
+_registry = frozen.frozen({
     'default',
     'employee',
     'employee_plus'
@@ -21,17 +23,18 @@ _registry = frozenset({
 def get():
     return _registry
 
-_SCOPES_PER_DATASET = {
-    'TEST': {
-        ('READ', 'WRITE'),
-        ('GRANT',)
-    }
-}
-_DATASETS = tuple(_SCOPES_PER_DATASET.keys())
+# New stuff from Pieter
 
 
-def scopes_per_dataset():
-    return _SCOPES_PER_DATASET
+@functools.lru_cache()
+def datasets():
+    """
+    All datasets defined in the configuration.
+
+    :rtype: tuple(str)
+    
+    """
+    return tuple(config['scopes'].keys())
 
 
 def implied_scopes():
@@ -44,13 +47,6 @@ def implied_scopes():
                 scopename = "%s:%s" % (dataset, scope)
                 implied.append(scopename)
                 result[scopename] = tuple(implied)
-    return MappingProxyType(result)
+    return types.MappingProxyType(result)
 
-
-def all_scopes():
-    return tuple(implied_scopes().keys())
-
-
-def datasets():
-    return set(_SCOPES_PER_DATASET.keys())
 

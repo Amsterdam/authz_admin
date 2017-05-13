@@ -16,12 +16,17 @@
 import os
 import sys
 import sphinx_rtd_theme
+import pathlib
+
+PROJECT_PATH = pathlib.Path(
+    os.path.dirname(os.path.abspath(__file__))
+).parent
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../venv/lib/python3.6/site-packages'))
+sys.path.insert(0, str(PROJECT_PATH))
+# sys.path.insert(0, str(PROJECT_PATH / '.venv/lib/python3.6/site-packages'))
 
 
 # -- General configuration ------------------------------------------------
@@ -96,17 +101,33 @@ default_role = 'py:obj'
 #html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+#html_theme = 'bizstyle'
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 # html_theme_options = {}
+
+# Sphinx RTD theme:
 html_theme_options = {
-    'collapse_navigation': False,
+    # 'typekit_id': 'hiw1hhg',
+    # 'analytics_id': None,
+    # 'sticky_navigation': False,
+    # 'logo_only': None,
+    # 'collapse_navigation': False,
+    # 'display_version': True,
     'display_version': False,
-    'navigation_depth': 3,
+    # 'navigation_depth': 4,
+    # 'prev_next_buttons_location': 'bottom',
+    # 'canonical_url': None,
 }
+
+# bizstyle theme:
+# html_theme_options = {
+#     'rightsidebar': True
+# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -182,5 +203,8 @@ intersphinx_mapping = {
 
 
 autodoc_default_flags = [
-    'members', 'private-members', 'special-members'
+    'members',
+    'private-members',
+    # 'special-members',
+    'show-inheritance'
 ]

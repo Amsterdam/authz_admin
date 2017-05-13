@@ -1,41 +1,39 @@
 """
-    oauth2.rfc6749.authorizationrequest
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This module implements the OAuth2 authorization request as defined in
+:rfc:`6749#section-4.1.1` and :rfc:`6749#section-4.2.1`:
 
-    This module implements the OAuth2 authorization request as defined in
-    RFC6749, sections 4.1.1 and 4.2.1:
+.. code-block:: text
 
-        The client constructs the request URI by adding the following
-        parameters to the query component of the authorization endpoint URI
-        using the "application/x-www-form-urlencoded" format, per Appendix B:
+    The client constructs the request URI by adding the following
+    parameters to the query component of the authorization endpoint URI
+    using the "application/x-www-form-urlencoded" format, per Appendix B:
 
-        response_type
-            REQUIRED.  Value MUST be set to "code".
+    response_type
+        REQUIRED.  Value MUST be set to "code".
 
-        client_id
-            REQUIRED.  The client identifier as described in Section 2.2.
+    client_id
+        REQUIRED.  The client identifier as described in Section 2.2.
 
-        redirect_uri
-            OPTIONAL.  As described in Section 3.1.2.
+    redirect_uri
+        OPTIONAL.  As described in Section 3.1.2.
 
-        scope
-            OPTIONAL.  The scope of the access request as described by
-            Section 3.3.
+    scope
+        OPTIONAL.  The scope of the access request as described by
+        Section 3.3.
 
-        state
-            RECOMMENDED.  An opaque value used by the client to maintain
-            state between the request and callback.  The authorization
-            server includes this value when redirecting the user-agent back
-            to the client.  The parameter SHOULD be used for preventing
-            cross-site request forgery as described in Section 10.12.
+    state
+        RECOMMENDED.  An opaque value used by the client to maintain
+        state between the request and callback.  The authorization
+        server includes this value when redirecting the user-agent back
+        to the client.  The parameter SHOULD be used for preventing
+        cross-site request forgery as described in Section 10.12.
 
-    Usage:
+Usage::
 
-    ::
+    authorizationrequestparams = oauth2.rfc6749.authorizationrequest.parse(
+        request, clientregistry, scoperegistry
+    )
 
-        authorizationrequestparams = oauth2.rfc6749.authorizationrequest.parse(
-            request, clientregistry, scoperegistry
-        )
 """
 import collections
 
@@ -44,7 +42,7 @@ from aiohttp import web_exceptions
 from . import authorizationresponse
 from oauth2 import types, decorators
 
-SUPPORTED_RESPONSE_TYPES = {'code', 'token'}
+SUPPORTED_RESPONSE_TYPES = frozenset({'code', 'token'})
 
 AuthorizationRequestParams = collections.namedtuple(
     'AuthorizationRequestParams',
@@ -64,18 +62,21 @@ def params(request, clientregistry, scoperegistry):
 
 
 class ParamParser:
-    """ Provides request parsing for an authorization request.
+    """
+    Provides request parsing for an authorization request.
 
-    Notes from RFC6749 section 3.1:
+    Notes from :rfc:`6749#section-3.1`:
 
-    * Parameters sent without a value MUST be treated as if they were omitted
-      from the request.
-    * The authorization server MUST ignore unrecognized request parameters.
-    * Request and response parameters MUST NOT be included more than once.
+    *   Parameters sent without a value MUST be treated as if they were omitted
+        from the request.
+    *   The authorization server MUST ignore unrecognized request parameters.
+    *   Request and response parameters MUST NOT be included more than once.
 
-    :todo
+    .. todo::
+
         How can we check whether a request parameter was included more than
         once? (point 3 above)
+
     """
 
     def __init__(self, request, clientregistry, scoperegistry):

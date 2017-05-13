@@ -3,6 +3,21 @@ database:
   ports:
     - "5432:5432"
   environment:
-    - POSTGRES_DB=authz
-    - POSTGRES_USER=authuser
-    - POSTGRES_PASSWORD=authpassword
+    - POSTGRES_DB=oauth2
+    - POSTGRES_USER=oauth2
+    - POSTGRES_PASSWORD=oauth2
+
+auth:
+  build: .
+  links:
+    - database:database
+  ports:
+    - "8000:8000"
+  environment:
+    JWT_REFRESH_SECRET: refreshsecret
+    JWT_ACCESS_SECRET: accesssecret
+    DB_HOST: database
+    TMA_OAUTH2_AUTHZ_URI: ${TMA_OAUTH2_AUTHZ_URI}
+    TMA_OAUTH2_TOKEN_URI: ${TMA_OAUTH2_TOKEN_URI}
+    TMA_OAUTH2_CLIENT_ID: ${TMA_OAUTH2_CLIENT_ID}
+

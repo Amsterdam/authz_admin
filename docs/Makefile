@@ -3,6 +3,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+AUTOBUILD     = sphinx-autobuild
 SPHINXPROJ    = DatapuntOAuth2
 SOURCEDIR     = .
 BUILDDIR      = _build
@@ -20,6 +21,10 @@ inv: sphinx.inv python.inv
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+
+server:
+	@$(AUTOBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) --watch ../oauth2
 
 
 sphinx.inv:

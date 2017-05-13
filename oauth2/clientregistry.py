@@ -1,15 +1,14 @@
 """
-    oauth2.clientregistry
-    ~~~~~~~~~~~~~~~~~~~~~
+Convenient placeholder during developement.
 
-    Convenient placeholder during developement. Will be replaced by an actual
-    (database?) backend down the road.
+Will be replaced by an actual (database?) backend down the road.
+
 """
 import collections.abc
 from . import types
 
 
-# A registry to loop over (O(N) lookups)
+#: A registry to loop over (O(N) lookups)
 _registry = (
     types.Client(
         identifier=b'NOadtMwDSQKmw30l4l2xxQ.data.amsterdam',
@@ -44,8 +43,8 @@ class _Registry(collections.abc.Mapping):
             yield c.identifier
 
 
-instance = _Registry()
+_instance = _Registry()
 
 
 def get():
-    return instance
+    return _instance

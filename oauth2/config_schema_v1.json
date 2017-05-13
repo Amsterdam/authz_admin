@@ -1,60 +1,87 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "config_schema_v1.json",
   "type": "object",
   "required": ["jwt", "postgres", "idp"],
-
   "properties": {
+
+
     "scopes": {
       "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": [
-            "array",
-            "string"
-          ],
-          "pattern": "^[a-z]+$",
-          "items": {
-            "type": "string",
-            "pattern": "^[a-z]+$"
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Z]+$": {
+          "type": "object",
+          "required": ["name", "scopes"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "scopes": {
+              "type": "object",
+              "additionalProperties": false,
+              "patternProperties": {
+                "^[A-Z]+$": {
+                  "type": "object",
+                  "required": ["summary"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "summary": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "includes": {
+                      "type": "string",
+                      "pattern": "^[A-Z]+$"
+                    },
+                    "included_by": {
+                      "type": "string",
+                      "pattern": "^[A-Z]+$"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
+
+
     "authorization_service": {
       "type": "object",
       "required": ["host", "port", "root"],
-
+      "additionalProperties": false,
       "properties": {
         "host": {"type": "string"},
-
         "port": {"type": "integer"},
-
         "root": {"type": "string"}
-      },
-
-      "additionalProperties": false
+      }
     },
+
 
     "client_admin_service": {
       "type": "object",
       "required": ["host", "port", "root"],
-
+      "additionalProperties": false,
       "properties": {
         "host": {"type": "string"},
-
         "port": {"type": "integer"},
-
         "root": {"type": "string"}
-      },
-
-      "additionalProperties": false
+      }
     },
+
 
     "authz_admin_service": {
       "type": "object",
       "required": ["host", "port", "root"],
+      "additionalProperties": false,
 
       "properties": {
         "host": {"type": "string"},
@@ -62,27 +89,27 @@
         "port": {"type": "integer"},
 
         "root": {"type": "string"}
-      },
-
-      "additionalProperties": false
+      }
     },
+
 
     "jwt": {
       "type": "object",
       "required": ["refreshtokens", "accesstokens"],
+      "additionalProperties": false,
 
       "properties": {
         "refreshtokens": {"$ref": "#/definitions/jwtconfig"},
 
         "accesstokens": {"$ref": "#/definitions/jwtconfig"}
-      },
-
-      "additionalProperties": false
+      }
     },
+
 
     "postgres": {
       "type": "object",
       "required": ["host", "port", "user", "password", "dbname"],
+      "additionalProperties": false,
 
       "properties": {
         "host": {"type": "string"},
@@ -94,11 +121,10 @@
         "password": {"type": "string"},
 
         "dbname": {"type": "string"}
-      },
-
-      "additionalProperties": false
+      }
 
     },
+
 
     "idp": {
       "type": "object",
@@ -109,6 +135,7 @@
         }
       }
     },
+
 
     "logging": {"$ref": "#/definitions/logging.dictconfig"}
   },

@@ -1,21 +1,14 @@
-Datapunt Permission Management and OAuth2 Authorization Services
-================================================================
+.. _index:
+
+.. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :glob:
 
-   api/authorization_service
-   api/authz_admin_service
-   api/client_admin_service
-   api/shared
+   api/*
    sphinx101
    todo_list
+   License <license>
+   Index <genindex>
 
-
-Indices and tables
-==================
-
-*  :ref:`genindex`
-*  :ref:`modindex`
-*  :ref:`search`

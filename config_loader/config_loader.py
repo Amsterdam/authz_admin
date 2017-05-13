@@ -1,20 +1,3 @@
-"""
-Module that loads configuration settings from a yaml file.
-
-**Features**
-
-- Environment interpolation with defaults
-- JSON schema validation
-
-**Example usage**::
-
-    from . import config_loader
-    CONFIG = config_loader.load(
-        path_to_config_file,
-        path_to_config_schema_file
-    )
-
-"""
 import json
 import os
 import pathlib
@@ -101,12 +84,13 @@ def _interpolate_environment(config):
     return {key: interpolate_recursive(config[key]) for key in config}
 
 
-def _validate(config, schemafile):
+def _validate(config: dict, schemafile: pathlib.Path):
     """
     Validate the given ``config`` using the JSON schema given in ``schemafile``.
 
-    :param dict config: configuration mapping
-    :param pathlib.PurePath schemafile: path to the schema definition file.
+    :param config: configuration mapping
+    :param schemafile: an object that has
+        an ``open()`` method as context manager.
 
     """
     with schemafile.open() as f:

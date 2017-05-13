@@ -1,8 +1,8 @@
-""" See <https://setuptools.readthedocs.io/en/latest/>.
+#!/usr/bin/env python3
+
+"""See <https://setuptools.readthedocs.io/en/latest/>.
 """
 from setuptools import setup
-
-
 setup(
     version='0.1.1',
     name='datapunt-oauth2',
@@ -17,7 +17,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=['oauth2'],
+    packages=['oauth2', 'config_loader'],
     install_requires=[
         'jsonschema',
         'psycopg2',
@@ -28,12 +28,14 @@ setup(
     extras_require={
         'doc': [
             'sphinx',
-            'sphinx_rtd_theme'
+            'sphinx_rtd_theme',
+            'sphinx-autobuild'
         ],
-        'dev': [
-            'pytest==3.0.5',
-            'pytest-cov==2.4.0'
-        ],
+        'dev': [],
+        'test': [
+            'pytest',
+            'pytest-cov'
+        ]
     },
     entry_points={
         'console_scripts': [
@@ -42,4 +44,7 @@ setup(
             'authz_admin_service = oauth2.authz_admin_service.main:start',
         ],
     },
+    setup_requires=[
+        'setuptools_git'
+    ],
 )

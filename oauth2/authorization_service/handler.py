@@ -1,7 +1,3 @@
-"""
-    oauth2.authorization_service.requesthandlers
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
 import uuid
 
 from . import authorizationrequest, authorizationresponse, routes

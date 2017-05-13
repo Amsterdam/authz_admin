@@ -9,7 +9,7 @@ client_admin_service:
   port: 8111
 
 authz_admin_service:
-  root: /authorizations
+  root: /oauth2scopes
   host: localhost
   port: 8112
 
@@ -17,7 +17,7 @@ jwt:
   refreshtokens:
     secret: refresh_testsecret
     algorithm: HS256
-    lifetime: ${JWT_LIFETIME:-43200}  # 12 x 3600
+    lifetime: ${JWT_LIFETIME:-43200}  # 12 × 3600
   accesstokens:
     secret: access_testsecret
     algorithm: HS256
@@ -26,9 +26,9 @@ jwt:
 postgres:
   host: ${DB_HOST:-localhost}
   port: ${DB_PORT:-5432}
-  user: ${DB_USER:-oauthuser}
-  password: ${DB_PASS:-oauthpassword}
-  dbname: ${DB_DATABASE:-oauth}
+  user: ${DB_USER:-oauth2}
+  password: ${DB_PASS:-oauth2}
+  dbname: ${DB_DATABASE:-oauth2}
 
 idp:
   oauth2.idp.tma_oauth2:
@@ -67,6 +67,21 @@ logging:
     handlers: [root]
 
 scopes:
-  test:
-    - grant
-    - [ read, write ]
+  HR:
+    name: Handelsregister
+    url: https://www.amsterdam.nl/stelselpedia/hr-index/
+    scopes:
+      GRAND:
+        summary: Toegangsbeheer
+        description: |-
+            Mag de eigen toegangsrechten doorgeven aan anderen.
+      READ:
+        summary: Leestoegang
+        description: |-
+            Geeft onbeperkt leestoegang tot alle informatie.
+        included_by: WRITE
+      WRITE:
+        summary: Schrijftoegang
+        description: |-
+            Heeft onbeperkt schrijftoegang tot alle informatie.
+        includes: READ

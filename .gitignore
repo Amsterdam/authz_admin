@@ -1,6 +1,3 @@
-# secret config
-tma.env
-
 # Python
 *.pyc
 
@@ -9,19 +6,15 @@ __pycache__
 *.egg-info
 .eggs
 
-# IntelliJ stuff:
-/.idea/
-/*.iml
-/.editorconfig
-/.requirements_intellij.txt
+# Python setuptools
+/build
+/dist
 
 # PyDev/Eclipse
 .project
 .pydevproject
 
 # Python virtual environement:
-# PvB:
-/.venv
 # EL:
 .venv
 

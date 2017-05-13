@@ -31,6 +31,16 @@ For details on basic rST formatting, see the :ref:`sphinx:rst-primer`
 
 *   There must be a space between the link text and the url in `hyperlinks <http://example.com/>`_.
 
+*   Conventions for header markup:
+
+    #. ``#`` with overline
+    #. ``*`` with overline
+    #. ``=``
+    #. ``-``
+    #. ``^``
+    #. ``"``
+
+
 
 Roles added by Sphinx
 ---------------------

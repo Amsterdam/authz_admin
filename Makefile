@@ -1,19 +1,39 @@
-.PHONY: test coverage clean distclean
+.PHONY: authorization_service test testcov testcovclean clean distclean docs_*
 
 RM = rm -rf
-PYTHON = python3
+
+# `pytest` and `python -m pytest` are equivalent, except that the latter will
+# add the current working directory to sys.path. We don't want that; we want
+# to test against the _installed_ package(s), not against any python sources
+# that are (accidentally) in our CWD.
+PYTEST = pytest
+
+# The ?= operator below assigns only if the variable isn't defined yet. This
+# allows the caller to override them::
+#
+#     TESTS=other_tests make test
+#
+PYTEST_OPTS ?= -p no:cacheprovider --capture=no --verbose
+TESTS ?= tests
+
 
 authorization_service:
-	@. tma.env; \
+	. tma.env; \
 	authorization_service
 
-test: clean
-	$(PYTHON) -m pytest -p no:cacheprovider --verbose --capture=no .
 
-coverage: clean
-	$(PYTHON) -m pytest -p no:cacheprovider --verbose --cov=oauth2 --cov-report=term --cov-config .coveragerc --capture=no .
+test:
+	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
-clean:
+
+testcov:
+	$(PYTEST) --cov-config .coveragerc --cov=oauth2 --cov-report=term $(TESTS)
+
+testcov_clean:
+	@$(RM) .cache .coverage
+
+
+clean: testcov_clean
 	@$(RM) build/ *.egg-info/ .eggs/ dist/
 	@find . \( \
 		-iname "*.pyc" \
@@ -29,6 +49,8 @@ clean:
 		-or -iname ".DS_Store" \
 		\) -delete
 
+
+# @evert waar komt dit eigenlijk vandaan?
 distclean: clean
 	@$(RM) \
 		dist/ \
@@ -38,6 +60,8 @@ distclean: clean
 		parts/ \
 		MANIFEST \
 		htmlcov/ \
-		.coverage \
 		.installed.cfg
-	
+
+
+docs_%:
+	$(MAKE) -C docs $*
