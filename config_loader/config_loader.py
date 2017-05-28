@@ -34,10 +34,10 @@ def load(config_file_path, config_schema_file_path):
 
 def _load_yaml(path):
     """
-    Read the config file from `path`.
+    Read the config file from ``path``.
 
-    :type path: pathlib.PurePath
-    :returns dict: the config dictionary, as read from file.
+    :param pathlib.Path path:
+    :returns dict or set or list: the config object, as read from file.
 
     """
     with path.open() as f:
@@ -53,9 +53,11 @@ def _interpolate_environment(config):
     Recursively find string-type values in the given ``config``,
     and try to substitute them with values from :data:`os.environ`.
 
-    **NOTE**: If a substituted value is a string containing only digits (i.e.
-    :func:`string.isdigit()` == ``True``), then this function will cast
-    it to an integer. It does not try to do any other type conversion.
+    **NOTE**
+
+    If a substituted value is a string containing only digits (i.e.
+    :py:meth:`str.isdigit()` is True), then this function will cast
+    it to an integer.  It does not try to do any other type conversion.
 
     :param config: configuration mapping
 
@@ -84,13 +86,13 @@ def _interpolate_environment(config):
     return {key: interpolate_recursive(config[key]) for key in config}
 
 
-def _validate(config: dict, schemafile: pathlib.Path):
+def _validate(config, schemafile):
     """
     Validate the given ``config`` using the JSON schema given in ``schemafile``.
 
-    :param config: configuration mapping
-    :param schemafile: an object that has
-        an ``open()`` method as context manager.
+    :param config: configuration object.
+    :type config: dict or set or list
+    :param pathlib.Path schemafile: path to the JSON Schema definition file.
 
     """
     with schemafile.open() as f:
@@ -100,6 +102,7 @@ def _validate(config: dict, schemafile: pathlib.Path):
             error_msg = "Couldn't parse JSON schema {}"
             raise ConfigError(error_msg.format(schemafile)) from e
     try:
+        # noinspection PyUnboundLocalVariable
         jsonschema.validate(config, schema)
     except jsonschema.exceptions.SchemaError as e:
         error_msg = "Invalid JSON schema definition at {}"

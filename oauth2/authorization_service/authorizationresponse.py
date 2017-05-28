@@ -82,6 +82,10 @@ and :rfc:`6749#section-4.2.2.1`:
 
 We use the RFC's error code description as the value for error_description,
 and for now we don't include an error_uri.
+
+.. py:class:: aiohttp.web_exceptions.HTTPFound
+    See :ref:`aiohttp exceptions <aiohttp-web-exceptions>`
+
 """
 import urllib
 
@@ -89,11 +93,15 @@ from aiohttp import web_exceptions
 
 
 class _AuthorizationResponse(web_exceptions.HTTPFound):
-    """Base class for authorization responses."""
 
     def __init__(self, redirect_uri, state):
-        """ Creates a new error response, including the state parameter if it
+        # language=rst
+        """
+        Base class for authorization responses.
+
+        Creates a new error response, including the state parameter if it
         was present in the request.
+
         """
         if state is not None:
             self.params['state'] = state

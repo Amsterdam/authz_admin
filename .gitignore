@@ -1,7 +1,5 @@
-# Python
-*.pyc
-
 # Python ephemerals:
+*.pyc
 __pycache__
 *.egg-info
 .eggs
@@ -14,8 +12,11 @@ __pycache__
 .project
 .pydevproject
 
+# PyCharm/IntelliJ
+.idea
+*.iml
+
 # Python virtual environement:
-# EL:
 .venv
 
 # Generated documentation:

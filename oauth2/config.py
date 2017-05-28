@@ -1,13 +1,18 @@
+# language=rst
 """
 Module that loads the configuration settings for all our services.
+
+.. envvar:: CONFIG_PATH
+
+    If set, the configuration is loaded from this path.
 
 See also :mod:`config_loader`.
 
 **Example usage**::
 
     from oauth2 import config
-    CONFIG = config.get()
-    os.chdir(CONFIG['working_directory'])
+        CONFIG = config.get()
+        os.chdir(CONFIG['working_directory'])
 
 ..  py:data:: CONFIG_SCHEMA_V1_PATH
 
@@ -46,7 +51,10 @@ CONFIG_SCHEMA_V1_PATH = pathlib.Path(
 
 @functools.lru_cache()
 def get():
+    # language=rst
     """
+    Load, parse and validate the configuration file.
+
     Load, parse and validate the configuration file from
     one of the `DEFAULT_CONFIG_PATHS` or from the location
     given in the :envvar:`CONFIG_PATH` environment variable.

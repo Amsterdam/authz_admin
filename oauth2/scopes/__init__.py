@@ -34,7 +34,7 @@ def datasets():
     :rtype: tuple(str)
     
     """
-    return tuple(config['scopes'].keys())
+    return tuple(config.get()['scopes'].keys())
 
 
 def implied_scopes():
@@ -48,5 +48,3 @@ def implied_scopes():
                 implied.append(scopename)
                 result[scopename] = tuple(implied)
     return types.MappingProxyType(result)
-
-

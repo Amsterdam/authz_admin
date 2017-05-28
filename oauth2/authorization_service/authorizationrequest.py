@@ -88,8 +88,8 @@ class ParamParser:
     def client_id(self):
         """ The client_id included in the request. (REQUIRED)
 
-        :raises aiohttp.web_exceptions.HTTPBadRequest: if the client_id query
-            parameter is not present or invalid
+        :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
+            if the client_id query parameter is not present or invalid
 
         :todo
             Once we have settled on a format for the client identifier we can
@@ -106,8 +106,8 @@ class ParamParser:
     def redirect_uri(self):
         """ The redirect_uri for this request. (OPTIONAL)
 
-        :raises aiohttp.web_exceptions.HTTPBadRequest: if the redirect_uri
-            parameter is not present, invalid, or mismatching.
+        :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
+            if the redirect_uri parameter is not present, invalid, or mismatching.
         """
         client_redirects = self.clientregistry[self.client_id].redirect_uris
         redirect_uri = self.request.query.get('redirect_uri')

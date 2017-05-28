@@ -1,6 +1,8 @@
 """
-Placeholder for the user registry. The user registry
-maps user identifiers onto user attributes, e.g. scopes.
+Placeholder for the user registry.
+
+The user registry maps user identifiers onto user attributes, e.g. scopes.
+
 """
 import collections
 

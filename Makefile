@@ -1,4 +1,4 @@
-.PHONY: authorization_service test testcov testcovclean clean distclean docs_*
+.PHONY: test testclean distclean clean authorization_service
 
 RM = rm -rf
 
@@ -13,7 +13,7 @@ PYTEST = pytest
 #
 #     TESTS=other_tests make test
 #
-PYTEST_OPTS ?= -p no:cacheprovider --capture=no --verbose
+PYTEST_OPTS ?= -p no:cacheprovider --capture=no --verbose --cov=src --cov-report=term --no-cov-on-fail
 TESTS ?= tests
 
 
@@ -25,33 +25,12 @@ authorization_service:
 test:
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
-
-testcov:
-	$(PYTEST) --cov-config .coveragerc --cov=oauth2 --cov-report=term $(TESTS)
-
-testcov_clean:
+testclean:
 	@$(RM) .cache .coverage
 
 
-clean: testcov_clean
-	@$(RM) build/ *.egg-info/ .eggs/ dist/
-	@find . \( \
-		-iname "*.pyc" \
-		-or -iname "*.pyo" \
-		-or -iname "*.so" \
-		-or -iname "*.o" \
-		-or -iname "*~" \
-		-or -iname "._*" \
-		-or -iname "*.swp" \
-		-or -iname "Desktop.ini" \
-		-or -iname "Thumbs.db" \
-		-or -iname "__MACOSX__" \
-		-or -iname ".DS_Store" \
-		\) -delete
-
-
 # @evert waar komt dit eigenlijk vandaan?
-distclean: clean
+distclean:
 	@$(RM) \
 		dist/ \
 		bin/ \
@@ -62,6 +41,19 @@ distclean: clean
 		htmlcov/ \
 		.installed.cfg
 
-
-docs_%:
-	$(MAKE) -C docs $*
+clean: testclean distclean
+	@$(RM) build *.egg-info .eggs dist
+	@find . \( \
+		-name "*.pyc" \
+		-or -name "__pycache__" \
+		-or -name "*.pyo" \
+		-or -name "*.so" \
+		-or -name "*.o" \
+		-or -name "*~" \
+		-or -name "._*" \
+		-or -name "*.swp" \
+		-or -name "Desktop.ini" \
+		-or -name "Thumbs.db" \
+		-or -name "__MACOSX__" \
+		-or -name ".DS_Store" \
+		\) -delete

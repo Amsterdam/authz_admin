@@ -1,3 +1,5 @@
+.. reference this page as :ref:`index` (from which it's included)
+
 Datapunt OAuth2 Services
 ========================
 

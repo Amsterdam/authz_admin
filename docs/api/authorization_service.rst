@@ -16,6 +16,7 @@ authorizationresponse
 ---------------------
 
 .. automodule:: oauth2.authorization_service.authorizationresponse
+    :undoc-members:
 
 
 handler

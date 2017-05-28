@@ -18,11 +18,11 @@ _logger = logging.getLogger(__name__)
 
 def frozen(thing):
     """
-    Creates a frozen copy of `thing`.
+    Creates a frozen copy of ``thing``.
 
     :param thing:
     :type thing: bool or None or str or numbers.Number or dict or list or set
-    :returns: a frozen copy of `thing`, using the following transformations:
+    :returns: a frozen copy of ``thing``, using the following transformations:
 
         -   `dict` → `types.MappingProxyType`
         -   `set` → `frozenset`
@@ -39,13 +39,10 @@ def frozen(thing):
     ):
         return thing
     if isinstance(thing, abc.Mapping):
-        _logger.debug("Freezing dictionary: %s", thing)
         return types.MappingProxyType({key: frozen(thing[key]) for key in thing})
     if isinstance(thing, abc.Set):
-        _logger.debug("Freezing set: %s", thing)
         return frozenset({frozen(value) for value in thing})
     if isinstance(thing, abc.Collection):
-        _logger.debug("Freezing list: %s", thing)
         return tuple([frozen(value) for value in thing])
     raise TypeError("Can't freeze object of type %s: %s" %
                     (type(thing), thing))

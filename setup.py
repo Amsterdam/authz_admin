@@ -19,23 +19,22 @@ setup(
     ],
     packages=['oauth2', 'config_loader'],
     install_requires=[
+        'aiohttp',
         'jsonschema',
         'psycopg2',
-        'pyyaml',
-        'sqlalchemy',
-        'aiohttp'
+        'PyYaml',
+        'SQLAlchemy',
     ],
     extras_require={
-        'doc': [
-            'sphinx',
+        'docs': [
+            'Sphinx',
+            'sphinx-autobuild',
             'sphinx_rtd_theme',
-            'sphinx-autobuild'
         ],
-        'dev': [],
         'test': [
             'pytest',
-            'pytest-cov'
-        ]
+            'pytest-cov',
+        ],
     },
     entry_points={
         'console_scripts': [
@@ -45,6 +44,6 @@ setup(
         ],
     },
     setup_requires=[
-        'setuptools_git'
+        'setuptools_git',
     ],
 )
