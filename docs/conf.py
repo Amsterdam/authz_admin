@@ -80,6 +80,8 @@ default_role = 'py:obj'
 
 nitpicky = True
 
+autodoc_mock_imports = ['aiohttp.web_exceptions']
+
 
 # -- Options for extensions -----------------------------------------------
 
@@ -87,8 +89,6 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6/', 'python.inv'),
     'sphinx': ('http://www.sphinx-doc.org/en/stable/', 'sphinx.inv'),
     'aiohttp': ('http://aiohttp.readthedocs.io/en/stable/', 'aiohttp.inv'),
-    #'requests': ('http://docs.python-requests.org/en/master/', 'requests.inv'),
-    #'flask': ('https://flask.readthedocs.io/en/latest/', 'flask.inv'),
     'jwt': ('https://pyjwt.readthedocs.io/en/latest/', 'jwt.inv'),
 }
 

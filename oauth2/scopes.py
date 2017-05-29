@@ -1,14 +1,15 @@
+# language=rst
 """
-Convenient placeholder during developement.
+Interface to the datasets and scopes defined in the configuration file.
 
-Will be replaced by an actual (database?) backend down the road.
+The configuration file defines a number of *datasets*
 
 """
 
 import types
 import functools
 
-from .. import config, frozen
+from oauth2 import CONFIG, frozen
 
 
 # Old stuff from Evert ;-)
@@ -27,18 +28,22 @@ def get():
 
 
 @functools.lru_cache()
-def datasets():
+def all_scopes():
     """
-    All datasets defined in the configuration.
+    All scopes defined in the configuration.
 
-    :rtype: tuple(str)
-    
+    :rtype: frozenset(str)
+
     """
-    return tuple(config.get()['scopes'].keys())
+    retval = CONFIG['datasets']
+    for dataset_token in retval:
+        dataset = retval[dataset_token]
+
+    return retval
 
 
 def implied_scopes():
-    result = {}
+    retval = {}
     for dataset in _SCOPES_PER_DATASET:
         for scopes in _SCOPES_PER_DATASET[dataset]:
             assert isinstance(scopes, tuple)
@@ -46,5 +51,5 @@ def implied_scopes():
             for scope in scopes:
                 scopename = "%s:%s" % (dataset, scope)
                 implied.append(scopename)
-                result[scopename] = tuple(implied)
-    return types.MappingProxyType(result)
+                retval[scopename] = tuple(implied)
+    return types.MappingProxyType(retval)

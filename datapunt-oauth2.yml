@@ -66,22 +66,22 @@ logging:
     level: ${LOGLEVEL:-DEBUG}
     handlers: [root]
 
-scopes:
+datasets:
   HR:
     name: Handelsregister
     url: https://www.amsterdam.nl/stelselpedia/hr-index/
     scopes:
-      GRAND:
+      GRNT:
         summary: Toegangsbeheer
         description: |-
             Mag de eigen toegangsrechten doorgeven aan anderen.
-      READ:
+      RD:
         summary: Leestoegang
         description: |-
             Geeft onbeperkt leestoegang tot alle informatie.
-        included_by: WRITE
-      WRITE:
+        included_by: WT
+      WT:
         summary: Schrijftoegang
         description: |-
             Heeft onbeperkt schrijftoegang tot alle informatie.
-        includes: READ
+        includes: RD

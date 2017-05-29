@@ -5,11 +5,11 @@
   "properties": {
 
 
-    "scopes": {
+    "datasets": {
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "^[A-Z]+$": {
+        "^\\w{1,4}$": {
           "type": "object",
           "required": ["name", "scopes"],
           "additionalProperties": false,
@@ -25,7 +25,7 @@
               "type": "object",
               "additionalProperties": false,
               "patternProperties": {
-                "^[A-Z]+$": {
+                "^\\w{1,4}$": {
                   "type": "object",
                   "required": ["summary"],
                   "additionalProperties": false,
@@ -38,11 +38,11 @@
                     },
                     "includes": {
                       "type": "string",
-                      "pattern": "^[A-Z]+$"
+                      "pattern": "^\\w{1,4}$"
                     },
                     "included_by": {
                       "type": "string",
-                      "pattern": "^[A-Z]+$"
+                      "pattern": "^\\w{1,4}$"
                     }
                   }
                 }
@@ -261,7 +261,10 @@
           "type": "object",
 
           "properties": {
-            "level": {"type": "string"},
+            "level": {
+              "type": "string",
+              "enum": [ "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG" ]
+            },
 
             "filters": {
               "type": "array",

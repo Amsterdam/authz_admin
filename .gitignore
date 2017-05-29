@@ -20,6 +20,7 @@ __pycache__
 .venv
 
 # Generated documentation:
-/docs/_build/
+/docs/_build
 # Downloaded intersphinx inventory files:
 /docs/*.inv
+/docs/*.inv.txt

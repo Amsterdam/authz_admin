@@ -16,4 +16,3 @@
     glossary
     License <license>
     Index <genindex>
-

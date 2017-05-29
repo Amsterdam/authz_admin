@@ -1,3 +1,4 @@
+# language=rst
 """
 About successful authorization responses for the “authorization grant” flow,
 from :rfc:`6749#section-4.1.2`:
@@ -84,7 +85,13 @@ We use the RFC's error code description as the value for error_description,
 and for now we don't include an error_uri.
 
 .. py:class:: aiohttp.web_exceptions.HTTPFound
-    See :ref:`aiohttp exceptions <aiohttp-web-exceptions>`
+
+    See :ref:`aiohttp exceptions <aiohttp-web-exceptions>`.
+
+    .. This explicit documentation of aiohttp.web_exceptions.HTTPFound
+        is here to suppress a Sphinx warning about not being able
+        to cross reference this class. The class is cross referenced
+        because it's the superclass of `_AuthorizationResponse`
 
 """
 import urllib

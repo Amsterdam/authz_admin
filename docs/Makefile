@@ -10,7 +10,6 @@ BUILDDIR      = _build
 
 # Put it first so that "make" without argument is like "make help".
 help:
-	echo $(0)
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS)
 
 
@@ -24,4 +23,8 @@ server:
 
 
 clean:
-	@$(RM) $(BUILDDIR) *.inv *.inv.txt
+	@$(RM) $(BUILDDIR)
+
+
+invclean:
+	@$(RM) *.inv *.inv.txt
