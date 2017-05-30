@@ -35,7 +35,7 @@ def start():
     requesthandler = handler.RequestHandler(
         idpregistry(conf),
         clientregistry.get(),
-        scopes.get()
+        scopes.all_scopes()
     )
     # register routes
     routes.register_routes(app, service_conf['root'], requesthandler)
