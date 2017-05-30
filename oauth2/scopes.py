@@ -21,6 +21,6 @@ def all_scopes():
     """
     retval = []
     for dataset_token, dataset in config.get().get('datasets', {}).items():
-        for scope_token, _ in dataset.get('scopes', {}).items():
+        for scope_token in dataset.get('scopes', {}):
             retval.append("{}.{}".format(dataset_token, scope_token))
     return frozenset(retval)
