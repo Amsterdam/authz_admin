@@ -1,6 +1,4 @@
-# language=rst
-"""
-Some decisions:
+"""Some decisions:
 
 TOKEN TYPE:
     For now we use the bearer token type. I've seen two alternatives; MAC
@@ -27,4 +25,5 @@ REDIRECT URIs:
     this method only holds as long as we only allow exact matches. Later on
     way me want to check the URI before redirecting, or possibly even at both
     points in time.
+
 """

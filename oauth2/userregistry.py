@@ -1,5 +1,4 @@
-"""
-Placeholder for the user registry.
+"""Placeholder for the user registry.
 
 The user registry maps user identifiers onto user attributes, e.g. scopes.
 
@@ -22,8 +21,7 @@ class _Registry(collections.abc.Mapping):
     __len__ = _registry.__len__
 
     def __getitem__(self, key):
-        """ Get user information from the registry based on a user id
-        """
+        """Get user information from the registry based on a user id."""
         result = tuple(c for c in _registry if c.uid == key)
         if len(result) == 0:
             raise KeyError('Unknown user id')

@@ -5,17 +5,15 @@ from aiohttp import web
 from oauth2 import config, clientregistry, scopes
 from . import handler, routes
 
-if hasattr(web.Request, '_forwarded'):
-    from aiohttp.web import Application
-else:
-    from .aiohttp_patch import Application
+from aiohttp.web import Application
 
 
 def idpregistry(conf):
-    """ Create an index of IdP plugins based on the gievn configuration.
+    """Create an index of IdP plugins based on the gievn configuration.
 
     :param conf: configuration dict
     :return dict: IDP_ID => tuple(callable, callable)
+
     """
     idps = dict()
     for idp_mod in conf['idp']:
@@ -25,8 +23,7 @@ def idpregistry(conf):
 
 
 def start():
-    """ Loads the config and start the server
-    """
+    """Loads the config and start the server."""
     conf = config.get()
     service_conf = conf['authorization_service']
     # create application

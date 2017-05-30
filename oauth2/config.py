@@ -1,4 +1,3 @@
-# language=rst
 """
 Module that loads the configuration settings for all our services.
 
@@ -35,7 +34,7 @@ import functools
 import pathlib
 import os
 import config_loader
-import logging, logging.config
+import logging.config
 
 from .frozen import frozen
 
@@ -56,7 +55,6 @@ CONFIG_SCHEMA_V1_PATH = pathlib.Path(
 
 
 def _config_path():
-    # language=rst
     """
     Determines which path to use for the configuration file.
 
@@ -81,7 +79,6 @@ def _config_path():
 
 
 def _validate_scopes(config):
-    # language=rst
     """
     Validate internal consistancy of scope relations ``includes`` and ``included_by``.
 
@@ -104,7 +101,6 @@ def _validate_scopes(config):
 
 @functools.lru_cache()
 def get():
-    # language=rst
     """
     Load and validate the configuration.
 

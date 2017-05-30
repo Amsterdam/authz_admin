@@ -1,5 +1,4 @@
-""" Some decorators used throughout the code.
-"""
+"""Some decorators used throughout the code."""
 
 from functools import update_wrapper
 
@@ -15,6 +14,7 @@ class reify(object):
     instance variable.  It is, in Python parlance, a non-data descriptor.
 
     """
+
     def __init__(self, wrapped):
         self.wrapped = wrapped
         update_wrapper(self, wrapped)

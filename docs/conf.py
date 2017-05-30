@@ -78,7 +78,7 @@ add_module_names = False
 
 default_role = 'py:obj'
 
-nitpicky = True
+# nitpicky = False
 
 autodoc_mock_imports = ['aiohttp.web_exceptions']
 

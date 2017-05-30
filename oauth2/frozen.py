@@ -1,11 +1,11 @@
-"""
-Recursively freeze mutable dicts, sets and lists.
+"""Recursively freeze mutable dicts, sets and lists.
 
 Example usage::
 
     from oauth2.frozen import frozen
 
     MY_FROZEN_DICT = frozen(my_mutable_dict)
+
 """
 
 import logging
@@ -17,8 +17,7 @@ _logger = logging.getLogger(__name__)
 
 
 def frozen(thing):
-    """
-    Creates a frozen copy of ``thing``.
+    """Creates a frozen copy of ``thing``.
 
     :param thing:
     :type thing: bool or None or str or numbers.Number or dict or list or set

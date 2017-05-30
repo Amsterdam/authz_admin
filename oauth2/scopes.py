@@ -1,6 +1,4 @@
-# language=rst
-"""
-Interface to the datasets and scopes defined in the configuration file.
+"""Interface to the datasets and scopes defined in the configuration file.
 
 The configuration file defines a number of *datasets*, and each dataset has a number of *scopes*. *Datasets* have a unique identifier consisting of 1–4 alphanumeric characters.
 
@@ -16,14 +14,13 @@ from oauth2 import config
 
 @functools.lru_cache()
 def all_scopes():
-    """
-    All scopes defined in the configuration.
+    """All scopes defined in the configuration.
 
     :rtype: frozenset(str)
 
     """
     retval = []
-    for dataset_token, dataset in config.get().get('datasets',{}).items():
-        for scope_token, scope in dataset.get('scopes', {}).items():
+    for dataset_token, dataset in config.get().get('datasets', {}).items():
+        for scope_token, _ in dataset.get('scopes', {}).items():
             retval.append("{}.{}".format(dataset_token, scope_token))
     return frozenset(retval)

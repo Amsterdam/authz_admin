@@ -1,4 +1,3 @@
-# language=rst
 """
 Module that loads configuration settings from a yaml file.
 

@@ -1,5 +1,4 @@
-"""
-Convenient placeholder during developement.
+"""Convenient placeholder during developement.
 
 Will be replaced by an actual (database?) backend down the road.
 
@@ -30,9 +29,7 @@ class _Registry(collections.abc.Mapping):
     __len__ = _registry.__len__
 
     def __getitem__(self, key):
-        """ Get client information from the client registry based on a client
-        identifier.
-        """
+        """Get client information from the client registry based on a client identifier."""
         result = tuple(c for c in _registry if c.identifier == key)
         if len(result) == 0:
             raise KeyError('Unknown client identifier')

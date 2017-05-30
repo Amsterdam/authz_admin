@@ -3,8 +3,7 @@ import secrets
 
 
 class ScopeTokenSet(frozenset):
-    """
-    A frozenset that takes an iterable or a space delimited string and turns
+    """A frozenset that takes an iterable or a space delimited string and turns
     it into an immutable sequence of syntax-validated scope-tokens.
 
     Per :rfc:`6749#section-3.3`:
@@ -39,8 +38,7 @@ class ScopeTokenSet(frozenset):
 
 
 class AuthorizationCode(str):
-    """
-    A wrapper around a urlsafe secret token of 160 bits / 20 bytes.
+    """A wrapper around a urlsafe secret token of 160 bits / 20 bytes.
 
     From RFC6749, Section 10.10.  Credentials-Guessing Attacks:
 
@@ -58,8 +56,7 @@ class AuthorizationCode(str):
 Client = collections.namedtuple(
     'Client', 'identifier name secret redirect_uris owner_id idps'
 )
-"""
-The registration information for a client.
+"""The registration information for a client.
 
 identifier (:rfc:`6749#section-2.2`):
     unique string. Using a uuid version 4 suffices,

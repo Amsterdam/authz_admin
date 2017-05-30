@@ -1,6 +1,4 @@
-# language=rst
-"""
-About successful authorization responses for the “authorization grant” flow,
+"""About successful authorization responses for the “authorization grant” flow,
 from :rfc:`6749#section-4.1.2`:
 
 .. code-block:: text
@@ -84,15 +82,6 @@ and :rfc:`6749#section-4.2.2.1`:
 We use the RFC's error code description as the value for error_description,
 and for now we don't include an error_uri.
 
-.. py:class:: aiohttp.web_exceptions.HTTPFound
-
-    See :ref:`aiohttp exceptions <aiohttp-web-exceptions>`.
-
-    .. This explicit documentation of aiohttp.web_exceptions.HTTPFound
-        is here to suppress a Sphinx warning about not being able
-        to cross reference this class. The class is cross referenced
-        because it's the superclass of `_AuthorizationResponse`
-
 """
 import urllib
 
@@ -102,9 +91,7 @@ from aiohttp import web_exceptions
 class _AuthorizationResponse(web_exceptions.HTTPFound):
 
     def __init__(self, redirect_uri, state):
-        # language=rst
-        """
-        Base class for authorization responses.
+        """Base class for authorization responses.
 
         Creates a new error response, including the state parameter if it
         was present in the request.

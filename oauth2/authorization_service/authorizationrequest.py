@@ -1,5 +1,4 @@
-"""
-This module implements the OAuth2 authorization request as defined in
+"""This module implements the OAuth2 authorization request as defined in
 :rfc:`6749#section-4.1.1` and :rfc:`6749#section-4.2.1`:
 
 .. code-block:: text
@@ -62,8 +61,7 @@ def params(request, clientregistry, scoperegistry):
 
 
 class ParamParser:
-    """
-    Provides request parsing for an authorization request.
+    """Provides request parsing for an authorization request.
 
     Notes from :rfc:`6749#section-3.1`:
 
@@ -86,7 +84,7 @@ class ParamParser:
 
     @decorators.reify
     def client_id(self):
-        """ The client_id included in the request. (REQUIRED)
+        """The client_id included in the request. (REQUIRED)
 
         :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
             if the client_id query parameter is not present or invalid
@@ -104,7 +102,7 @@ class ParamParser:
 
     @decorators.reify
     def redirect_uri(self):
-        """ The redirect_uri for this request. (OPTIONAL)
+        """The redirect_uri for this request. (OPTIONAL)
 
         :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
             if the redirect_uri parameter is not present, invalid, or mismatching.
@@ -122,19 +120,19 @@ class ParamParser:
 
     @decorators.reify
     def state(self):
-        """ The state parameter for this request. (RECOMMENDED)
-        """
+        """The state parameter for this request. (RECOMMENDED)"""
         return self.request.query.get('state')
 
     @decorators.reify
     def response_type(self):
-        """ The response_type for this request. (REQUIRED)
+        """The response_type for this request. (REQUIRED)
 
         :raises authorizationresponse.InvalidRequest:
             If the response_type is missing
 
         :raises authorizationresponse.UnsupportedResponseType:
             If the response_type is not supported
+
         """
         response_type = self.request.query.get('response_type')
         if not response_type:
@@ -148,10 +146,11 @@ class ParamParser:
 
     @decorators.reify
     def scope(self):
-        """ The scope for this request. (OPTIONAL)
+        """The scope for this request. (OPTIONAL)
 
         :raises authorizationresponse.InvalidScope:
             If the scope is invalid
+
         """
         try:
             scopes = types.ScopeTokenSet(self.request.query.get('scope', ''))
