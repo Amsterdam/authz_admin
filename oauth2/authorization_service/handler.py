@@ -1,6 +1,6 @@
 import uuid
 
-from . import authorizationrequest, authorizationresponse, routes
+from . import authorizationrequest, authorizationresponse
 
 authz_cache = dict()  # <- placeholder for Redis, memcached, or something else
 idp_cache = dict()
@@ -47,10 +47,9 @@ class RequestHandler:
 
         # create a UUID and the callback URI
         request_uuid = uuid.uuid4().hex
-        callback_base_uri = routes.idp_callback_uri(request, idp_id)
 
         # grab the response from the IdP plugin
-        response, *keyvalue = authentication_redirect(request_uuid, callback_base_uri)
+        response, *keyvalue = authentication_redirect(request_uuid)
         key, value = keyvalue[0], (len(keyvalue) == 2 and keyvalue[1]) or request_uuid
         idp_cache[key] = value
         return response

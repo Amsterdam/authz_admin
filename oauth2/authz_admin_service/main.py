@@ -24,8 +24,8 @@ def main():
     # run server
     web.run_app(
         app,
-        host=SERVICE_CONFIG['host'],
-        port=SERVICE_CONFIG['port']
+        host=SERVICE_CONFIG['bind_host'],
+        port=SERVICE_CONFIG['bind_port']
     )
     return 0
 

@@ -2,46 +2,44 @@ import importlib
 
 from aiohttp import web
 
-from oauth2 import config, clientregistry, scopes
-from . import handler, routes
+from oauth2 import clientregistry, scopes
+from oauth2.config import get as config_get
+from . import handler
 
 from aiohttp.web import Application
 
 
-def idpregistry(conf):
+def idpregistry(service_conf):
     """Create an index of IdP plugins based on the gievn configuration.
 
-    :param conf: configuration dict
     :return dict: IDP_ID => tuple(callable, callable)
 
     """
     idps = dict()
-    for idp_mod in conf['idp']:
+    for idp_mod in service_conf['idp_config']:
         idp = importlib.import_module(idp_mod)
-        idps[idp.IDP_ID] = idp.get(conf['idp'][idp_mod])
+        idps[idp.IDP_ID] = idp.get(service_conf['idp_config'][idp_mod])
     return idps
 
 
 def start():
-    """Loads the config and start the server."""
-    conf = config.get()
-    service_conf = conf['authorization_service']
+    """Start the server."""
+    config = config_get()
+    service_conf = config['authorization_service']
     # create application
     app = Application()
     # create request handler
     requesthandler = handler.RequestHandler(
-        idpregistry(conf),
+        idpregistry(service_conf),
         clientregistry.get(),
         scopes.all_scopes()
     )
     # register routes
-    routes.register_routes(app, service_conf['root'], requesthandler)
+    root = service_conf['root_path']
+    app.router.add_get(root + '/authorize', requesthandler.authorization)
+    app.router.add_get(root + '/idps/{idp}', requesthandler.idp_callback)
     # run server
-    web.run_app(
-        app,
-        host=service_conf['host'],
-        port=service_conf['port']
-    )
+    web.run_app(app, host=service_conf['bind_host'], port=service_conf['bind_port'])
 
 if __name__ == '__main__':
     start()

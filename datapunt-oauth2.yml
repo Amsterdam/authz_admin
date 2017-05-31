@@ -1,17 +1,22 @@
 authorization_service:
-  root: /oauth2
-  host: localhost
-  port: 8110
+  root_path: /oauth2
+  bind_host: localhost
+  bind_port: 8110
+  idp_config:
+    oauth2.idp.tma_oauth2:
+      client_id: ${TMA_OAUTH2_CLIENT_ID}
+      authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
+      callback_uri: https://acc.api.data.amsterdam.nl/oauth2/idps/tma/oauth2
 
 client_admin_service:
-  root: /oauth2clients
-  host: localhost
-  port: 8111
+  root_path: /oauth2clients
+  bind_host: localhost
+  bind_port: 8111
 
 authz_admin_service:
-  root: /oauth2scopes
-  host: localhost
-  port: 8112
+  root_path: /oauth2scopes
+  bind_host: localhost
+  bind_port: 8112
 
 jwt:
   refreshtokens:
@@ -29,11 +34,6 @@ postgres:
   user: ${DB_USER:-oauth2}
   password: ${DB_PASS:-oauth2}
   dbname: ${DB_DATABASE:-oauth2}
-
-idp:
-  oauth2.idp.tma_oauth2:
-    client_id: ${TMA_OAUTH2_CLIENT_ID}
-    authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
 
 logging:
   version: 1

@@ -1,10 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "required": ["jwt", "postgres", "idp"],
+  "required": ["jwt", "postgres"],
   "properties": {
-
-
     "datasets": {
       "type": "object",
       "additionalProperties": false,
@@ -56,39 +54,45 @@
 
     "authorization_service": {
       "type": "object",
-      "required": ["host", "port", "root"],
+      "required": ["bind_host", "bind_port", "root_path", "idp_config"],
       "additionalProperties": false,
       "properties": {
-        "host": {"type": "string"},
-        "port": {"type": "integer"},
-        "root": {"type": "string"}
+        "bind_host": {"type": "string"},
+        "bind_port": {"type": "integer"},
+        "root_path": {"type": "string"},
+        "idp_config": {
+          "type": "object",
+
+          "patternProperties": {
+            "^[a-zA-Z0-9._]+$": {
+              "type": "object"
+            }
+          }
+        }
       }
     },
 
 
     "client_admin_service": {
       "type": "object",
-      "required": ["host", "port", "root"],
+      "required": ["bind_host", "bind_port", "root_path"],
       "additionalProperties": false,
       "properties": {
-        "host": {"type": "string"},
-        "port": {"type": "integer"},
-        "root": {"type": "string"}
+        "bind_host": {"type": "string"},
+        "bind_port": {"type": "integer"},
+        "root_path": {"type": "string"}
       }
     },
 
 
     "authz_admin_service": {
       "type": "object",
-      "required": ["host", "port", "root"],
+      "required": ["bind_host", "bind_port", "root_path"],
       "additionalProperties": false,
-
       "properties": {
-        "host": {"type": "string"},
-
-        "port": {"type": "integer"},
-
-        "root": {"type": "string"}
+        "bind_host": {"type": "string"},
+        "bind_port": {"type": "integer"},
+        "root_path": {"type": "string"}
       }
     },
 
@@ -97,10 +101,8 @@
       "type": "object",
       "required": ["refreshtokens", "accesstokens"],
       "additionalProperties": false,
-
       "properties": {
         "refreshtokens": {"$ref": "#/definitions/jwtconfig"},
-
         "accesstokens": {"$ref": "#/definitions/jwtconfig"}
       }
     },
@@ -110,30 +112,14 @@
       "type": "object",
       "required": ["host", "port", "user", "password", "dbname"],
       "additionalProperties": false,
-
       "properties": {
         "host": {"type": "string"},
-
         "port": {"type": "integer"},
-
         "user": {"type": "string"},
-
         "password": {"type": "string"},
-
         "dbname": {"type": "string"}
       }
 
-    },
-
-
-    "idp": {
-      "type": "object",
-
-      "patternProperties": {
-        "^[a-zA-Z0-9._-]+$": {
-          "type": "object"
-        }
-      }
     },
 
 
@@ -166,23 +152,17 @@
     "logging.dictconfig": {
       "type": "object",
       "required": ["version"],
-
       "properties": {
         "version": {"type": "integer", "enum": [1]},
-
         "formatters": {
           "type": "object",
-
           "patternProperties": {
             "^[a-zA-Z0-9._-]+$": {
               "type": "object",
-
               "properties": {
                 "format": {"type": "string"},
-
                 "datefmt": {"type": "string"}
               },
-
               "additionalProperties": false
             }
           }
@@ -190,15 +170,12 @@
 
         "filters": {
           "type": "object",
-
           "patternProperties": {
             "^[a-zA-Z0-9._-]+$": {
               "type": "object",
-
               "properties": {
                 "name": {"type": "string"}
               },
-
               "additionalProperties": false
             }
           }
@@ -206,19 +183,14 @@
 
         "handlers": {
           "type": "object",
-
           "patternProperties": {
             "^[a-zA-Z0-9._-]+$": {
               "type": "object",
               "required": ["class"],
-
               "properties": {
                 "class": {"type": "string"},
-
                 "level": {"type": "string"},
-
                 "formatter": {"type": "string"},
-
                 "filters": {
                   "type": "array",
                   "items": {"type": "string"},
@@ -231,22 +203,17 @@
 
         "loggers": {
           "type": "object",
-
           "patternProperties": {
             "^[a-zA-Z0-9._-]+$": {
               "type": "object",
-
               "properties": {
                 "level": {"type": "string"},
-
                 "propagate": {"type": "boolean"},
-
                 "filters": {
                   "type": "array",
                   "items": {"type": "string"},
                   "uniqueItems": true
                 },
-
                 "handlers": {
                   "type": "array",
                   "items": {"type": "string"},
@@ -259,19 +226,16 @@
 
         "root": {
           "type": "object",
-
           "properties": {
             "level": {
               "type": "string",
               "enum": [ "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG" ]
             },
-
             "filters": {
               "type": "array",
               "items": {"type": "string"},
               "uniqueItems": true
             },
-
             "handlers": {
               "type": "array",
               "items": {"type": "string"},
@@ -281,7 +245,6 @@
         },
 
         "incremental": {"type": "boolean"},
-
         "disable_existing_loggers": {"type": "boolean"}
       }
     }
