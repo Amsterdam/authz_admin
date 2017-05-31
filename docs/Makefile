@@ -1,5 +1,3 @@
-# .PHONY: help server clean inv
-
 RM            = rm -rf
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
@@ -28,3 +26,8 @@ clean:
 
 invclean:
 	@$(RM) *.inv *.inv.txt
+
+
+publish: html
+	cd gh-pages; $(RM) *; touch .nojekyll
+	cd _build/html; cp -a * ../../gh-pages/

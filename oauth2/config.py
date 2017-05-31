@@ -10,8 +10,8 @@ See also :mod:`config_loader`.
 **Example usage**::
 
     from oauth2 import config
-        CONFIG = config.get()
-        os.chdir(CONFIG['working_directory'])
+    os.chdir(config.get()['working_directory'])
+
 
 ..  py:data:: CONFIG_SCHEMA_V1_PATH
 
@@ -25,8 +25,6 @@ See also :mod:`config_loader`.
 
         -   :file:`/etc/datapunt-oauth2.yml`
         -   :file:`./datapunt-oauth2.yml`
-            relative to the current working directory
-
 
 """
 
