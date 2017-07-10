@@ -12,7 +12,7 @@ Glossary
 
 
     ADP
-        **Amsterdam Data Portal** is *geen Data Portal* maar een *firewall* van de Gemeente. Wij bevragen de :term:`BRP` van buitenaf via deze firewall.
+        **Amsterdam Data Portaal** is *geen Data Portal* maar een *firewall* van de Gemeente. Wij bevragen de :term:`BRP` van buitenaf via deze firewall.
 
 
     BRP
