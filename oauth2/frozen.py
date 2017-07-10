@@ -1,4 +1,6 @@
-"""Recursively freeze mutable dicts, sets and lists.
+# language=rst
+"""
+Recursively freeze mutable dicts, sets and lists.
 
 Example usage::
 
