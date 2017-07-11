@@ -69,7 +69,7 @@ logging:
 datasets:
   CA:
     name: Datacatalogus Amsterdam
-    url: 'https://atlas.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+    url: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
     scopes:
       L1:
         summary: Level 1
