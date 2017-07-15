@@ -1,6 +1,8 @@
 """Interface to the datasets and scopes defined in the configuration file.
 
-The configuration file defines a number of *datasets*, and each dataset has a number of *scopes*. *Datasets* have a unique identifier consisting of 1–4 alphanumeric characters.
+The configuration file defines a number of *datasets*, and each dataset has a
+number of *scopes*. *Datasets* have a unique identifier consisting of 1–4
+alphanumeric characters.
 
 """
 

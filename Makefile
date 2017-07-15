@@ -22,14 +22,19 @@ authorization_service:
 	authorization_service
 
 
+authz_admin_service:
+	authz_admin_service
+
+
 test:
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
+
 
 testclean:
 	@$(RM) .cache .coverage
 
 
-# @evert waar komt dit eigenlijk vandaan?
+# @evert waar komt dit eigenlijk vandaan? [--PvB]
 distclean:
 	@$(RM) \
 		dist/ \
@@ -43,17 +48,17 @@ distclean:
 
 clean: testclean distclean
 	@$(RM) build *.egg-info .eggs dist
-	@find . \( \
-		-name "*.pyc" \
-		-or -name "__pycache__" \
-		-or -name "*.pyo" \
-		-or -name "*.so" \
-		-or -name "*.o" \
-		-or -name "*~" \
-		-or -name "._*" \
-		-or -name "*.swp" \
-		-or -name "Desktop.ini" \
-		-or -name "Thumbs.db" \
-		-or -name "__MACOSX__" \
-		-or -name ".DS_Store" \
-		\) -delete
+	@find . -not -path "./.venv/*" -and \( \
+		-name "*.pyc" -or \
+		-name "__pycache__" -or \
+		-name "*.pyo" -or \
+		-name "*.so" -or \
+		-name "*.o" -or \
+		-name "*~" -or \
+		-name "._*" -or \
+		-name "*.swp" -or \
+		-name "Desktop.ini" -or \
+		-name "Thumbs.db" -or \
+		-name "__MACOSX__" -or \
+		-name ".DS_Store" \
+	\) -delete

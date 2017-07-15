@@ -32,7 +32,7 @@ import functools
 import pathlib
 import os
 import config_loader
-import logging.config
+import logging
 
 from .frozen import frozen
 

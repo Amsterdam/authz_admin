@@ -13,4 +13,18 @@ The latest published documentation for this project can be found *here*.
 
 .. todo::
 
-   Publish the documentation somewhere and insert a link in the sentence above.
+   Publish the documentation somewhere (ReadTheDocs?) and insert a link in the
+   sentence above.
+
+
+Conventions
+===========
+
+*   The project top-level directory is also the source root.
+*   We use PyTest for tests.
+*   PyTest can be integrated with SetupTools (see
+    https://docs.pytest.org/en/latest/goodpractices.html). We don’t do this.
+*   Common commands for builds, distributing, packaging, documentation etceteca
+    are in :file:`Makefile`s.
+*   RST-files and -docstrings are indented with 4 spaces.
+*   Globals must be immutable.

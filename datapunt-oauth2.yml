@@ -66,21 +66,33 @@ logging:
     handlers: [root]
 
 datasets:
+  CA:
+    name: Datacatalogus Amsterdam
+    url: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+    scopes:
+      L1:
+        summary: Level 1
+        included_by: L2
+        description: |-
+          TODO: beschrijven wat L1 meer heeft dan anoniem.
+      L2:
+        summary: Level 2
+        includes: L1
+        description: |-
+          TODO: beschrijven wat L2 meer heeft dan L1.
   HR:
     name: Handelsregister
-    url: https://www.amsterdam.nl/stelselpedia/hr-index/
+    url: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
     scopes:
-      GRNT:
-        summary: Toegangsbeheer
+      INF:
+        summary: Onbeperkt aantal bevragingen
         description: |-
-            Mag de eigen toegangsrechten doorgeven aan anderen.
-      RD:
-        summary: Leestoegang
-        description: |-
-            Geeft onbeperkt leestoegang tot alle informatie.
-        included_by: WT
-      WT:
-        summary: Schrijftoegang
-        description: |-
-            Heeft onbeperkt schrijftoegang tot alle informatie.
-        includes: RD
+          Deze permissie geeft gebruikers het recht onbeperkt informatie op te
+          vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
+          per dag doen).
+  BAG:
+    name: Basisregister Adressen en Gebouwen
+    url: 'https://www.amsterdam.nl/stelselpedia/bag-index/'
+
+profiles:
+  DigiD
