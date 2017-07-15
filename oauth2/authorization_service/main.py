@@ -10,6 +10,7 @@ from aiohttp.web import Application
 
 
 def idpregistry(service_conf):
+    # language=rst
     """Create an index of IdP plugins based on the given configuration.
 
     :return dict: IDP_ID => tuple(callable, callable)
@@ -23,6 +24,7 @@ def idpregistry(service_conf):
 
 
 def start():
+    # language=rst
     """Start the server."""
     config = config_get()
     service_conf = config['authorization_service']

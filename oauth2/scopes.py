@@ -16,6 +16,7 @@ from oauth2 import config
 
 @functools.lru_cache()
 def all_scopes():
+    # language=rst
     """All scopes defined in the configuration.
 
     :rtype: frozenset(str)

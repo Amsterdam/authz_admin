@@ -4,6 +4,7 @@ from functools import update_wrapper
 
 
 class reify(object):
+    # language=rst
     """
     Copied from `Pyramid <https://trypyramid.com/>`_
 

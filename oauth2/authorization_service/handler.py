@@ -10,9 +10,10 @@ class RequestHandler:
     """Async handlers for all endpoints."""
 
     def __init__(self, idpregistry, clientregistry, scoperegistry):
+        # language=rst
         """Constructor.
 
-        :param idp:
+        :param idpregistry:
         :param clientregistry:
         :param scoperegistry:
         """
@@ -21,6 +22,7 @@ class RequestHandler:
         self.scoperegistry = scoperegistry
 
     async def authorization(self, request):
+        # language=rst
         """Authorization endpoint (RFC6749 section 3.1)"""
         authzreqparams = authorizationrequest.params(
             request, self.clientregistry, self.scoperegistry
@@ -53,6 +55,7 @@ class RequestHandler:
         return response
 
     async def idp_callback(self, request):
+        # language=rst
         """ IdP callback endpoint
         """
         idp_identifier = request.match_info['idp']

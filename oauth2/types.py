@@ -3,6 +3,7 @@ import secrets
 
 
 class ScopeTokenSet(frozenset):
+    # language=rst
     """A frozenset that takes an iterable or a space delimited string and turns
     it into an immutable sequence of syntax-validated scope-tokens.
 
@@ -38,6 +39,7 @@ class ScopeTokenSet(frozenset):
 
 
 class AuthorizationCode(str):
+    # language=rst
     """A wrapper around a urlsafe secret token of 160 bits / 20 bytes.
 
     From RFC6749, Section 10.10.  Credentials-Guessing Attacks:

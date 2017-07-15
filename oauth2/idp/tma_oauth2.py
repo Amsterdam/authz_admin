@@ -19,6 +19,7 @@ IDP_ID = 'tma_oauth2'
 
 
 def get(config):
+    # language=rst
     """ Closure that returns the implementation of our IdP interface, bound to
     the given configuration.
 
@@ -41,6 +42,7 @@ def get(config):
     authn_redirect_base = config['authorization_uri'] + separator
 
     def authentication_redirect(_):
+        # language=rst
         """ Create the authentication redirect and identifier.
 
         :param _: ignore the given uuid; we don't return a ``value`` so the

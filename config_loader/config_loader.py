@@ -7,13 +7,13 @@ import yaml
 
 
 class ConfigError(Exception):
-    """ Configuration errors
-    """
+    # language=rst
+    """Configuration Error"""
 
 
 def load(config_file_path, config_schema_file_path):
-    """
-    Load, parse and validate the configuration file.
+    # language=rst
+    """Load, parse and validate the configuration file.
 
     :param config_file_path: Path to the configuration file.
     :type config_file_path: pathlib.PurePath or str
@@ -33,8 +33,8 @@ def load(config_file_path, config_schema_file_path):
 
 
 def _load_yaml(path):
-    """
-    Read the config file from ``path``.
+    # language=rst
+    """Read the config file from ``path``.
 
     :param pathlib.Path path:
     :returns dict or set or list: the config object, as read from file.
@@ -49,15 +49,17 @@ def _load_yaml(path):
 
 
 def _interpolate_environment(config):
-    """
+    # language=rst
+    """Substitute environment variables.
+
     Recursively find string-type values in the given ``config``,
     and try to substitute them with values from :data:`os.environ`.
 
-    **NOTE**
+    .. note::
 
-    If a substituted value is a string containing only digits (i.e.
-    :py:meth:`str.isdigit()` is True), then this function will cast
-    it to an integer.  It does not try to do any other type conversion.
+        If a substituted value is a string containing only digits (i.e.
+        :py:meth:`str.isdigit()` is True), then this function will cast
+        it to an integer.  It does not try to do any other type conversion.
 
     :param config: configuration mapping
 
@@ -65,7 +67,7 @@ def _interpolate_environment(config):
 
     def interpolate(value):
         try:
-            result = TemplateWithDefaults(value).substitute(os.environ)
+            result = _TemplateWithDefaults(value).substitute(os.environ)
         except KeyError as e:
             error_msg = "Could not substitute: {}"
             raise ConfigError(error_msg.format(value)) from e
@@ -87,6 +89,7 @@ def _interpolate_environment(config):
 
 
 def _validate(config, schemafile):
+    # language=rst
     """
     Validate the given ``config`` using the JSON schema given in ``schemafile``.
 
@@ -108,11 +111,11 @@ def _validate(config, schemafile):
         error_msg = "Invalid JSON schema definition at {}"
         raise ConfigError(error_msg.format(schemafile)) from e
     except jsonschema.exceptions.ValidationError as e:
-        error_msg = "Schema validation failed for configuration file {}"
-        raise ConfigError(error_msg.format(schemafile)) from e
+        raise ConfigError("Schema validation failed.") from e
 
 
-class TemplateWithDefaults(string.Template):
+class _TemplateWithDefaults(string.Template):
+    # language=rst
     """
     String template that supports Bash-style default values for interpolation.
 

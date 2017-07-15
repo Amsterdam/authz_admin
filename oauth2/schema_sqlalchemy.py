@@ -18,6 +18,7 @@ from sqlalchemy.engine.url import URL as ENGINE_URL
 
 
 def create():
+    # language=rst
     """ Creates the database schema.
 
     .. todo:: Accept an open psycopg2 connection as a parameter?

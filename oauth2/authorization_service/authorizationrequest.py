@@ -61,6 +61,7 @@ def params(request, clientregistry, scoperegistry):
 
 
 class ParamParser:
+    # language=rst
     """Provides request parsing for an authorization request.
 
     Notes from :rfc:`6749#section-3.1`:
@@ -84,6 +85,7 @@ class ParamParser:
 
     @decorators.reify
     def client_id(self):
+        # language=rst
         """The client_id included in the request. (REQUIRED)
 
         :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
@@ -102,6 +104,7 @@ class ParamParser:
 
     @decorators.reify
     def redirect_uri(self):
+        # language=rst
         """The redirect_uri for this request. (OPTIONAL)
 
         :raises :ref:`aiohttp.web_exceptions.HTTPBadRequest <aiohttp-web-exceptions>`:
@@ -120,11 +123,13 @@ class ParamParser:
 
     @decorators.reify
     def state(self):
+        # language=rst
         """The state parameter for this request. (RECOMMENDED)"""
         return self.request.query.get('state')
 
     @decorators.reify
     def response_type(self):
+        # language=rst
         """The response_type for this request. (REQUIRED)
 
         :raises authorizationresponse.InvalidRequest:
@@ -146,6 +151,7 @@ class ParamParser:
 
     @decorators.reify
     def scope(self):
+        # language=rst
         """The scope for this request. (OPTIONAL)
 
         :raises authorizationresponse.InvalidScope:

@@ -29,3 +29,9 @@ main
 ----
 
 .. automodule:: oauth2.authorization_service.main
+
+
+routes
+------
+
+.. automodule:: oauth2.authorization_service.routes

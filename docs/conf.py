@@ -116,6 +116,10 @@ autodoc_default_flags = [
     'show-inheritance'
 ]
 
+# Extract both the class docstring and the docstring in __init__ or __new__.
+# By default, autoclass only extracts the class-level docstring.
+autoclass_content = 'both'
+
 extlinks = {
     'epic': ('https://taiga.datapunt.amsterdam.nl/project/kpaska-datapunt-backend/epic/%s', 'epic #'),
     'story': ('https://taiga.datapunt.amsterdam.nl/project/kpaska-datapunt-backend/us/%s', 'user story #'),

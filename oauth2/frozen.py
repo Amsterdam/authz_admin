@@ -19,6 +19,7 @@ _logger = logging.getLogger(__name__)
 
 
 def frozen(thing):
+    # language=rst
     """Creates a frozen copy of ``thing``.
 
     :param thing:

@@ -91,6 +91,7 @@ from aiohttp import web_exceptions
 class _AuthorizationResponse(web_exceptions.HTTPFound):
 
     def __init__(self, redirect_uri, state):
+        # language=rst
         """Base class for authorization responses.
 
         Creates a new error response, including the state parameter if it
@@ -114,11 +115,13 @@ class _AuthorizationResponse(web_exceptions.HTTPFound):
 
     @property
     def params(self):
+        # language=rst
         """Discourage direct instantiation."""
         raise NotImplementedError
 
 
 class AuthorizationCode(_AuthorizationResponse):
+    # language=rst
     """A successful authorization response for the “authorization grant” flow."""
 
     def __init__(self, code, redirect_uri, state):

@@ -19,14 +19,19 @@ setup(
     ],
     packages=['oauth2', 'config_loader'],
     install_requires=[
+        'aiodns', # Recommended by aiohttp docs
         'aiohttp',
+        'aiopg',
+        'cchardet', # Recommended by aiohttp docs
         'jsonschema',
-        'psycopg2',
+        'mimeparse',
         'PyYaml',
         'SQLAlchemy',
+        'uvloop',
     ],
     extras_require={
         'docs': [
+            'MacFSEvents',
             'Sphinx',
             'sphinx-autobuild',
             'sphinx_rtd_theme',
@@ -35,6 +40,10 @@ setup(
             'pytest',
             'pytest-cov',
         ],
+        'dev': [
+            'jupyter',
+            'aiohttp-devtools'
+        ]
     },
     entry_points={
         'console_scripts': [

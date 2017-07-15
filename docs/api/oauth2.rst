@@ -18,6 +18,12 @@ oauth2.config
 .. automodule:: oauth2.config
 
 
+oauth2.database
+---------------
+
+.. automodule:: oauth2.database
+
+
 oauth2.decorators
 -----------------
 
@@ -28,6 +34,12 @@ oauth2.frozen
 -------------
 
 .. automodule:: oauth2.frozen
+
+
+oauth2.json
+-----------
+
+.. automodule:: oauth2.json
 
 
 oauth2.scopes

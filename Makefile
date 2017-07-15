@@ -22,10 +22,6 @@ authorization_service:
 	authorization_service
 
 
-authz_admin_service:
-	authz_admin_service
-
-
 test:
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 

@@ -29,6 +29,7 @@ class _Registry(collections.abc.Mapping):
     __len__ = _registry.__len__
 
     def __getitem__(self, key):
+        # language=rst
         """Get client information from the client registry based on a client identifier."""
         result = tuple(c for c in _registry if c.identifier == key)
         if len(result) == 0:

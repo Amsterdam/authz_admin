@@ -41,7 +41,6 @@ For details on basic rST formatting, see the :ref:`sphinx:rst-primer`
     #. ``"``
 
 
-
 Roles added by Sphinx
 ---------------------
 
@@ -113,6 +112,18 @@ Directives
 
 See :doc:`sphinx:domains` for ia. the **Python** and **Standard** domains with
 their special directives.
+
+See :doc:`markup/para` for documentation of many handy directives, such as:
+
+.. code-block:: rst
+
+    .. note::
+    .. warning::
+    .. versionadded:: version
+    .. versionchanged:: version
+    .. deprecated:: version
+    .. seealso::
+    .. hlist::
 
 
 Autodoc
