@@ -3,6 +3,7 @@
   "type": "object",
   "required": ["jwt", "postgres"],
   "properties": {
+
     "datasets": {
       "type": "object",
       "additionalProperties": false,
@@ -54,12 +55,16 @@
 
     "authorization_service": {
       "type": "object",
-      "required": ["bind_host", "bind_port", "root_path", "idp_config"],
+      "required": ["bind_host", "bind_port", "idp_config", "root_path"],
       "additionalProperties": false,
       "properties": {
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
-        "root_path": {"type": "string"},
+        "external_fqdn": {"type": "string"},
+        "external_port": {"type": "integer"},
+        "external_scheme": {
+          "type": "string",
+          "enum": [ "http", "https" ]},
         "idp_config": {
           "type": "object",
 
@@ -68,7 +73,8 @@
               "type": "object"
             }
           }
-        }
+        },
+        "root_path": {"type": "string"}
       }
     },
 

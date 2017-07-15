@@ -6,7 +6,6 @@ authorization_service:
     oauth2.idp.tma_oauth2:
       client_id: ${TMA_OAUTH2_CLIENT_ID}
       authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
-      callback_uri: https://acc.api.data.amsterdam.nl/oauth2/idps/tma/oauth2
 
 client_admin_service:
   root_path: /oauth2clients

@@ -148,3 +148,11 @@ html_theme_options = {
     # 'prev_next_buttons_location': 'bottom',
     # 'canonical_url': None,
 }
+
+html_static_path = ['_static']
+
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',  # override wide tables in RTD theme
+    ],
+}

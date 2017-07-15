@@ -10,7 +10,7 @@ from aiohttp.web import Application
 
 
 def idpregistry(service_conf):
-    """Create an index of IdP plugins based on the gievn configuration.
+    """Create an index of IdP plugins based on the given configuration.
 
     :return dict: IDP_ID => tuple(callable, callable)
 
@@ -34,7 +34,7 @@ def start():
         clientregistry.get(),
         scopes.all_scopes()
     )
-    # register routes
+    # register resources
     root = service_conf['root_path']
     app.router.add_get(root + '/authorize', requesthandler.authorization)
     app.router.add_get(root + '/idps/{idp}', requesthandler.idp_callback)

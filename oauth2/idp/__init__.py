@@ -22,7 +22,7 @@
 
     ::
 
-        def authentication_redirect(uuid, callback_base_uri):
+        def authentication_redirect(uuid):
             \""" Redirect to the login page of the IdP
 
             :param uuid:

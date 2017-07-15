@@ -7,11 +7,10 @@ idp_cache = dict()
 
 
 class RequestHandler:
-    """ Async handlers for all endpoints.
-    """
+    """Async handlers for all endpoints."""
 
     def __init__(self, idpregistry, clientregistry, scoperegistry):
-        """ Constructor.
+        """Constructor.
 
         :param idp:
         :param clientregistry:
@@ -22,8 +21,7 @@ class RequestHandler:
         self.scoperegistry = scoperegistry
 
     async def authorization(self, request):
-        """ Authorization endpoint (RFC6749 section 3.1)
-        """
+        """Authorization endpoint (RFC6749 section 3.1)"""
         authzreqparams = authorizationrequest.params(
             request, self.clientregistry, self.scoperegistry
         )
