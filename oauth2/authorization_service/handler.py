@@ -56,8 +56,7 @@ class RequestHandler:
 
     async def idp_callback(self, request):
         # language=rst
-        """ IdP callback endpoint
-        """
+        """IdP callback endpoint."""
         idp_identifier = request.match_info['idp']
 #         if authzreqparams.response_type == 'code':
 #             authorization_code = types.AuthorizationCode()

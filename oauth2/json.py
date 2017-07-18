@@ -1,11 +1,14 @@
 """Asynchronous JSON serializer.
 
 This module defines a method `encode`.
+
 """
 
 
 import re
 import inspect
+import collections
+import collections.abc
 
 CHUNK_SIZE = 1024*1024
 IM_A_DICT = {}
@@ -94,6 +97,9 @@ async def _encode_async_generator(obj, stack):
             else:
                 yield ','
             if is_dict:
+                if not isinstance(item[0], str):
+                    message = "Dictionary key is not a string: '%r'"
+                    raise ValueError(message % repr(item[0]))
                 yield _encode_string(item[0]) + ':'
                 async for s in _encode(item[1], stack):
                     yield s
@@ -108,13 +114,16 @@ async def _encode_async_generator(obj, stack):
         stack.remove(obj)
 
 
-async def _encode_dict(obj: dict, stack):
+async def _encode_dict(obj, stack):
     if obj in stack:
         raise ValueError("Cannot serialize cyclic data structure.")
     stack.add(obj)
     try:
         first = True
         for key, value in obj.items():
+            if not isinstance(key, str):
+                message = "Dictionary key is not a string: '%r'"
+                raise ValueError(message % repr(key))
             if first:
                 yield '{' + _encode_string(key) + ':'
                 first = False
@@ -130,19 +139,7 @@ async def _encode_dict(obj: dict, stack):
         stack.remove(obj)
 
 
-async def _encode_async_dict(obj, stack):
-    if obj in stack:
-        raise ValueError("Cannot serialize cyclic data structure.")
-    stack.add(obj)
-    try:
-        yield None  # TODO: implement
-    finally:
-        stack.remove(obj)
-
-
 async def _encode(obj, stack):
-    if stack:
-        pass
     if isinstance(obj, str):
         yield _encode_string(obj)
     elif obj is None:
@@ -155,29 +152,30 @@ async def _encode(obj, stack):
         yield _encode_float(obj)
     elif isinstance(obj, int):
         yield str(obj)
+    elif isinstance(obj, collections.abc.Mapping):
+        async for s in _encode_dict(obj, stack):
+            yield s
+    elif isinstance(obj, collections.abc.Iterable):
+        async for s in _encode_list(obj, stack):
+            yield s
     elif inspect.isasyncgen(obj):
         async for s in _encode_async_generator(obj, stack):
             yield s
-    # TODO: more types
 
 
-def _yield_chunks(buffer, chunk_size):
-    while len(buffer) >= chunk_size:
-        yield buffer[]
-
-
-async def encode(obj, *, chunk_size=CHUNK_SIZE):
+async def encode(obj, chunk_size=CHUNK_SIZE):
     """Asynchronous JSON serializer.
 
-    :param obj: The object to be serialized.
-    :param max_chunk_size:
-    :return:
+    :param any obj:
+    :param int chunk_size: The size of chunks to be yielded.
+    :rtype: collections.AsyncIterable
+
     """
     buffer = bytearray()
     async for b in _encode(obj, set()):
         buffer += b.encode()
-        if len(buffer) >= chunk_size:
-            yield buffer.encode()
-            buffer = ''
+        while len(buffer) >= chunk_size:
+            yield buffer[:chunk_size]
+            del buffer[:chunk_size]
     if len(buffer) > 0:
-        yield buffer.encode()
+        yield buffer

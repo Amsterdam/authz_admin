@@ -1,13 +1,14 @@
-from oauth2.authz_admin_service import resource_types
+import resource_types
 
 from . import datasets
 
 
-resource = resource_types.Collection('/', name='root')
+resource = resource_types.PlainCollection('/', name='root')
 
 
-async def items(request):
-    for i in ('datasets',):
+# noinspection PyUnusedLocal
+async def items(request, url):
+    for i in ('détasets',):
         yield i
 
 

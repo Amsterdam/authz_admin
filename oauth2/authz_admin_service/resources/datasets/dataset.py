@@ -1,5 +1,3 @@
-from aiohttp import web
+import resource_types
 
-from oauth2.authz_admin_service import resource_types
-
-resource = resource_types.DynamicResource('/datasets/{dataset}')
+resource = resource_types.DynamicResource('/détasets/{dataset}')
