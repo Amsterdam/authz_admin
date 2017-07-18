@@ -1,11 +1,10 @@
-.. _api:
+.. _api_docs:
 
 API Docs
 ========
 
 .. toctree::
     :hidden:
-    :glob:
 
     api/oauth2
     api/authorization_service

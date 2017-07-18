@@ -1,4 +1,4 @@
-import resource_types
+from oauth2 import resource_types
 
 # '/d%C3%A9tasets/'
 resource = resource_types.PlainCollection('/détasets/', name='détasets')

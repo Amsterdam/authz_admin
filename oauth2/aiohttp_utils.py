@@ -1,14 +1,29 @@
+# languege=rst
+"""
+
+This module contains some aiohttp-related utils for:
+
+Content negotiation
+    See :func:`best_content_type`.
+
+"""
 import inspect
 import logging
 import re
-from collections import deque
 from collections.abc import Mapping
 
 from aiohttp import web
 
 from . import json as ajson
+from .embed import parse as parse_embed
 
 _logger = logging.getLogger(__name__)
+
+
+# ┏━━━━━━━━━━━━━━━━━━━━━┓
+# ┃ Content Negotiation ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━┛
+
 
 AVAILABLE_CONTENT_TYPES = (
     "application/hal+json",
@@ -20,108 +35,36 @@ HAL_JSON_COMPATIBLE = {
     "*/*"
 }
 
-EMBED_TOKEN = re.compile(',?[a-z_]\\w*|\\?[^,()]*|,?\\*|[()]', flags=re.IGNORECASE)
 
+def best_content_type(request):
+    # language=rst
+    """The best matching Content-Type.
 
-async def _embedded(embedded, request, rel_url, embed):
+    :param aiohttp.web.Request request:
+    :rtype: str
+    :raises: :ref:`aiohttp.web.HTTPNotAcceptable <aiohttp-web-exceptions>` if
+        none of the available content types are acceptable by the client.
+
     """
-
-    :param embedded: Can be either a link object, or a list of link objects.
-    :param request:
-    :param rel_url:
-    :param embed:
-
-    """
-    if isinstance(embedded, dict):
-        pass
+    mime_types = [
+        part.split(';', 2)[0].strip() for part in request.headers.get('ACCEPT', '*/*').split(',')
+    ]
+    if not HAL_JSON_COMPATIBLE.isdisjoint(mime_types):
+        return "application/hal+json; charset=UTF-8"
+    elif "application/json" in mime_types:
+        return "application/json; charset=UTF-8"
     else:
-        pass
+        body = "\n".join(AVAILABLE_CONTENT_TYPES).encode('ascii')
+        raise web.HTTPNotAcceptable(
+            body=body,
+            content_type='text/plain; charset="US-ASCII"'
+        )
 
 
 async def _raw_path_to_resource(raw_path, router):
     for resource in router.resources():
         if isinstance(resource, _ResourceMixin) and resource.match(raw_path):
             return resource
-
-
-def _tokenize_embed(s):
-    # language=rst
-    """Tokenizer for the 'embed' query parameter.
-
-    :param str s:
-    :yield: `str`
-    :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is detected.
-
-    """
-    pos = 0
-    for match in EMBED_TOKEN.finditer(s):
-        if match.start() != pos:
-            raise web.HTTPBadRequest(
-                text="Syntax error in query parameter 'embed' at position %d" % pos
-            )
-        token = match[0]
-        if token[:1] == ',':
-            token = token[1:]
-        yield token, pos
-        pos = match.end()
-    if pos != len(s):
-        raise web.HTTPBadRequest(
-            text="Syntax error in query parameter 'embed' at position %d" % pos
-        )
-
-
-def _parse_embed(s):
-    # language=rst
-    """
-
-    :param str s:
-    :rtype: dict
-    :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is
-        detected.
-
-    """
-    result = {}
-    stack = deque()
-    stack.appendleft(result)
-    current = None
-    resource_names = set()
-    for token, pos in _tokenize_embed(s):
-        if token == '(':
-            if current is None:
-                raise web.HTTPBadRequest(
-                    text="Unexpected opening parenthesis in query parameter 'embed' at position %d" % pos
-                )
-            stack.appendleft(stack[0][current])
-            current = None
-            pass
-        elif token == ')':
-            stack.popleft()
-            if len(stack) == 0:
-                raise web.HTTPBadRequest(
-                    text="Unmatched closing parenthesis in query parameter 'embed' at position %d" % pos
-                ) from None
-        elif token[:1] == '?':
-            if current is None:
-                raise web.HTTPBadRequest(
-                    text="Unexpected query string '%s' in query parameter 'embed' at position %d" % (token, pos)
-                )
-            stack[0][current]['_query'] = token
-        else:
-            if token in stack[0]:
-                raise web.HTTPBadRequest(
-                    text="Link name '%s' mentioned more than once in query parameter 'embed' at position %d" % (token, pos)
-                )
-            if token in ('self', 'collection', 'up'):
-                raise web.HTTPBadRequest(
-                    text="Resource relation '%s' can not be embedded" % token
-                )
-            current = token
-            stack[0][token] = {}
-    if len(stack) > 1:
-        raise web.HTTPBadRequest(
-            text="Missing closing parenthesis in query parameter 'embed'"
-        )
-    return result
 
 
 class _ResourceMixin:
@@ -195,7 +138,7 @@ class _ResourceMixin:
         """
         if rel_url is None:
             rel_url = request.rel_url
-            embed = _parse_embed(
+            embed = parse_embed(
                 ','.join(request.headers.getall('embed'))
             )
 

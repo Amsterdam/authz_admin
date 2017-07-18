@@ -6,6 +6,12 @@ oauth2
 .. automodule:: oauth2
 
 
+oauth2.aiohttp_utils
+--------------------
+
+.. automodule:: oauth2.aiohttp_utils
+
+
 oauth2.clientregistry
 ---------------------
 
