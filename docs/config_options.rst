@@ -54,5 +54,5 @@ Example:
 | external_fqdn         | string     | Hostname that is used by clients       |
 |                       |            | to contact the server. Used when       |
 |                       |            | running behind a load balancer or      |
-|                       |            | other proxy. (Optional)                |
+|                       |            | other proxy. (Optional, default )      |
 +-----------------------+------------+----------------------------------------+
