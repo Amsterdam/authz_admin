@@ -1,12 +1,11 @@
 import inspect
+import json as ajson
 import logging
 import re
 from collections import deque
 from collections.abc import Mapping
 
 from aiohttp import web
-
-from . import json as ajson
 
 _logger = logging.getLogger(__name__)
 

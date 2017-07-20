@@ -3,22 +3,26 @@ import asyncio
 import uvloop
 
 from aiohttp import web
+from rest_utils import parse_embed
+import rest_utils.resources as rest_resources
 
 from oauth2.config import load as load_config
 from oauth2 import database
 from . import resources
 
 
-def add_resources(router):
+def add_routes(router):
     # language=rst
     """
 
     :param web.UrlDispatcher router:
 
     """
-    router.register_resource(resources.resource)
-    router.register_resource(resources.datasets.resource)
-    router.register_resource(resources.datasets.dataset.resource)
+    root = router.add_resource('/', name='root')
+    rest_resources.DumbCollection(root)
+    datasets = router.add_resource('/datasets/', name='datasets')
+    rest_resources.DumbCollection(datasets)
+
 
 
 # noinspection PyUnusedLocal
@@ -29,16 +33,19 @@ def application(argv):
     :param list argv: Unused, but required to allow this method to be called by
         the aiohttp :ref:`aiohttp-web-cli`.
 
-    .. todo:: insert `aiohttp.web.normalize_path_middleware`
-
     """
     if len(argv) > 0:
         raise Exception("Don’t know what to do with command line parameters.", argv)
-    app = web.Application()
+    app = web.Application(
+        middlewares=[
+            parse_embed.middleware,
+            web.normalize_path_middleware()
+        ]
+    )
     config = load_config()
     app['config'] = config
     app['connection_pool'] = database.ConnectionPool(config['postgres'])
-    add_resources(app.router)
+    add_routes(app.router)
     app.on_startup.append(database.put_schema)
     return app
 

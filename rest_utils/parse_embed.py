@@ -1,3 +1,5 @@
+"""Middleware that parses the 'embed=...' query parameter."""
+
 import re
 from collections import deque
 
@@ -56,26 +58,28 @@ def _tokenize_embed(s):
         )
 
 
-def parse(embed):
+def parse(request):
     # language=rst
     """Parser for the 'embed' query parameter.
 
     Example::
 
-        parse('foo?a=b(bar,*)')
+        parse('foo?a=b&c=d(bar,*)')
         >>> {'foo': {'_query': '?a=b', 'bar': {}, '*': {}}}
 
-    :param str embed:
+    :param aiohttp.web.Request request:
     :rtype: dict
     :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is
         detected.
 
     """
+    if 'embed' not in request.headers:
+        return {}
+    embed = ','.join(request.headers.getall('embed'))
     result = {}
     stack = deque()
     stack.appendleft(result)
     current = None
-    resource_names = set()
     for token, pos in _tokenize_embed(embed):
         if token == '(':
             if current is None:
@@ -115,3 +119,9 @@ def parse(embed):
     return result
 
 
+# noinspection PyUnusedLocal
+async def middleware(app, handler):
+    async def middleware_handler(request):
+        request['embed'] = parse(request)
+        return await handler(request)
+    return middleware_handler

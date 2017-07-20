@@ -59,9 +59,9 @@ def _encode_float(o, allow_nan=False):
 
 
 async def _encode_list(obj, stack):
-    if obj in stack:
+    if id(obj) in stack:
         raise ValueError("Cannot serialize cyclic data structure.")
-    stack.add(obj)
+    stack.add(id(obj))
     try:
         first = True
         for item in obj:
@@ -77,13 +77,13 @@ async def _encode_list(obj, stack):
         else:
             yield ']'
     finally:
-        stack.remove(obj)
+        stack.remove(id(obj))
 
 
 async def _encode_async_generator(obj, stack):
-    if obj in stack:
+    if id(obj) in stack:
         raise ValueError("Cannot serialize cyclic data structure.")
-    stack.add(obj)
+    stack.add(id(obj))
     try:
         first = True
         is_dict = False
@@ -111,13 +111,13 @@ async def _encode_async_generator(obj, stack):
         else:
             yield '}' if is_dict else ']'
     finally:
-        stack.remove(obj)
+        stack.remove(id(obj))
 
 
 async def _encode_dict(obj, stack):
-    if obj in stack:
+    if id(obj) in stack:
         raise ValueError("Cannot serialize cyclic data structure.")
-    stack.add(obj)
+    stack.add(id(obj))
     try:
         first = True
         for key, value in obj.items():
@@ -136,10 +136,16 @@ async def _encode_dict(obj, stack):
         else:
             yield '}'
     finally:
-        stack.remove(obj)
+        stack.remove(id(obj))
 
 
 async def _encode(obj, stack):
+    """
+
+    :param any obj:
+    :param set stack:
+
+    """
     if isinstance(obj, str):
         yield _encode_string(obj)
     elif obj is None:

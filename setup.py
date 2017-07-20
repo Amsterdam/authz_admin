@@ -17,7 +17,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=['oauth2', 'config_loader'],
+    packages=['oauth2', 'config_loader', 'rest_utils'],
     install_requires=[
         'aiodns', # Recommended by aiohttp docs
         'aiohttp',
