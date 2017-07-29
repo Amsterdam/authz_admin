@@ -30,7 +30,7 @@ See also :mod:`config_loader`.
 
 import functools
 import pathlib
-import os
+import os.path
 import config_loader
 import logging.config
 import logging
@@ -116,7 +116,7 @@ def load():
         CONFIG_SCHEMA_V1_PATH
     )
     logging.config.dictConfig(config['logging'])
-    _logger.info("Loaded configuration from '%s'", config_path)
+    _logger.info("Loaded configuration from '%s'", os.path.abspath(config_path))
     # Procedure logging.config.dictConfig() (called
     # above) requires a MutableMapping as its input,
     # so we only freeze config *after* that call:

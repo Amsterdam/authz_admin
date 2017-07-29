@@ -1,14 +1,18 @@
 import sys
 import asyncio
 import uvloop
+import os.path
+import logging
 
 from aiohttp import web
-from rest_utils import parse_embed
-import rest_utils.resources as rest_resources
+import swagger_parser
 
+from rest_utils.middleware import middleware as rest_utils_middleware
 from oauth2.config import load as load_config
 from oauth2 import database
-from . import resources
+from . import handlers
+
+_logger = logging.getLogger(__name__)
 
 
 def add_routes(router):
@@ -18,14 +22,11 @@ def add_routes(router):
     :param web.UrlDispatcher router:
 
     """
-    root = router.add_resource('/', name='root')
-    rest_resources.DumbCollection(root)
-    datasets = router.add_resource('/datasets/', name='datasets')
-    rest_resources.DumbCollection(datasets)
+    handlers.Root.add_to_router(router, '/')
+    handlers.Datasets.add_to_router(router, '/datasets/')
+    handlers.Dataset.add_to_router(router, '/datasets/{dataset}')
 
 
-
-# noinspection PyUnusedLocal
 def application(argv):
     # language=rst
     """Constructs and returns an `aiohttp.web.application`.
@@ -38,13 +39,16 @@ def application(argv):
         raise Exception("Don’t know what to do with command line parameters.", argv)
     app = web.Application(
         middlewares=[
-            parse_embed.middleware,
+            rest_utils_middleware,
             web.normalize_path_middleware()
         ]
     )
     config = load_config()
     app['config'] = config
     app['connection_pool'] = database.ConnectionPool(config['postgres'])
+    app['rest_utils.swagger'] = swagger_parser.SwaggerParser(
+        swagger_path=os.path.join(os.path.dirname(__file__), 'openapi.yml')
+    )
     add_routes(app.router)
     app.on_startup.append(database.put_schema)
     return app

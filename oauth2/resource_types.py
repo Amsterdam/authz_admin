@@ -210,7 +210,7 @@ class _ResourceMixin:
             }
         # Embed links as requested:
         for link_name in list(result['_links'].keys()):
-            sub_embed = embed.get(link_name, embed.get('*', None))
+            sub_embed = embed.get(link_name, None)
             if sub_embed is not None:
                 embedded[link_name] = _embedded(
                     result['_links'].pop(link_name),
@@ -226,14 +226,14 @@ class _ResourceMixin:
                 url = rel_url.join(web.URL(links['href']))
                 resource = _raw_path_to_resource(url.raw_path, request.app.router)
                 if resource:
-                    result['_embedded'][link_name] = resource.to_dict(request, rel_url=url, embed=sub_embed)
+                    result['_embedded'][link_name] = await resource.to_dict(request, rel_url=url, embed=sub_embed)
                     del result['_links'][link_name]
             elif inspect.isasyncgen(links):
                 async for link in links:
                     url = rel_url.join(web.URL(link['href']))
                     resource = _raw_path_to_resource(url.raw_path, request.app.router)
                     if resource:
-                        result['_embedded'][link_name] = resource.to_dict(request, rel_url=url, embed=sub_embed)
+                        result['_embedded'][link_name] = await resource.to_dict(request, rel_url=url, embed=sub_embed)
                         del result['_links'][link_name]
 
         # Make proper link objects:

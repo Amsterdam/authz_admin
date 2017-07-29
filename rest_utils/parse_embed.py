@@ -1,12 +1,16 @@
 """Middleware that parses the 'embed=...' query parameter."""
 
 import re
+import logging
 from collections import deque
+import typing as T
 
 from aiohttp import web
 
+_logger = logging.getLogger(__name__)
 
-_EMBED_TOKEN = re.compile(',?[a-z_]\\w*|\\?[^,()]*|,?\\*|[()]', flags=re.IGNORECASE)
+
+_EMBED_TOKEN = re.compile(r',?[a-z_]\w*|\(|,?\)', flags=re.IGNORECASE)
 """Used only by :func:`_tokenize_embed`."""
 
 
@@ -18,22 +22,20 @@ def _tokenize_embed(s):
 
     Possible tokens are:
 
-    identifier
-        always starts with an underscore '_' or an alphabetical character,
+    identifiers
+        always start with an underscore '_' or an alphabetical character,
         followed by zero or more underscores, alphabetical characters or digits.
         Examples: ``foo``, ``_BAR``, ``f00_123``
-    query string
-        always starts with a question mark.
-    punctuation character
-        either ``(``, ``)`` or ``*``
+    punctuation characters
+        either ``(`` or ``)``
 
     For each token found, this generator yields a tuple ``(token, pos)`` with
     the token string and the position at which the token was found.
 
     Example::
 
-        list(_tokenize_embed('foo?a=b(bar,*)'))
-        >>> [('foo', 0), ('?a=b', 3), ('(', 7), ('bar', 8), ('*', 11), (')', 13)]
+        list(_tokenize_embed('foo(bar,baz)'))
+        >>> [('foo', 0), ('(', 3), ('bar', 4), ('baz', 8), (')', 11)]
 
     :param str s:
     :yields: tuple(token: str, pos: int)
@@ -45,7 +47,7 @@ def _tokenize_embed(s):
     for match in _EMBED_TOKEN.finditer(s):
         if match.start() != pos:
             raise web.HTTPBadRequest(
-                text="Syntax error in query parameter 'embed' at position %d" % pos
+                text="Syntax error in query parameter 'embed' at '%s'" % s[pos:]
             )
         token = match[0]
         if token[:1] == ',':
@@ -54,18 +56,18 @@ def _tokenize_embed(s):
         pos = match.end()
     if pos != len(s):
         raise web.HTTPBadRequest(
-            text="Syntax error in query parameter 'embed' at position %d" % pos
+            text="Syntax error in query parameter 'embed' at '%s'" % s[pos:]
         )
 
 
-def parse(request):
+def parse_embed(embed: str) -> T.Dict[str, str]:
     # language=rst
     """Parser for the 'embed' query parameter.
 
     Example::
 
-        parse('foo?a=b&c=d(bar,*)')
-        >>> {'foo': {'_query': '?a=b', 'bar': {}, '*': {}}}
+        parse('foo(bar,baz)')
+        >>> {'foo': {'bar': {}, 'baz': {}}}
 
     :param aiohttp.web.Request request:
     :rtype: dict
@@ -73,55 +75,49 @@ def parse(request):
         detected.
 
     """
-    if 'embed' not in request.headers:
-        return {}
-    embed = ','.join(request.headers.getall('embed'))
     result = {}
-    stack = deque()
-    stack.appendleft(result)
+    if len(embed) == 0:
+        return result
+    seen = deque()
+    seen.appendleft(set())
+    sub_query_info = None
     current = None
     for token, pos in _tokenize_embed(embed):
+        rest = embed[pos:]
         if token == '(':
             if current is None:
                 raise web.HTTPBadRequest(
-                    text="Unexpected opening parenthesis in query parameter 'embed' at position %d" % pos
+                    text="Unexpected opening parenthesis in query parameter 'embed' at '%s'" % rest
                 )
-            stack.appendleft(stack[0][current])
+            if len(seen) == 1:
+                sub_query_info = (current, pos + 1)
+            seen.appendleft(set())
             current = None
-            pass
         elif token == ')':
-            stack.popleft()
-            if len(stack) == 0:
+            seen.popleft()
+            if len(seen) == 0:
                 raise web.HTTPBadRequest(
-                    text="Unmatched closing parenthesis in query parameter 'embed' at position %d" % pos
-                ) from None
-        elif token[:1] == '?':
-            if current is None:
-                raise web.HTTPBadRequest(
-                    text="Unexpected query string '%s' in query parameter 'embed' at position %d" % (token, pos)
+                    text="Unmatched closing parenthesis in query parameter 'embed' at '%s'" % rest
                 )
-            stack[0][current]['_query'] = token
+            if len(seen) == 1:
+                result[sub_query_info[0]] = embed[sub_query_info[1]:pos]
         else:
-            if token in stack[0]:
+            if token in seen[0]:
+                message = "Link relation '%s' mentioned more than once in query parameter 'embed' at '%s'"
                 raise web.HTTPBadRequest(
-                    text="Link name '%s' mentioned more than once in query parameter 'embed' at position %d" % (token, pos)
+                    text=message % (token, rest)
                 )
             if token in ('self', 'collection', 'up'):
+                message = "Link relation '%s' can not be embedded"
                 raise web.HTTPBadRequest(
-                    text="Resource relation '%s' can not be embedded" % token
+                    text= message % token
                 )
+            seen[0].add(token)
             current = token
-            stack[0][token] = {}
-    if len(stack) > 1:
+            if len(seen) == 1:
+                result[token] = None
+    if len(seen) > 1:
         raise web.HTTPBadRequest(
-            text="Missing closing parenthesis in query parameter 'embed'"
+            text="Unmatched opening parenthesis in query parameter 'embed' at position %d" % sub_query_info[1]
         )
     return result
-
-
-# noinspection PyUnusedLocal
-async def middleware(app, handler):
-    async def middleware_handler(request):
-        request['embed'] = parse(request)
-        return await handler(request)
-    return middleware_handler

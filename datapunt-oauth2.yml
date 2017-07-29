@@ -38,7 +38,7 @@ logging:
   version: 1
   formatters:
     default:
-      format: '%(asctime)s oauth2 %(levelname)-8s %(name)s:%(lineno)d: %(message)s'
+      format: '%(asctime)s oauth2 %(levelname)-8s %(module)s:%(lineno)d: %(message)s'
   handlers:
     console:
       class: logging.StreamHandler
@@ -47,13 +47,15 @@ logging:
       class: logging.StreamHandler
   loggers:
     oauth2:
-      propagate: True
+      propagate: true
     aiohttp.access:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [aiohttp.access]
-      propagate: False
+      propagate: false
     aiohttp:
-      propagate: True
+      propagate: true
+    rest_utils:
+      propagate: true
   root:
     level: ${LOGLEVEL:-DEBUG}
     handlers: [console]
@@ -61,7 +63,7 @@ logging:
 datasets:
   CA:
     name: Datacatalogus Amsterdam
-    url: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+    describedby: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
     scopes:
       L1:
         summary: Level 1
@@ -75,7 +77,7 @@ datasets:
           TODO: beschrijven wat L2 meer heeft dan L1.
   HR:
     name: Handelsregister
-    url: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
+    describedby: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
     scopes:
       INF:
         summary: Onbeperkt aantal bevragingen

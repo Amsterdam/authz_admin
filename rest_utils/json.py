@@ -4,11 +4,16 @@ This module defines a method `encode`.
 
 """
 
-
 import re
+import logging
 import inspect
 import collections
 import collections.abc
+
+from yarl import URL
+
+_logger = logging.getLogger(__name__)
+
 
 CHUNK_SIZE = 1024*1024
 IM_A_DICT = {}
@@ -146,7 +151,9 @@ async def _encode(obj, stack):
     :param set stack:
 
     """
-    if isinstance(obj, str):
+    if isinstance(obj, URL):
+        yield _encode_string(str(obj))
+    elif isinstance(obj, str):
         yield _encode_string(obj)
     elif obj is None:
         yield 'null'
@@ -167,6 +174,16 @@ async def _encode(obj, stack):
     elif inspect.isasyncgen(obj):
         async for s in _encode_async_generator(obj, stack):
             yield s
+    elif hasattr(obj, '__str__'):
+        message = "Not sure how to serialize object of class %s:\n" \
+                  "%s\nDefaulting to str()."
+        _logger.warning(message, type(obj), repr(obj))
+        yield _encode_string(str(obj))
+    else:
+        message = "Don't know how to serialize object of class %s:\n" \
+                  "%s"
+        _logger.error(message, type(obj), repr(obj))
+        yield 'null'
 
 
 async def encode(obj, chunk_size=CHUNK_SIZE):
