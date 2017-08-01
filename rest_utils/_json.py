@@ -11,16 +11,19 @@ import collections
 import collections.abc
 
 from yarl import URL
+from aiohttp import web
+
+from . import _view
 
 _logger = logging.getLogger(__name__)
 
 
-CHUNK_SIZE = 1024*1024
+JSON_DEFAULT_CHUNK_SIZE = 1024 * 1024
 IM_A_DICT = {}
-INFINITY = float('inf')
+_INFINITY = float('inf')
 
-ESCAPE = re.compile(r'[\x00-\x1f\\"\b\f\n\r\t]')
-ESCAPE_DCT = {
+_ESCAPE = re.compile(r'[\x00-\x1f\\"\b\f\n\r\t]')
+_ESCAPE_DCT = {
     '\\': '\\\\',
     '"': '\\"',
     '\b': '\\b',
@@ -30,15 +33,15 @@ ESCAPE_DCT = {
     '\t': '\\t',
 }
 for i in range(0x20):
-    ESCAPE_DCT.setdefault(chr(i), '\\u{0:04x}'.format(i))
+    _ESCAPE_DCT.setdefault(chr(i), '\\u{0:04x}'.format(i))
 
 
 def _replace(match):
-    return ESCAPE_DCT[match.group(0)]
+    return _ESCAPE_DCT[match.group(0)]
 
 
 def _encode_string(s):
-    return '"' + ESCAPE.sub(_replace, s) + '"'
+    return '"' + _ESCAPE.sub(_replace, s) + '"'
 
 
 def _encode_float(o, allow_nan=False):
@@ -48,9 +51,9 @@ def _encode_float(o, allow_nan=False):
 
     if o != o:
         text = 'NaN'
-    elif o == INFINITY:
+    elif o == _INFINITY:
         text = 'Infinity'
-    elif o == -INFINITY:
+    elif o == -_INFINITY:
         text = '-Infinity'
     else:
         return repr(o)
@@ -153,6 +156,18 @@ async def _encode(obj, stack):
     """
     if isinstance(obj, URL):
         yield _encode_string(str(obj))
+    elif isinstance(obj, _view.View):
+        try:
+            obj = await obj.to_dict()
+        except web.HTTPException as e:
+            obj = {
+                '_links': {'self': {'href': 'http://error.com/'}},
+                '_status': e.status_code
+            }
+            if e.text is not None:
+                obj['description'] = e.text
+        async for s in _encode_dict(obj, stack):
+            yield s
     elif isinstance(obj, str):
         yield _encode_string(obj)
     elif obj is None:
@@ -186,7 +201,7 @@ async def _encode(obj, stack):
         yield 'null'
 
 
-async def encode(obj, chunk_size=CHUNK_SIZE):
+async def json_encode(obj, chunk_size=JSON_DEFAULT_CHUNK_SIZE):
     """Asynchronous JSON serializer.
 
     :param any obj:

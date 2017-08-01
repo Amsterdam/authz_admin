@@ -7,9 +7,7 @@ Content negotiation
     See :func:`best_content_type`.
 
 """
-import json as ajson
 import logging
-import re
 
 from aiohttp import web
 
@@ -19,7 +17,6 @@ _logger = logging.getLogger(__name__)
 # ┏━━━━━━━━━━━━━━━━━━━━━┓
 # ┃ Content Negotiation ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━┛
-
 
 AVAILABLE_CONTENT_TYPES = (
     "application/hal+json",
@@ -44,6 +41,8 @@ def best_content_type(request):
         none of the available content types are acceptable by the client.
 
     """
+    if 'ACCEPT' not in request.headers:
+        return "application/hal+json; charset=UTF-8"
     accept = ','.join(request.headers.getall('ACCEPT', ['*/*']))
     mime_types = [
         part.split(';', 2)[0].strip() for part in accept.split(',')

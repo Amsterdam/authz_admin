@@ -107,7 +107,7 @@ def parse_embed(embed: str) -> T.Dict[str, str]:
                 raise web.HTTPBadRequest(
                     text=message % (token, rest)
                 )
-            if token in ('self', 'collection', 'up'):
+            if token in ('self',):
                 message = "Link relation '%s' can not be embedded"
                 raise web.HTTPBadRequest(
                     text= message % token

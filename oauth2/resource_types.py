@@ -1,5 +1,5 @@
 import inspect
-import json as ajson
+import _json as ajson
 import logging
 import re
 from collections import deque
@@ -174,7 +174,7 @@ class _ResourceMixin:
         response.content_type = self.best_content_type(request)
 
         await response.prepare(request)
-        async for chunk in ajson.encode(await self.to_dict(request)):
+        async for chunk in ajson.json_encode(await self.to_dict(request)):
             response.write(chunk)
             await response.drain()
         response.write_eof()

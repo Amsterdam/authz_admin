@@ -1,15 +1,16 @@
-import sys
 import asyncio
-import uvloop
-import os.path
 import logging
+import os.path
+import sys
+import typing as T
 
-from aiohttp import web
 import swagger_parser
+import uvloop
+from aiohttp import web
 
-from rest_utils.middleware import middleware as rest_utils_middleware
-from oauth2.config import load as load_config
+import rest_utils
 from oauth2 import database
+from oauth2.config import load as load_config
 from . import handlers
 
 _logger = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ def add_routes(router):
     handlers.Root.add_to_router(router, '/')
     handlers.Datasets.add_to_router(router, '/datasets/')
     handlers.Dataset.add_to_router(router, '/datasets/{dataset}')
+    handlers.Scopes.add_to_router(router, '/datasets/{dataset}/scopes/')
+    handlers.Scope.add_to_router(router, '/datasets/{dataset}/scopes/{scope}')
 
 
 def application(argv):
@@ -39,16 +42,18 @@ def application(argv):
         raise Exception("Don’t know what to do with command line parameters.", argv)
     app = web.Application(
         middlewares=[
-            rest_utils_middleware,
+            rest_utils.middleware,
             web.normalize_path_middleware()
         ]
     )
     config = load_config()
     app['config'] = config
+    app['etag'] = rest_utils.ETagGenerator().update(config).etag
     app['connection_pool'] = database.ConnectionPool(config['postgres'])
-    app['rest_utils.swagger'] = swagger_parser.SwaggerParser(
+    app['swagger'] = swagger_parser.SwaggerParser(
         swagger_path=os.path.join(os.path.dirname(__file__), 'openapi.yml')
     )
+    app.router.add_static('/hal', 'hal-browser')
     add_routes(app.router)
     app.on_startup.append(database.put_schema)
     return app

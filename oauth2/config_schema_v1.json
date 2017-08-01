@@ -26,10 +26,10 @@
               "patternProperties": {
                 "^\\w{1,4}$": {
                   "type": "object",
-                  "required": ["summary"],
+                  "required": ["name"],
                   "additionalProperties": false,
                   "properties": {
-                    "summary": {
+                    "name": {
                       "type": "string"
                     },
                     "description": {

@@ -54,6 +54,8 @@ logging:
       propagate: false
     aiohttp:
       propagate: true
+    aiohttp.*:
+      propagate: true
     rest_utils:
       propagate: true
   root:
@@ -66,12 +68,12 @@ datasets:
     describedby: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
     scopes:
       L1:
-        summary: Level 1
+        name: Level 1
         included_by: L2
         description: |-
           TODO: beschrijven wat L1 meer heeft dan anoniem.
       L2:
-        summary: Level 2
+        name: Level 2
         includes: L1
         description: |-
           TODO: beschrijven wat L2 meer heeft dan L1.
@@ -80,7 +82,7 @@ datasets:
     describedby: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
     scopes:
       INF:
-        summary: Onbeperkt aantal bevragingen
+        name: Onbeperkt aantal bevragingen
         description: |-
           Deze permissie geeft gebruikers het recht onbeperkt informatie op te
           vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
