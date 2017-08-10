@@ -66,7 +66,7 @@ variables. The services will complain if they’re missing.
 
 This repository hosts 3 distinct services:
 
-*   `oauth2.authorization_service`
+*   `oauth2.authz_service`
 *   `oauth2.authz_admin_service`
 *   `oauth2.client_admin_service`
 

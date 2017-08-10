@@ -4,7 +4,9 @@ from ._etags import (
     etaggify, assert_preconditions, VALID_ETAG_PATTERN
 )
 from ._json import JSON_DEFAULT_CHUNK_SIZE, IM_A_DICT, json_encode
-from ._middleware import ASSERT_PRECONDITIONS, BEST_CONTENT_TYPE, middleware
+from ._middleware import (
+    ASSERT_PRECONDITIONS, BEST_CONTENT_TYPE, EMBED, middleware
+)
 from ._parse_embed import parse_embed
 from ._view import View
 
@@ -22,6 +24,7 @@ __all__ = (
     'json_encode',
     'ASSERT_PRECONDITIONS',
     'BEST_CONTENT_TYPE',
+    'EMBED',
     'middleware',
     'parse_embed',
     'View',

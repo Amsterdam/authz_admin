@@ -27,15 +27,14 @@ class View(web.View):
 
     def __init__(
             self, request: web.Request,
-            rel_url: T.Union[web.URL, collections.abc.Mapping]=None,
+            match_dict: T.Optional[collections.abc.Mapping]=None,
             embed=None
     ):
         super().__init__(request)
-        if rel_url is None:
+        if match_dict is None:
             rel_url = request.rel_url
-        elif not isinstance(rel_url, web.URL):
-            assert isinstance(rel_url, collections.abc.Mapping)
-            rel_url = self.resource().url_for(**rel_url)
+        else:
+            rel_url = self.resource().url_for(**match_dict)
         if embed is not None:
             rel_url = rel_url.update_query(embed=embed)
         self.__rel_url = rel_url
@@ -51,6 +50,7 @@ class View(web.View):
         )
 
     def __getitem__(self, item):
+        # language=rst
         """Shorthand for ``self.match_dict[item]``"""
         return self.__match_dict[item]
 
@@ -129,9 +129,10 @@ class View(web.View):
     @staticmethod
     def construct_resource_for(request: web.Request, rel_url: web.URL) \
             -> T.Optional[web.View]:
+        # language=rst
         """
 
-        .. deprecated::
+        .. deprecated:: v0
 
             Only used by :meth:`PlainView.all_links` and
             :meth:`DynamicView.all_links`, which are themselves deprecated.
@@ -189,7 +190,7 @@ class View(web.View):
         This default implementation returns *no* attributes, ie. an empty
         `dict`.
 
-        Most stubclasses should override this default implementation.
+        Most subclasses should override this default implementation.
 
         """
         return {}
@@ -198,20 +199,22 @@ class View(web.View):
         # language=rst
         """
 
-        Called by :meth:`Resource.links` and :meth:`Resource.embedded`.  See the
+        Called by :meth:`.links` and :meth:`.embedded`.  See the
         documentation of these methods for more info.
+
+        Most subclasses should override this default implementation.
 
         :returns: This method must return a dict.  The values must have one of
             the following types:
 
-            -   asynchronous generator of `Resource` objects
-            -   generator of `Resource` objects
-            -   `Resource`
-            -   link
-            -   Iterable of `Resource` and/or link objects (may be mixed)
+            -   asynchronous generator of `.View` objects
+            -   generator of `.View` objects
+            -   a `.View` object
+            -   a *link object*
+            -   Iterable of `.View`\s and/or *link objects* (may be mixed)
 
-            where *link* is a HALJSON link object, ie. a `dict` with at least a
-            key ``href``.
+            where *link object* means a HALJSON link object, ie. a `dict` with
+            at least a key ``href``.
 
         """
         return {}
@@ -280,6 +283,8 @@ class View(web.View):
             response.headers.add('ETag', self.etag)
         response.content_type = self.request[BEST_CONTENT_TYPE]
         response.enable_compression()
+        if self.canonical_rel_url != self.request.rel_url:
+            response.headers.add('Content-Location', str(self.canonical_rel_url))
         await response.prepare(self.request)
         async for chunk in _json.json_encode(data):
             response.write(chunk)
@@ -296,95 +301,4 @@ class View(web.View):
         result['_embedded'] = await self.embedded()
         if len(result['_embedded']) == 0:
             del result['_embedded']
-        return result
-
-
-class DynamicView(View):
-    """
-
-    .. deprecated::
-
-        Functionality of classes :class:`DynamicView` and :class:`PlainView` was
-        moved into :class:`View`. This class is here only to keep method
-        :meth:`all_links` around.
-
-    """
-
-    async def all_links(self) -> T.Dict[str, T.Any]:
-        # language=rst
-        """Overrides :meth:`Resource.all_links`.
-
-        This default implementation returns "subresources" of ``self``
-        found in the router.
-
-        Some subclasses may want to override this method.
-
-        """
-        result = {}
-        # noinspection PyUnresolvedReferences
-        formatter = _slashify(self.resource().get_info()['formatter'])
-        for aiohttp_resource in self.request.app.router.resources():
-            if not isinstance(aiohttp_resource, web.DynamicResource):
-                continue
-            sub_formatter = aiohttp_resource.get_info()['formatter']
-            if not sub_formatter.startswith(formatter):
-                continue
-            match = self.SEGMENT_RE.match(sub_formatter, len(formatter))
-            if match is None:
-                continue
-            sub_rel_url = web.URL(_slashify(self.rel_url.raw_path) + match[0])
-            sub_rel_url = self.add_embed_to_url(sub_rel_url, match[0])
-            sub_resource = self.construct_resource_for(
-                self.request, sub_rel_url
-            )
-            result[match[1]] = sub_resource if sub_resource else {
-                'href': str(sub_rel_url),
-                'name': match[1]
-            }
-        return result
-
-
-class PlainView(View):
-    """
-
-    .. deprecated::
-
-        Functionality of classes :class:`DynamicView` and :class:`PlainView` was
-        moved into :class:`View`. This class is here only to keep method
-        :meth:`all_links` around.
-
-    """
-
-
-    async def all_links(self):
-        # language=rst
-        """Overrides :meth:`Resource.all_links`.
-
-        This default implementation returns "subresources" of ``self``
-        found in the router.
-
-        Some subclasses may want to override this method.
-
-        """
-        result = {}
-        # noinspection PyUnresolvedReferences
-        path = _slashify(self.resource().get_info()['path'])
-        for aiohttp_resource in self.request.app.router.resources():
-            if not isinstance(aiohttp_resource, web.PlainResource):
-                continue
-            sub_path = aiohttp_resource.get_info()['path']
-            if not sub_path.startswith(path):
-                continue
-            match = self.SEGMENT_RE.match(sub_path, len(path))
-            if match is None:
-                continue
-            sub_rel_url = web.URL(_slashify(self.rel_url.raw_path) + match[0])
-            sub_rel_url = self.add_embed_to_url(sub_rel_url, match[0])
-            sub_resource = self.construct_resource_for(
-                self.request, sub_rel_url
-            )
-            result[match[1]] = sub_resource if sub_resource else {
-                'href': str(sub_rel_url),
-                'name': match[1]
-            }
         return result

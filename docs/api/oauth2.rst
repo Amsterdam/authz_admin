@@ -6,12 +6,6 @@ oauth2
 .. automodule:: oauth2
 
 
-oauth2.aiohttp_utils
---------------------
-
-.. automodule:: oauth2.aiohttp_utils
-
-
 oauth2.clientregistry
 ---------------------
 
@@ -42,19 +36,19 @@ oauth2.frozen
 .. automodule:: oauth2.frozen
 
 
-oauth2.json
------------
-
-.. automodule:: oauth2.json
-
-
-oauth2.scopes
--------------
-
-.. automodule:: oauth2.scopes
-
-
 oauth2.types
 ------------
 
 .. automodule:: oauth2.types
+
+
+oauth2.userregistry
+-------------------
+
+.. automodule:: oauth2.userregistry
+
+
+oauth2.view
+-----------
+
+.. automodule:: oauth2.view

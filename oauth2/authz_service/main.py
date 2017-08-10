@@ -2,8 +2,8 @@ import importlib
 
 from aiohttp import web
 
-from oauth2 import clientregistry, scopes
-from oauth2.config import get as config_get
+from oauth2 import clientregistry
+from oauth2.config import load as config_load, all_scopes
 from . import handler
 
 from aiohttp.web import Application
@@ -17,24 +17,24 @@ def idpregistry(service_conf):
 
     """
     idps = dict()
-    for idp_mod in service_conf['idp_config']:
-        idp = importlib.import_module(idp_mod)
-        idps[idp.IDP_ID] = idp.get(service_conf['idp_config'][idp_mod])
+    for idp_mod in service_conf['idps']:
+        idp = importlib.import_module("oauth2.idps.%s" % idp_mod)
+        idps[idp.IDP_ID] = idp.get(service_conf['idps'][idp_mod])
     return idps
 
 
 def start():
     # language=rst
     """Start the server."""
-    config = config_get()
-    service_conf = config['authorization_service']
+    config = config_load()
+    service_conf = config['authz_service']
     # create application
     app = Application()
     # create request handler
     requesthandler = handler.RequestHandler(
         idpregistry(service_conf),
         clientregistry.get(),
-        scopes.all_scopes()
+        all_scopes(config)
     )
     # register resources
     root = service_conf['root_path']

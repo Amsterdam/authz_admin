@@ -9,6 +9,7 @@ _logger = logging.getLogger(__name__)
 
 BEST_CONTENT_TYPE = 'rest_utils.best_content_type'
 ASSERT_PRECONDITIONS = 'rest_utils.assert_preconditions'
+EMBED = 'rest_utils.embed'
 
 
 # noinspection PyUnusedLocal

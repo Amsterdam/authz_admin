@@ -1,12 +1,3 @@
-# languege=rst
-"""
-
-This module contains some aiohttp-related utils for:
-
-Content negotiation
-    See :func:`best_content_type`.
-
-"""
 import logging
 
 from aiohttp import web

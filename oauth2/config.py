@@ -28,12 +28,13 @@ See also :mod:`config_loader`.
 
 """
 
-import functools
 import pathlib
 import os.path
 import config_loader
 import logging.config
 import logging
+import typing as T
+import functools
 
 from .frozen import frozen
 
@@ -125,6 +126,23 @@ def load():
     return config
 
 
-@functools.lru_cache()
-def get():
-    return load()
+def all_scopes(config: T.Hashable) -> T.FrozenSet[str]:
+    # language=rst
+    """All scopes defined in the configuration.
+
+    To be precise, this function returns a frozen set of fully qualified scope
+    identifiers:
+
+    ..  code-block:: abnf
+
+        fq_scope_id = dataset_id "." scope_id
+        dataset_id = 1# token_char
+        scope_id = 1# token_char
+        token_char = ...
+
+    """
+    retval = []
+    for dataset_token, dataset in config['authz_admin_service']['datasets'].items():
+        for scope_token in dataset.get('scopes', {}):
+            retval.append("{}.{}".format(dataset_token, scope_token))
+    return frozenset(retval)

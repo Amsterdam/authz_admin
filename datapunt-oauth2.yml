@@ -1,11 +1,21 @@
-authorization_service:
+authn_service:
+  root_path: /oauth2authn
+  bind_host: localhost
+  bind_port: 8114
+  roles:
+    - token: bdp
+      name: Beheerder Datapunt
+    - token: oth
+      name: Some Role
+
+authz_service:
   root_path: /oauth2
   bind_host: localhost
   bind_port: 8110
-  idp_config:
-    oauth2.idp.tma_oauth2:
-      client_id: ${TMA_OAUTH2_CLIENT_ID}
-      authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
+  idps:
+    tma_oauth2:
+      client_id: ${TMA_OAUTH2_CLIENT_ID:-undefined}
+      authorization_uri: ${TMA_OAUTH2_AUTHZ_URI:-undefined}
 
 client_admin_service:
   root_path: /oauth2clients
@@ -16,6 +26,32 @@ authz_admin_service:
   root_path: /oauth2scopes
   bind_host: localhost
   bind_port: 8112
+  datasets:
+    CA:
+      name: Datacatalogus Amsterdam
+      describedby: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+      scopes:
+        L1:
+          name: Level 1
+          included_by: L2
+          description: |-
+            TODO: beschrijven wat L1 meer heeft dan anoniem.
+        L2:
+          name: Level 2
+          includes: L1
+          description: |-
+            TODO: beschrijven wat L2 meer heeft dan L1.
+    HR:
+      name: Handelsregister
+      describedby: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
+      scopes:
+        INF:
+          name: Onbeperkt aantal bevragingen
+          description: |-
+            Deze permissie geeft gebruikers het recht onbeperkt informatie op te
+            vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
+            per dag doen).
+
 
 jwt:
   refreshtokens:
@@ -61,29 +97,3 @@ logging:
   root:
     level: ${LOGLEVEL:-DEBUG}
     handlers: [console]
-
-datasets:
-  CA:
-    name: Datacatalogus Amsterdam
-    describedby: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
-    scopes:
-      L1:
-        name: Level 1
-        included_by: L2
-        description: |-
-          TODO: beschrijven wat L1 meer heeft dan anoniem.
-      L2:
-        name: Level 2
-        includes: L1
-        description: |-
-          TODO: beschrijven wat L2 meer heeft dan L1.
-  HR:
-    name: Handelsregister
-    describedby: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
-    scopes:
-      INF:
-        name: Onbeperkt aantal bevragingen
-        description: |-
-          Deze permissie geeft gebruikers het recht onbeperkt informatie op te
-          vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
-          per dag doen).

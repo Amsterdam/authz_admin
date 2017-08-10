@@ -1,7 +1,10 @@
 import typing as T
 import abc
+import logging
 
 import rest_utils
+
+_logger = logging.getLogger(__name__)
 
 
 class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
@@ -19,6 +22,7 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
             action=self.request.method.lower()
         )
         if path is None:
+            _logger.error("Couldn't find swagger info for path %s", str(self.rel_url))
             return {}
         return dict({
             param: param_info['default']
@@ -27,11 +31,12 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
         })
 
     async def attributes(self):
-        swagger = self.request.app['swagger']
-        _, path_spec = swagger.get_path_spec(self.rel_url.raw_path)
-        return {
-            'swagger': path_spec
-        }
+        return {}
+        # swagger = self.request.app['swagger']
+        # _, path_spec = swagger.get_path_spec(self.rel_url.raw_path)
+        # return {
+        #     'swagger': path_spec
+        # }
 
     @property
     @abc.abstractmethod

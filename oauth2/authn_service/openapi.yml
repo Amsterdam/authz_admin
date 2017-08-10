@@ -1,7 +1,7 @@
 swagger: '2.0'
 
 info:
-  title: Datapunt Authorization Management Service
+  title: Datapunt Authentication Service
   termsOfService: TODO
   contact:
     name: Datapunt Amsterdam
@@ -12,12 +12,12 @@ info:
   #   url: https://datapunt.amsterdam.nl/license
   version: '1.0.0'
 
-host: localhost:8112
+host: api.data.amsterdam.nl
 
-# basePath: /oauth2/authz_admin
+basePath: /authn/
 
 schemes:
-  - http
+  - https
 
 produces:
   - application/hal+json
@@ -69,7 +69,7 @@ securityDefinitions:
       ead: Edit account details
       ear: Edit account roles
     flow: implicit
-    authorizationUrl: 'http://localhost:8110/authorization'
+    authorizationUrl: 'https://data.amsterdam.nl/oauth2/authz?idp=datapunt'
 
   API-key:
     type: apiKey
@@ -89,17 +89,6 @@ securityDefinitions:
       indicate that authorization is _optional._
     in: header
     name: Authorization
-
-#  OAuth2:
-#    type: oauth2
-#    scopes:
-#      grnt: Grant rights to others
-#    description: >-
-#      OAuth2 autorisatie op basis van authenticatie bij Toegangsmakelaar
-#      Amsterdam (TMA).
-#    flow: accessCode
-#    authorizationUrl: 'https://api.data.amsterdam.nl/oauth2/authz'
-#    tokenUrl: 'https://api.data.amsterdam.nl/oauth2/token'
 
 
 definitions:
@@ -191,7 +180,46 @@ definitions:
     required:
       - href
     properties:
-      $ref: '#/definitions/Link/properties'
+      href:
+        $ref: '#/definitions/HRef'
+      name:
+        $ref: '#/definitions/Name'
+      templated:
+        $ref: '#/definitions/Templated'
+      type:
+        description: |
+          Its value is a string used as a hint to indicate the media type
+          expected when dereferencing the target resource.
+        type: string
+        pattern: "^[-+\\w.]+/[-+\\w.]+(?:;\\s*\\w+=(?:\"(?:\"\"|[^\"])*\"|[^;,\"][^;,]*)?)*$"
+        example: "application/hal+json"
+      deprecation:
+        description: |
+          Its presence indicates that the link is to be deprecated (i.e.
+          removed) at a future date. Its value is a URL that SHOULD provide
+          further information about the deprecation. A client SHOULD provide
+          some notification (for example, by logging a warning message) whenever
+          it traverses over a link that has this property. The notification
+          SHOULD include the deprecation property's value so that a client
+          maintainer can easily find information about the deprecation.
+        type: string
+        example: "Deprecated. Don't do this again."
+      profile:
+        description: |
+          Its value is a string which is a URI that hints about the profile
+          [RFC6906] of the target resource.
+        type: string
+        format: url
+      title:
+        description: |
+          Its value is a string and is intended for labelling the link with a
+          human-readable identifier (as defined by [RFC5988]).
+        type: string
+      hreflang:
+        description: |
+          Its value is a string and is intended for indicating the language of
+          the target resource (as defined by [RFC5988]).
+        type: string
 
 
   CuriesLink:
@@ -274,16 +302,48 @@ definitions:
     items:
       $ref: '#/definitions/Resource'
     properties:
-      $ref: '#/definitions/Resource/properties'
+      _links:
+        description: |
+          It is an object whose property names are link relation types (as
+          defined by [RFC5988]) and values are either a Link Object or an array
+          of Link Objects.  The subject resource of these links is the Resource
+          Object of which the containing "_links" object is a property.
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          items:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+          curies:
+            type: array
+            items:
+              $ref: '#/definitions/CuriesLink'
+        additionalProperties:
+          $ref: '#/definitions/LinkOrLinks'
+      _embedded:
+        description: |
+          It is an object whose property names are link relation types (as
+          defined by [RFC5988]) and values are either a Resource Object or an
+          array of Resource Objects. Embedded Resources MAY be a full, partial,
+          or inconsistent version of the representation served from the target
+          URI.
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/ResourceOrResources'
 
 
 paths:
 
 
-  "/":
-    get:
+  "/authenticate":
+    post:
       parameters:
-        - $ref: '#/parameters/embed'
+        - name: login
+          in: body
       responses:
         '200':
           description: OK

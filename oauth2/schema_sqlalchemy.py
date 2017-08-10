@@ -23,7 +23,7 @@ def create():
 
     .. todo:: Accept an open psycopg2 connection as a parameter?
 
-    :raise: All kind of SQLAlchemy exceptions if schema creation fails.
+    :raises: All kinds of SQLAlchemy exceptions if schema creation fails.
 
     """
     engine = create_engine(

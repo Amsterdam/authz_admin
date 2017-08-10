@@ -12,7 +12,7 @@ class Scopes(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        datasets = self.request.app['config']['datasets']
+        datasets = self.request.app['config']['authz_admin_service']['datasets']
         if self['dataset'] not in datasets:
             raise web.HTTPNotFound
         self._dataset = datasets[self['dataset']]
@@ -38,17 +38,14 @@ class Scopes(view.OAuth2View):
             )
             for name in self._dataset['scopes']
         ]
-        return {
-            'item': items,
-            'up': _datasets.Dataset(self.request, self.match_dict, self.embed.get('up'))
-        }
+        return {'item': items}
 
 
 class Scope(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        datasets = self.request.app['config']['datasets']
+        datasets = self.request.app['config']['authz_admin_service']['datasets']
         if self['dataset'] not in datasets:
             raise web.HTTPNotFound(text="No such dataset")
         self._dataset = datasets[self['dataset']]
@@ -77,8 +74,7 @@ class Scope(view.OAuth2View):
 
     async def all_links(self):
         result = {
-            'dataset': _datasets.Dataset(self.request, self.match_dict, embed=self.embed.get('dataset')),
-            'up': Scopes(self.request, self.match_dict, self.embed.get('up'))
+            'dataset': _datasets.Dataset(self.request, self.match_dict, embed=self.embed.get('dataset'))
         }
         for fieldname in ('includes', 'included_by'):
             if fieldname in self._scope:

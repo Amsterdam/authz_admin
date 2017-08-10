@@ -26,6 +26,7 @@ setup(
         'jsonschema',
         'mimeparse',
         'PyYaml',
+        'PyJWT',
         'SQLAlchemy',
         'uvloop',
     ],
@@ -47,9 +48,11 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'authorization_service = oauth2.authorization_service.main:start',
-            'client_admin_service = oauth2.client_admin_service.server:start',
             'authz_admin_service = oauth2.authz_admin_service.main:main',
+            'authn_service = oauth2.authn_service.main:main',
+            'authz_service = oauth2.authz_service.main:start',
+            'client_admin_service = oauth2.client_admin_service.server:start',
+            'dummy_authz_service = oauth2.dummy_authz_service.main:main',
         ],
     },
     setup_requires=[

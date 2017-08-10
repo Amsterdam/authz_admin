@@ -24,10 +24,15 @@ def add_routes(router):
 
     """
     handlers.Root.add_to_router(router, '/')
-    handlers.Datasets.add_to_router(router, '/datasets/')
+    handlers.Datasets.add_to_router(router, '/datasets')
     handlers.Dataset.add_to_router(router, '/datasets/{dataset}')
-    handlers.Scopes.add_to_router(router, '/datasets/{dataset}/scopes/')
+    handlers.Scopes.add_to_router(router, '/datasets/{dataset}/scopes')
     handlers.Scope.add_to_router(router, '/datasets/{dataset}/scopes/{scope}')
+
+
+def on_response_prepare(request: web.Request, response: web.Response):
+    _logger.debug("on_response_prepare() called.")
+    response.headers.add('Access-Control-Allow-Origin', '*')
 
 
 def application(argv):
@@ -56,6 +61,7 @@ def application(argv):
     app.router.add_static('/hal', 'hal-browser')
     add_routes(app.router)
     app.on_startup.append(database.put_schema)
+    app.on_response_prepare.append(on_response_prepare)
     return app
 
 

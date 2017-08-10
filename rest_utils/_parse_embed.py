@@ -69,8 +69,6 @@ def parse_embed(embed: str) -> T.Dict[str, str]:
         parse('foo(bar,baz)')
         >>> {'foo': {'bar': {}, 'baz': {}}}
 
-    :param aiohttp.web.Request request:
-    :rtype: dict
     :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is
         detected.
 

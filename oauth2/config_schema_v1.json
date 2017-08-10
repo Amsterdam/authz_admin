@@ -4,58 +4,37 @@
   "required": ["jwt", "postgres"],
   "properties": {
 
-    "datasets": {
+    "authn_service": {
       "type": "object",
+      "required": ["roles"],
       "additionalProperties": false,
-      "patternProperties": {
-        "^\\w{1,4}$": {
-          "type": "object",
-          "required": ["name", "scopes"],
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "describedby": {
-              "type": "string",
-              "format": "uri"
-            },
-            "scopes": {
-              "type": "object",
-              "additionalProperties": false,
-              "patternProperties": {
-                "^\\w{1,4}$": {
-                  "type": "object",
-                  "required": ["name"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "includes": {
-                      "type": "string",
-                      "pattern": "^\\w{1,4}$"
-                    },
-                    "included_by": {
-                      "type": "string",
-                      "pattern": "^\\w{1,4}$"
-                    }
-                  }
-                }
+      "properties": {
+        "bind_host": {"type": "string"},
+        "bind_port": {"type": "integer"},
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["token", "name"],
+            "additionalProperties": false,
+            "properties": {
+              "token": {
+                "type": "string",
+                "pattern": "^\\w{1,5}$"
+              },
+              "name": {
+                "type": "string"
               }
             }
           }
-        }
+        },
+        "root_path": {"type": "string"}
       }
     },
 
-
-    "authorization_service": {
+    "authz_service": {
       "type": "object",
-      "required": ["bind_host", "bind_port", "idp_config", "root_path"],
+      "required": ["bind_host", "bind_port", "idps", "root_path"],
       "additionalProperties": false,
       "properties": {
         "bind_host": {"type": "string"},
@@ -65,7 +44,7 @@
         "external_scheme": {
           "type": "string",
           "enum": [ "http", "https" ]},
-        "idp_config": {
+        "idps": {
           "type": "object",
 
           "patternProperties": {
@@ -77,7 +56,6 @@
         "root_path": {"type": "string"}
       }
     },
-
 
     "client_admin_service": {
       "type": "object",
@@ -98,7 +76,54 @@
       "properties": {
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
-        "root_path": {"type": "string"}
+        "root_path": {"type": "string"},
+        "datasets": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^\\w{1,4}$": {
+              "type": "object",
+              "required": ["name", "scopes"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "describedby": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "scopes": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "patternProperties": {
+                    "^\\w{1,4}$": {
+                      "type": "object",
+                      "required": ["name"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "includes": {
+                          "type": "string",
+                          "pattern": "^\\w{1,4}$"
+                        },
+                        "included_by": {
+                          "type": "string",
+                          "pattern": "^\\w{1,4}$"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
 

@@ -25,19 +25,16 @@ class Datasets(view.OAuth2View):
                 {'dataset': name},
                 self.embed.get('item')
             )
-            for name in self.request.app['config']['datasets']
+            for name in self.request.app['config']['authz_admin_service']['datasets']
         ]
-        return {
-            'item': items,
-            'up': _root.Root(self.request, {}, self.embed.get('up'))
-        }
+        return {'item': items}
 
 
 class Dataset(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        datasets = self.request.app['config']['datasets']
+        datasets = self.request.app['config']['authz_admin_service']['datasets']
         if self['dataset'] not in datasets:
             raise web.HTTPNotFound
         self._dataset = datasets[self['dataset']]
@@ -51,11 +48,12 @@ class Dataset(view.OAuth2View):
         return self.request.app['etag']
 
     async def all_links(self):
-        scopes = _scopes.Scopes(self.request, self.match_dict, embed=self.embed.get('scopes'))
-        result = {
-            'up': Datasets(self.request, {}, embed=self.embed.get('up')),
-            'scopes': scopes
-        }
+        scopes = _scopes.Scopes(
+            self.request,
+            self.match_dict,
+            embed=self.embed.get('scopes')
+        )
+        result = {'scopes': scopes}
         if 'describedby' in self._dataset:
             result['describedby'] = {'href': self._dataset['describedby']}
         return result

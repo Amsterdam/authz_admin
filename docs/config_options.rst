@@ -37,8 +37,8 @@ Example:
     root_path: /oauth2
     bind_host: localhost
     bind_port: 8110
-    idp_config:
-      oauth2.idp.tma_oauth2:
+    idps:
+      tma_oauth2:
         client_id: ${TMA_OAUTH2_CLIENT_ID}
         authorization_uri: ${TMA_OAUTH2_AUTHZ_URI}
 

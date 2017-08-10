@@ -17,7 +17,7 @@ html:
 
 server:
 	@$(AUTOBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) \
-	  --watch ../oauth2 --watch ../config_loader
+	  --watch ../oauth2 --watch ../config_loader --watch ../rest_utils
 
 
 clean:
