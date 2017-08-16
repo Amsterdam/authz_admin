@@ -55,7 +55,7 @@ async def authorization_handler(request: web.Request):
     )
 
 
-def on_response_prepare(request: web.Request, response: web.Response):
+def add_cors_headers(request: web.Request, response: web.Response):
     _logger.debug("on_response_prepare() called.")
     response.headers.add('Access-Control-Allow-Origin', '*')
 
@@ -79,7 +79,7 @@ def application(argv):
 
     app['config'] = config.load()
     app.router.add_route('GET', '/authorization', authorization_handler)
-    app.on_response_prepare.append(on_response_prepare)
+    app.on_response_prepare.append(add_cors_headers)
     return app
 
 

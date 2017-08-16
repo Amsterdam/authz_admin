@@ -183,15 +183,15 @@ definitions:
         type: string
 
 
-  LinkOrLinks:
-    title: Link Object or list of Link Objects
-    type: [object, array]
-    items:
-      $ref: '#/definitions/Link'
-    required:
-      - href
-    properties:
-      $ref: '#/definitions/Link/properties'
+  # LinkOrLinks:
+  #   title: Link Object or list of Link Objects
+  #   type: [object, array]
+  #   items:
+  #     $ref: '#/definitions/Link'
+  #   required:
+  #     - href
+  #   properties:
+  #     $ref: '#/definitions/Link/properties'
 
 
   CuriesLink:
@@ -250,7 +250,8 @@ definitions:
             items:
               $ref: '#/definitions/CuriesLink'
         additionalProperties:
-          $ref: '#/definitions/LinkOrLinks'
+          # $ref: '#/definitions/LinkOrLinks'
+          $ref: '#/definitions/Link'
       _embedded:
         description: |
           It is an object whose property names are link relation types (as
@@ -260,21 +261,22 @@ definitions:
           URI.
         type: object
         additionalProperties:
-          $ref: '#/definitions/ResourceOrResources'
+          $ref: '#/definitions/Resource'
+          #$ref: '#/definitions/ResourceOrResources'
 
 
-  ResourceOrResources:
-    title: Resource Object or list of Resource Objects
-    description: |
-      A Resource Object represents a resource. It has two reserved properties:
-      (1) "_links" which contain links to other resources, and (2) "_embedded"
-      which contain embedded resources. All other properties MUST be valid JSON,
-      and represent the current state of the resource.
-    type: [object, array]
-    items:
-      $ref: '#/definitions/Resource'
-    properties:
-      $ref: '#/definitions/Resource/properties'
+  # ResourceOrResources:
+  #   title: Resource Object or list of Resource Objects
+  #   description: |
+  #     A Resource Object represents a resource. It has two reserved properties:
+  #     (1) "_links" which contain links to other resources, and (2) "_embedded"
+  #     which contain embedded resources. All other properties MUST be valid JSON,
+  #     and represent the current state of the resource.
+  #   type: [object, array]
+  #   items:
+  #     $ref: '#/definitions/Resource'
+  #   properties:
+  #     $ref: '#/definitions/Resource/properties'
 
 
 paths:

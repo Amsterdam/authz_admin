@@ -1,7 +1,7 @@
 swagger: '2.0'
 
 info:
-  title: Datapunt Authentication Service
+  title: Datapunt Authorization Management Service
   termsOfService: TODO
   contact:
     name: Datapunt Amsterdam
@@ -12,12 +12,12 @@ info:
   #   url: https://datapunt.amsterdam.nl/license
   version: '1.0.0'
 
-host: api.data.amsterdam.nl
+host: localhost:8112
 
-basePath: /authn/
+basePath: /authn
 
 schemes:
-  - https
+  - http
 
 produces:
   - application/hal+json
@@ -69,7 +69,7 @@ securityDefinitions:
       ead: Edit account details
       ear: Edit account roles
     flow: implicit
-    authorizationUrl: 'https://data.amsterdam.nl/oauth2/authz?idp=datapunt'
+    authorizationUrl: 'http://localhost:8110/authorization'
 
   API-key:
     type: apiKey
@@ -89,6 +89,17 @@ securityDefinitions:
       indicate that authorization is _optional._
     in: header
     name: Authorization
+
+#  OAuth2:
+#    type: oauth2
+#    scopes:
+#      grnt: Grant rights to others
+#    description: >-
+#      OAuth2 autorisatie op basis van authenticatie bij Toegangsmakelaar
+#      Amsterdam (TMA).
+#    flow: accessCode
+#    authorizationUrl: 'https://api.data.amsterdam.nl/oauth2/authz'
+#    tokenUrl: 'https://api.data.amsterdam.nl/oauth2/token'
 
 
 definitions:
@@ -172,54 +183,15 @@ definitions:
         type: string
 
 
-  LinkOrLinks:
-    title: Link Object or list of Link Objects
-    type: [object, array]
-    items:
-      $ref: '#/definitions/Link'
-    required:
-      - href
-    properties:
-      href:
-        $ref: '#/definitions/HRef'
-      name:
-        $ref: '#/definitions/Name'
-      templated:
-        $ref: '#/definitions/Templated'
-      type:
-        description: |
-          Its value is a string used as a hint to indicate the media type
-          expected when dereferencing the target resource.
-        type: string
-        pattern: "^[-+\\w.]+/[-+\\w.]+(?:;\\s*\\w+=(?:\"(?:\"\"|[^\"])*\"|[^;,\"][^;,]*)?)*$"
-        example: "application/hal+json"
-      deprecation:
-        description: |
-          Its presence indicates that the link is to be deprecated (i.e.
-          removed) at a future date. Its value is a URL that SHOULD provide
-          further information about the deprecation. A client SHOULD provide
-          some notification (for example, by logging a warning message) whenever
-          it traverses over a link that has this property. The notification
-          SHOULD include the deprecation property's value so that a client
-          maintainer can easily find information about the deprecation.
-        type: string
-        example: "Deprecated. Don't do this again."
-      profile:
-        description: |
-          Its value is a string which is a URI that hints about the profile
-          [RFC6906] of the target resource.
-        type: string
-        format: url
-      title:
-        description: |
-          Its value is a string and is intended for labelling the link with a
-          human-readable identifier (as defined by [RFC5988]).
-        type: string
-      hreflang:
-        description: |
-          Its value is a string and is intended for indicating the language of
-          the target resource (as defined by [RFC5988]).
-        type: string
+  # LinkOrLinks:
+  #   title: Link Object or list of Link Objects
+  #   type: [object, array]
+  #   items:
+  #     $ref: '#/definitions/Link'
+  #   required:
+  #     - href
+  #   properties:
+  #     $ref: '#/definitions/Link/properties'
 
 
   CuriesLink:
@@ -278,7 +250,8 @@ definitions:
             items:
               $ref: '#/definitions/CuriesLink'
         additionalProperties:
-          $ref: '#/definitions/LinkOrLinks'
+          # $ref: '#/definitions/LinkOrLinks'
+          $ref: '#/definitions/Link'
       _embedded:
         description: |
           It is an object whose property names are link relation types (as
@@ -288,77 +261,31 @@ definitions:
           URI.
         type: object
         additionalProperties:
-          $ref: '#/definitions/ResourceOrResources'
+          $ref: '#/definitions/Resource'
+          #$ref: '#/definitions/ResourceOrResources'
 
 
-  ResourceOrResources:
-    title: Resource Object or list of Resource Objects
-    description: |
-      A Resource Object represents a resource. It has two reserved properties:
-      (1) "_links" which contain links to other resources, and (2) "_embedded"
-      which contain embedded resources. All other properties MUST be valid JSON,
-      and represent the current state of the resource.
-    type: [object, array]
-    items:
-      $ref: '#/definitions/Resource'
-    properties:
-      _links:
-        description: |
-          It is an object whose property names are link relation types (as
-          defined by [RFC5988]) and values are either a Link Object or an array
-          of Link Objects.  The subject resource of these links is the Resource
-          Object of which the containing "_links" object is a property.
-        type: object
-        required:
-          - self
-        properties:
-          self:
-            $ref: '#/definitions/Link'
-          items:
-            type: array
-            items:
-              $ref: '#/definitions/Link'
-          curies:
-            type: array
-            items:
-              $ref: '#/definitions/CuriesLink'
-        additionalProperties:
-          $ref: '#/definitions/LinkOrLinks'
-      _embedded:
-        description: |
-          It is an object whose property names are link relation types (as
-          defined by [RFC5988]) and values are either a Resource Object or an
-          array of Resource Objects. Embedded Resources MAY be a full, partial,
-          or inconsistent version of the representation served from the target
-          URI.
-        type: object
-        additionalProperties:
-          $ref: '#/definitions/ResourceOrResources'
+  # ResourceOrResources:
+  #   title: Resource Object or list of Resource Objects
+  #   description: |
+  #     A Resource Object represents a resource. It has two reserved properties:
+  #     (1) "_links" which contain links to other resources, and (2) "_embedded"
+  #     which contain embedded resources. All other properties MUST be valid JSON,
+  #     and represent the current state of the resource.
+  #   type: [object, array]
+  #   items:
+  #     $ref: '#/definitions/Resource'
+  #   properties:
+  #     $ref: '#/definitions/Resource/properties'
 
 
 paths:
 
 
-  "/authenticate":
-    post:
-      parameters:
-        - name: login
-          in: body
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets":
+  "/login":
     get:
       parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "item"
+        -
       responses:
         '200':
           description: OK
@@ -366,221 +293,3 @@ paths:
             $ref: '#/definitions/Resource'
 
 
-  "/datasets/{dataset}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "scopes"
-        #- $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets/{dataset}/scopes":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "item"
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets/{dataset}/scopes/{scope}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-      - name: scope
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/idps":
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/idps/{idp}":
-    parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
-    get:
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/idps/{idp}/users":
-    parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/idps/{idp}/users/{user}":
-    parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-      - name: user
-        in: path
-        required: true
-        type: string
-    get:
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/profiles":
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/profiles/{profile}":
-    parameters:
-      - name: profile
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: scopes
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/profiles/{profile}/scopes":
-    parameters:
-      - name: profile
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  /self:
-    get:
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  /users:
-    get:
-      parameters:
-        - name: typeahead
-          in: query
-          type: string
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'

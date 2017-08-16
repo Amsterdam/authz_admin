@@ -55,8 +55,10 @@ def application(argv):
     app['config'] = config
     app['etag'] = rest_utils.ETagGenerator().update(config).etag
     app['connection_pool'] = database.ConnectionPool(config['postgres'])
+    swagger_path = os.path.join(os.path.dirname(__file__), 'openapi.yml')
+    _logger.debug("Loading swagger file '%s'", swagger_path)
     app['swagger'] = swagger_parser.SwaggerParser(
-        swagger_path=os.path.join(os.path.dirname(__file__), 'openapi.yml')
+        swagger_path=swagger_path
     )
     app.router.add_static('/hal', 'hal-browser')
     add_routes(app.router)

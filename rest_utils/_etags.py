@@ -116,7 +116,7 @@ def assert_preconditions(request: web.Request):
     return assert_preconditions
 
 
-def etaggify(v: str, weak) -> str:
+def etaggify(v: str, weak: bool) -> str:
     weak = 'W/' if weak else ''
     return weak + '"' + v + '"'
 

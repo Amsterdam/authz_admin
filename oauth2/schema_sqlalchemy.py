@@ -17,7 +17,7 @@ from sqlalchemy import (create_engine, MetaData, Table, Column, ForeignKey, Inde
 from sqlalchemy.engine.url import URL as ENGINE_URL
 
 
-def create():
+def main():
     # language=rst
     """ Creates the database schema.
 
@@ -116,4 +116,4 @@ def create():
 
 
 if __name__ == '__main__':
-    create()
+    main()

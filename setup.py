@@ -21,6 +21,7 @@ setup(
     install_requires=[
         'aiodns', # Recommended by aiohttp docs
         'aiohttp',
+        'aiohttp-jinja2',
         'aiopg',
         'cchardet', # Recommended by aiohttp docs
         'jsonschema',
@@ -28,7 +29,7 @@ setup(
         'PyYaml',
         'PyJWT',
         'SQLAlchemy',
-        'uvloop',
+        'uvloop', # Recommended by aiohttp docs
     ],
     extras_require={
         'docs': [

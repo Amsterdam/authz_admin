@@ -9,33 +9,20 @@
       "required": ["roles"],
       "additionalProperties": false,
       "properties": {
-        "bind_host": {"type": "string"},
-        "bind_port": {"type": "integer"},
         "roles": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["token", "name"],
-            "additionalProperties": false,
-            "properties": {
-              "token": {
-                "type": "string",
-                "pattern": "^\\w{1,5}$"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "root_path": {"type": "string"}
+          "type": "object",
+          "patternProperties": {
+            "^[1-9]\\d*$": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
       }
     },
 
     "authz_service": {
       "type": "object",
-      "required": ["bind_host", "bind_port", "idps", "root_path"],
       "additionalProperties": false,
+      "required": ["bind_host", "bind_port", "idps", "root_path"],
       "properties": {
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
@@ -46,7 +33,7 @@
           "enum": [ "http", "https" ]},
         "idps": {
           "type": "object",
-
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-zA-Z0-9._]+$": {
               "type": "object"
@@ -57,41 +44,29 @@
       }
     },
 
-    "client_admin_service": {
-      "type": "object",
-      "required": ["bind_host", "bind_port", "root_path"],
-      "additionalProperties": false,
-      "properties": {
-        "bind_host": {"type": "string"},
-        "bind_port": {"type": "integer"},
-        "root_path": {"type": "string"}
-      }
-    },
-
-
     "authz_admin_service": {
       "type": "object",
-      "required": ["bind_host", "bind_port", "root_path"],
       "additionalProperties": false,
+      "required": ["bind_host", "bind_port", "prefix"],
       "properties": {
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
-        "root_path": {"type": "string"},
+        "prefix": {"type": "string", "format": "url"},
         "datasets": {
           "type": "object",
           "additionalProperties": false,
           "patternProperties": {
             "^\\w{1,4}$": {
               "type": "object",
-              "required": ["name", "scopes"],
               "additionalProperties": false,
+              "required": ["name", "scopes"],
               "properties": {
                 "name": {
                   "type": "string"
                 },
                 "describedby": {
                   "type": "string",
-                  "format": "uri"
+                  "format": "url"
                 },
                 "scopes": {
                   "type": "object",
@@ -127,11 +102,21 @@
       }
     },
 
+    "client_admin_service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bind_host", "bind_port", "prefix"],
+      "properties": {
+        "bind_host": {"type": "string"},
+        "bind_port": {"type": "integer"},
+        "prefix": {"type": "string"}
+      }
+    },
 
     "jwt": {
       "type": "object",
-      "required": ["refreshtokens", "accesstokens"],
       "additionalProperties": false,
+      "required": ["refreshtokens", "accesstokens"],
       "properties": {
         "refreshtokens": {"$ref": "#/definitions/jwtconfig"},
         "accesstokens": {"$ref": "#/definitions/jwtconfig"}
@@ -141,8 +126,8 @@
 
     "postgres": {
       "type": "object",
-      "required": ["host", "port", "user", "password", "dbname"],
       "additionalProperties": false,
+      "required": ["host", "port", "user", "password", "dbname"],
       "properties": {
         "host": {"type": "string"},
         "port": {"type": "integer"},
@@ -162,6 +147,7 @@
   "definitions": {
     "jwtconfig": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["secret", "lifetime", "algorithm"],
 
       "properties": {
@@ -182,6 +168,7 @@
 
     "logging.dictconfig": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["version"],
       "properties": {
         "version": {"type": "integer", "enum": [1]},

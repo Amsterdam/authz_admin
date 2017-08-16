@@ -1,12 +1,14 @@
 import asyncio
 import logging
+import os.path
 import sys
 import re
-import time
 
+import aiohttp_jinja2
+import jinja2
+import swagger_parser
 import uvloop
 from aiohttp import web
-import jwt
 
 import rest_utils
 from oauth2 import config
@@ -14,43 +16,24 @@ from oauth2 import config
 _logger = logging.getLogger(__name__)
 
 
-def access_token(scope: str, secret) -> str:
-    return jwt.encode({
-        'sub': 'dp:datapunt@amsterdam.nl',
-        'iat': time.time() - 5,
-        'exp': time.time() + 3600 * 12,
-        'scope': scope
-    }, secret)
+async def authenticate_get_handler(request: web.Request):
+    """Performs HTTP Basic Auth."""
+    response = web.Response()
+    return response
 
 
-async def authorization_handler(request: web.Request):
-    if (request.query['response_type'] != 'token' or
-            'redirect_uri' not in request.query):
-        raise web.HTTPBadRequest(
-            text="Response type isn't 'token' or no redirect URI provided."
-        )
-    if 'scope' in request.query:
-        scope = request.query['scope']
-        if not re.fullmatch(r'[\x21\x23-\x5a\x5e-\x7e\[\]]+(?: [\x21\x23-\x5a\x5e-\x7e\[\]]+)*', scope):
-            raise web.HTTPBadRequest(
-                text="Syntax error in 'scopes' query parameter."
-            )
-    else:
-        scope = ' '.join(config.all_scopes(request.app['config']))
-    location = web.URL(request.query['redirect_uri'])
-    location = location.update_query(
-        access_token=access_token(scope, 'test123'),
-        token_type='bearer',
-        scope=scope
-    )
-    if 'state' in request.query:
-        location = location.update_query(state=request.query['state'])
-    return web.Response(
-        status=302,
-        headers={
-            'Location': location
-        }
-    )
+async def authenticate_post_handler(request):
+    response = web.Response()
+    return response
+
+
+@aiohttp_jinja2.template('login.html')
+async def login(request: web.Request) -> dict:
+    return {
+        'action_url': 'authenticate?' + request.query_string,
+        'whitelisted': False,
+        'html_error': None
+    }
 
 
 def application(argv):
@@ -65,13 +48,20 @@ def application(argv):
         raise Exception("Don't know what to do with command line parameters.", argv)
     app = web.Application(
         middlewares=[
-            rest_utils.middleware,
-            web.normalize_path_middleware()
+            rest_utils.middleware
         ]
     )
-
     app['config'] = config.load()
-    app.router.add_route('GET', '/authorization', authorization_handler)
+    swagger_path = os.path.join(os.path.dirname(__file__), 'openapi.yml')
+    _logger.info("Loading swagger file '%s'", swagger_path)
+    app['swagger'] = swagger_parser.SwaggerParser(
+        swagger_path=swagger_path
+    )
+    app['prefix'] = app['swagger'].base_path
+    app.router.add_route('GET', app['prefix'] + '/login', login)
+    app.router.add_route('GET', app['prefix'] + '/authenticate', authenticate_get_handler)
+    app.router.add_route('POST', app['prefix'] + '/authenticate', authenticate_post_handler)
+    app.router.add_static(app['prefix'] + '/static', 'oauth2/authn_service/static')
     return app
 
 
@@ -90,12 +80,17 @@ def main():
     # Build the application
     app = application([])
 
+    aiohttp_jinja2.setup(
+        app, loader=jinja2.PackageLoader('oauth2.authn_service')
+    )
+
     # run server
-    SERVICE_CONFIG = app['config']['authn_admin_service']
+    host = re.fullmatch(r'(.*?):(\d+)', app['swagger'].specification['host'])
+    assert host, "Host not defined in swagger file."
     web.run_app(
         app,
-        host=SERVICE_CONFIG['bind_host'],
-        port=SERVICE_CONFIG['bind_port']
+        host=host[1],
+        port=int(host[2])
     )
     return 0
 

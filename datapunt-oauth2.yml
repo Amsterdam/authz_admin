@@ -1,12 +1,8 @@
 authn_service:
-  root_path: /oauth2authn
-  bind_host: localhost
-  bind_port: 8114
   roles:
-    - token: bdp
-      name: Beheerder Datapunt
-    - token: oth
-      name: Some Role
+    "1": Beheerder Datapunt
+    "2": Eén of andere rol
+
 
 authz_service:
   root_path: /oauth2
@@ -17,13 +13,9 @@ authz_service:
       client_id: ${TMA_OAUTH2_CLIENT_ID:-undefined}
       authorization_uri: ${TMA_OAUTH2_AUTHZ_URI:-undefined}
 
-client_admin_service:
-  root_path: /oauth2clients
-  bind_host: localhost
-  bind_port: 8111
 
 authz_admin_service:
-  root_path: /oauth2scopes
+  prefix: /authz_admin
   bind_host: localhost
   bind_port: 8112
   datasets:
@@ -51,6 +43,12 @@ authz_admin_service:
             Deze permissie geeft gebruikers het recht onbeperkt informatie op te
             vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
             per dag doen).
+
+
+client_admin_service:
+  prefix: /client_admin
+  bind_host: localhost
+  bind_port: 8111
 
 
 jwt:
