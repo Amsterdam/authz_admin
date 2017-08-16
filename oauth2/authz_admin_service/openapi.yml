@@ -2,7 +2,7 @@ swagger: '2.0'
 
 info:
   title: Datapunt Authorization Management Service
-  termsOfService: TODO
+  # termsOfService: TODO
   contact:
     name: Datapunt Amsterdam
     url: https://data.amsterdam.nl/
@@ -12,16 +12,18 @@ info:
   #   url: https://datapunt.amsterdam.nl/license
   version: '1.0.0'
 
-host: localhost:8112
+host: api.data.amsterdam.nl
 
-# basePath: /oauth2/authz_admin
+basePath: /oauth2/authz_admin
 
 schemes:
-  - http
+  - https
 
 produces:
   - application/hal+json
 
+consumes:
+  - application/json
 
 parameters:
   page:
@@ -40,7 +42,6 @@ parameters:
     required: false
     type: string
     pattern: "^(?:0|[1-9]\\d*)$"
-    default: '0'
   embed:
     name: embed
     in: query
@@ -56,80 +57,21 @@ parameters:
     pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
 
 
-responses: {}
-
-
 securityDefinitions:
 
   OAuth2:
     type: oauth2
-    description: |
-      Authorization through our own Authorization Service.
+    description: >
+      Authorization through our own Authorization Service.  Scope names all start
+      with `azam`, which stands for **Authorization Account Management**.
     scopes:
-      ead: Edit account details
-      ear: Edit account roles
+      azam.r: "Read accounts and account roles."
+      azam.w: "Create and edit accounts and account roles.  Delete accounts."
     flow: implicit
-    authorizationUrl: 'http://localhost:8110/authorization'
-
-  API-key:
-    type: apiKey
-    description: |
-      Use `apikey` as the authorization scheme.
-      For example: `Authorization: apikey foo...bar`.
-    in: header
-    name: Authorization
-
-  None:
-    type: apiKey
-    description: |
-      Dummy [Security Scheme
-      Object](//swagger.io/specification/#securitySchemeObject);  used in some
-      [Security Definitions
-      Objects](//swagger.io/specification/#securityDefinitionsObject) to
-      indicate that authorization is _optional._
-    in: header
-    name: Authorization
-
-#  OAuth2:
-#    type: oauth2
-#    scopes:
-#      grnt: Grant rights to others
-#    description: >-
-#      OAuth2 autorisatie op basis van authenticatie bij Toegangsmakelaar
-#      Amsterdam (TMA).
-#    flow: accessCode
-#    authorizationUrl: 'https://api.data.amsterdam.nl/oauth2/authz'
-#    tokenUrl: 'https://api.data.amsterdam.nl/oauth2/token'
+    authorizationUrl: 'https://api.data.amsterdam.nl/oauth2_as/authorization'
 
 
 definitions:
-
-
-  HRef:
-    description: |
-      Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If
-      the value is a URI Template then the Link Object SHOULD have a
-      "templated" attribute whose value is true.
-    type: string
-    format: url
-    example: "http://www.example.com/"
-
-
-  Name:
-    description: |
-      Its value MAY be used as a secondary key for selecting Link Objects
-      which share the same relation type.
-    type: string
-    example:
-
-
-  Templated:
-    description: |
-      Its value is boolean and SHOULD be true when the Link Object's "href"
-      property is a URI Template. Its value SHOULD be considered false if it
-      is undefined or any other value than true.
-    type: boolean
-    default: false
 
 
   Link:
@@ -142,11 +84,25 @@ definitions:
       - href
     properties:
       href:
-        $ref: '#/definitions/HRef'
+        description: |
+          Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If
+          the value is a URI Template then the Link Object SHOULD have a
+          "templated" attribute whose value is true.
+        type: string
+        format: url
+        example: "http://www.example.com/"
       name:
-        $ref: '#/definitions/Name'
+        description: |
+          Its value MAY be used as a secondary key for selecting Link Objects
+          which share the same relation type.
+        type: string
       templated:
-        $ref: '#/definitions/Templated'
+        description: |
+          Its value is boolean and SHOULD be true when the Link Object's "href"
+          property is a URI Template. Its value SHOULD be considered false if it
+          is undefined or any other value than true.
+        type: boolean
+        default: false
       type:
         description: |
           Its value is a string used as a hint to indicate the media type
@@ -164,7 +120,6 @@ definitions:
           SHOULD include the deprecation property's value so that a client
           maintainer can easily find information about the deprecation.
         type: string
-        example: "Deprecated. Don't do this again."
       profile:
         description: |
           Its value is a string which is a URI that hints about the profile
@@ -194,75 +149,91 @@ definitions:
   #     $ref: '#/definitions/Link/properties'
 
 
-  CuriesLink:
-    description: |
-      Custom link relation types (Extension Relation Types in [RFC5988]) SHOULD
-      be URIs that when dereferenced in a web browser provide relevant
-      documentation, in the form of an HTML page, about the meaning and/or
-      behaviour of the target Resource. This will improve the discoverability of
-      the API. The CURIE Syntax [W3C.NOTE-curie-20101216] MAY be used for
-      brevity for these URIs. CURIEs are established within a HAL document via a
-      set of Link Objects with the relation type "curies" on the root Resource
-      Object. These links contain a URI Template with the token 'rel', and are
-      named via the "name" property.
-    allOf:
-      - $ref: '#/definitions/Link'
-      - required:
-        - href
-        - name
-        - templated
-        properties:
-          href:
-            $ref: '#/definitions/HRef'
-          name:
-            $ref: '#/definitions/Name'
-          templated:
-            $ref: '#/definitions/Templated'
+  # CuriesLink:
+  #   description: |
+  #     Custom link relation types (Extension Relation Types in [RFC5988]) SHOULD
+  #     be URIs that when dereferenced in a web browser provide relevant
+  #     documentation, in the form of an HTML page, about the meaning and/or
+  #     behaviour of the target Resource. This will improve the discoverability of
+  #     the API. The CURIE Syntax [W3C.NOTE-curie-20101216] MAY be used for
+  #     brevity for these URIs. CURIEs are established within a HAL document via a
+  #     set of Link Objects with the relation type "curies" on the root Resource
+  #     Object. These links contain a URI Template with the token 'rel', and are
+  #     named via the "name" property.
+  #   allOf:
+  #     - $ref: '#/definitions/Link'
+  #     - required:
+  #       - href
+  #       - name
+  #       - templated
+  #       properties:
+  #         href:
+  #           description: |
+  #             Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If
+  #             the value is a URI Template then the Link Object SHOULD have a
+  #             "templated" attribute whose value is true.
+  #           type: string
+  #           format: url
+  #           example: "http://www.example.com/"
+  #         name:
+  #           description: |
+  #             Its value MAY be used as a secondary key for selecting Link Objects
+  #             which share the same relation type.
+  #           type: string
+  #         templated:
+  #           description: |
+  #             Its value is boolean and SHOULD be true when the Link Object's "href"
+  #             property is a URI Template. Its value SHOULD be considered false if it
+  #             is undefined or any other value than true.
+  #           type: boolean
+  #           default: false
 
 
-  Resource:
-    title: Resource Object
-    description: |
-      A Resource Object represents a resource. It has two reserved properties:
-      (1) "_links" which contain links to other resources, and (2) "_embedded"
-      which contain embedded resources. All other properties MUST be valid JSON,
-      and represent the current state of the resource.
-    type: object
-    properties:
-      _links:
-        description: |
-          It is an object whose property names are link relation types (as
-          defined by [RFC5988]) and values are either a Link Object or an array
-          of Link Objects.  The subject resource of these links is the Resource
-          Object of which the containing "_links" object is a property.
-        type: object
-        required:
-          - self
-        properties:
-          self:
-            $ref: '#/definitions/Link'
-          items:
-            type: array
-            items:
-              $ref: '#/definitions/Link'
-          curies:
-            type: array
-            items:
-              $ref: '#/definitions/CuriesLink'
-        additionalProperties:
-          # $ref: '#/definitions/LinkOrLinks'
-          $ref: '#/definitions/Link'
-      _embedded:
-        description: |
-          It is an object whose property names are link relation types (as
-          defined by [RFC5988]) and values are either a Resource Object or an
-          array of Resource Objects. Embedded Resources MAY be a full, partial,
-          or inconsistent version of the representation served from the target
-          URI.
-        type: object
-        additionalProperties:
-          $ref: '#/definitions/Resource'
-          #$ref: '#/definitions/ResourceOrResources'
+  # Resource:
+  #   title: Resource Object
+  #   description: |
+  #     A Resource Object represents a resource. It has two reserved properties:
+  #     (1) "_links" which contain links to other resources, and (2) "_embedded"
+  #     which contain embedded resources. All other properties MUST be valid JSON,
+  #     and represent the current state of the resource.
+  #   type: object
+  #   properties:
+  #     _links:
+  #       description: |
+  #         It is an object whose property names are link relation types (as
+  #         defined by [RFC5988]) and values are either a Link Object or an array
+  #         of Link Objects.  The subject resource of these links is the Resource
+  #         Object of which the containing "_links" object is a property.
+  #       type: object
+  #       required:
+  #         - self
+  #       properties:
+  #         self:
+  #           $ref: '#/definitions/Link'
+  #         item:
+  #           type: array
+  #           items:
+  #             $ref: '#/definitions/Link'
+  #           # curies:
+  #           #   type: array
+  #           #   items:
+  #           #     $ref: '#/definitions/CuriesLink'
+  #       additionalProperties:
+  #         # $ref: '#/definitions/LinkOrLinks'
+  #         $ref: '#/definitions/Link'
+  #     _embedded:
+  #       description: |
+  #         It is an object whose property names are link relation types (as
+  #         defined by [RFC5988]) and values are either a Resource Object or an
+  #         array of Resource Objects. Embedded Resources MAY be a full, partial,
+  #         or inconsistent version of the representation served from the target
+  #         URI.
+  #       type: object
+  #       additionalProperties:
+  #         type: array
+  #         items:
+  #           $ref: '#/definitions/Resource'
+  #         #$ref: '#/definitions/ResourceOrResources'
 
 
   # ResourceOrResources:
@@ -284,108 +255,71 @@ paths:
 
   "/":
     get:
+      summary: "The root resource"
       parameters:
         - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets":
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "item"
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets/{dataset}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "scopes"
-        #- $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets/{dataset}/scopes":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: "item"
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  "/datasets/{dataset}/scopes/{scope}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-      - name: scope
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,4}$"
-    get:
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  idps:
+                    $ref: '#/definitions/Link'
+                  me:
+                    $ref: '#/definitions/Link'
+                  roles:
+                    $ref: '#/definitions/Link'
+                  accounts:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  idps:
+                    $ref: '#/paths/~1idps/get/responses/200/schema'
 
 
   "/idps":
     get:
+      summary: "Collection of all IdPs we connect with"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
+        - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1idps~1{idp}/get/responses/200/schema'
 
 
   "/idps/{idp}":
@@ -396,133 +330,394 @@ paths:
         type: string
         pattern: "^\\w{1,32}$"
     get:
+      summary: "One of the IdPs we connect with"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+              - name
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  accounts:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  accounts:
+                    $ref: '#/paths/~1idps~1{idp}~1accounts/get/responses/200/schema'
+              name:
+                type: string
+                maxLength: 120
+                minLength: 1
+              account_schema:
+                type: object
+                description: >
+                  A JSON schema definition with all the account attributes defined by this IdP.
 
 
-  "/idps/{idp}/users":
+  "/idps/{idp}/accounts":
     parameters:
       - name: idp
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,4}$"
+        pattern: "^\\w{1,32}$"
     get:
+      summary: "Collection of all accounts of this IdP"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
+        - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
 
 
-  "/idps/{idp}/users/{user}":
+  "/idps/{idp}/accounts/{account}":
     parameters:
       - name: idp
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,4}$"
-      - name: user
+        pattern: "^\\w{1,32}$"
+      - name: account
         in: path
         required: true
         type: string
+        pattern: "^.{1,255}$"
     get:
+      summary: "One account in IdP `{idp}`"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                  - roles
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1roles~1{role}/get/responses/200/schema'
+              _etag:
+                type: string
+                pattern: '^(?:W/)?"[^"]+"$'
+    put:
+      summary: "Register or update an account"
+      security:
+        - OAuth2:
+          - 'azam.r'
+          - 'azam.w'
+      description: >-
+        When **registering a new account**, provide the `If-None-Match: *` request
+        header. When **updating an existing account**, provide the `If-Match: "«etag»"`
+        request header.
 
+        - The attributes allowed/required in the request body JSON object depend
+          on the IdP.  The client may send a list of associated roles when
+          creating or updating an account resource.
 
-  "/profiles":
-    get:
+        - The body doesn't have to be a valid HAL+JSON object: only top-level
+          attributes and the list of associated roles are relevant.
+
+        Example request body:
+
+            {
+              "_links": {
+                "roles": [
+                  { "href": "/roles/role1" },
+                  { "href": "/roles/role2" }
+                ]
+              },
+              "first_name": "Jane",
+              "last_name": "Doe"
+            }
       parameters:
-        - name: embed
-          in: query
+        - name: If-Match
+          description: >-
+            This request header is required if the client intends to *update* an
+            existing `account` resource.  The value *must* be the current `ETag`
+            of the account resource, as last seen by the client.  This prevents
+            lost updates if multiple clients are concurrently editing the same
+            resource.
+          in: header
           type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
+          pattern: '^(?:W/)?"[^"]+"$'
+        - name: If-None-Match
+          description: >-
+            This request header is required if the client intends to *create* a
+            new `account` resource.  This prevents lost updates if multiple
+            clients are concurrently creating the same resource.
+          in: header
+          type: string
+          enum: ['*']
+        - name: body
+          in: body
+          schema:
+            $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
+      responses:
+        '201':
+          description: >-
+            **Created**
+
+            The `ETag` response header contains the ETag of the newly created resource.
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+        '204':
+          description: >-
+            **No Content**
+
+            The resource was updated successfully.  The `ETag` response header contains the new ETag.
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+        '412':
+          description: >-
+            **Precondition Failed**
+
+            - If the client sent an `If-Match` request header, this means the
+              client doesn't have the latest version of the resource it wants to
+              update.  The client should first `GET` the latest version, merge
+              if possible, and try again.
+
+            - If the client sent an `If-None-Match` request header, this means
+              that the resource already exists.
+        '422':
+          description: "Unprocessable Entity"
+        '428':
+          description: >-
+            **Precondition Required**
+
+            The client didn't provide an `If-None-Match` or `If-Match` request header.
+
+
+  "/roles":
+    get:
+      summary: "All roles we have defined"
+      security:
+        - OAuth2:
+          - 'azam.r'
+      parameters:
+        - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1roles~1{role}/get/responses/200/schema'
 
 
-  "/profiles/{profile}":
+  "/roles/{role}":
     parameters:
-      - name: profile
+      - name: role
         in: path
         required: true
         type: string
         pattern: "^\\w{1,32}$"
     get:
+      summary: "One of the roles we have defined"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: scopes
+        - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+              - name
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  accounts:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  accounts:
+                    $ref: '#/paths/~1roles~1{role}~1accounts/get/responses/200/schema'
+              name:
+                type: string
+                minLength: 1
+                maxLength: 255
+              organization:
+                type: string
+                minLength: 1
+                maxLength: 255
 
 
-  "/profiles/{profile}/scopes":
+  "/roles/{role}/accounts":
     parameters:
-      - name: profile
+      - name: role
         in: path
         required: true
         type: string
         pattern: "^\\w{1,32}$"
     get:
-      parameters:
-        - name: embed
-          in: query
-          type: string
-          pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
-          default: item
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Resource'
-
-
-  /self:
-    get:
+      summary: "Collection of all accounts with this role"
+      security:
+        - OAuth2:
+          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
 
 
-  /users:
+  "/accounts":
     get:
+      summary: "List of typeahead suggestions."
+      security:
+        - OAuth2:
+          - 'azam.r'
+      description: >
+        In the response body, `#/_links/account` will be an array of links to
+        account resources.  Each link will have a `title` attribute, which
+        contains a type-ahead completion.
       parameters:
         - name: typeahead
           in: query
           type: string
+          required: true
       responses:
         '200':
-          description: OK
+          description: "OK"
           schema:
-            $ref: '#/definitions/Resource'
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                  - accounts
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  account:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  account:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
