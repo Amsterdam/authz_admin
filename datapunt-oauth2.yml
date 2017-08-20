@@ -21,7 +21,7 @@ authz_admin_service:
   datasets:
     CA:
       name: Datacatalogus Amsterdam
-      describedby: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+      described_by: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
       scopes:
         L1:
           name: Level 1
@@ -35,7 +35,7 @@ authz_admin_service:
             TODO: beschrijven wat L2 meer heeft dan L1.
     HR:
       name: Handelsregister
-      describedby: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
+      described_by: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
       scopes:
         INF:
           name: Onbeperkt aantal bevragingen
@@ -81,17 +81,19 @@ logging:
       class: logging.StreamHandler
   loggers:
     oauth2:
-      propagate: true
+      level: ${LOGLEVEL:-DEBUG}
+      handlers: [console]
+      propagate: false
     aiohttp.access:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [aiohttp.access]
       propagate: false
     aiohttp:
       propagate: true
-    aiohttp.*:
-      propagate: true
+#    aiohttp.*:
+#      propagate: true
     rest_utils:
       propagate: true
   root:
-    level: ${LOGLEVEL:-DEBUG}
+    level: ${LOGLEVEL:-WARNING}
     handlers: [console]

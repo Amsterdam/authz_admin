@@ -64,7 +64,7 @@
                 "name": {
                   "type": "string"
                 },
-                "describedby": {
+                "described_by": {
                   "type": "string",
                   "format": "url"
                 },

@@ -12,63 +12,67 @@ info:
   #   url: https://datapunt.amsterdam.nl/license
   version: '1.0.0'
 
-host: api.data.amsterdam.nl
+host: "localhost:8112"
 
-basePath: /oauth2/authz_admin
+basePath: "/oauth2/authz_admin"
 
 schemes:
-  - https
+  - http
 
 produces:
-  - application/hal+json
+  - 'application/hal+json'
+  - 'application/json'
 
 consumes:
-  - application/json
+  - 'application/json'
+  - 'application/hal+json'
 
 parameters:
   page:
     name: page
     in: query
-    description: |
+    description: >-
       The page number to return. Requires the `items` parameter. The first page
       has number 1.
     required: false
     type: string
-    pattern: "^[1-9]\\d*$"
+    pattern: '^[1-9]\\d*$'
   items:
     name: page_items
     in: query
     description: "The maximum number of items to return in one response."
     required: false
     type: string
-    pattern: "^(?:0|[1-9]\\d*)$"
+    pattern: '^(?:0|[1-9]\\d*)$'
   embed:
     name: embed
     in: query
-    description: |
+    description: >-
       Linked resources to embed.  For example: `foo(bar,baz())`.  This would
       embed all resources with link relation `foo`.
 
       * In these `foo`-resources, all resources of link types `bar` and `baz`
         will be embedded.
+
       * In the `bar` resource(s), the default embedding will occur.
+
       * In the `baz` resource(s), no embedding will occur.
     type: string
-    pattern: "^(?:,?[a-z_]\\w*|,?\\)|\\()+$"
+    pattern: '^(?:,?[a-z_]\\w*|,?\\)|\\()+$'
 
 
 securityDefinitions:
 
   OAuth2:
     type: oauth2
-    description: >
+    description: >-
       Authorization through our own Authorization Service.  Scope names all start
       with `azam`, which stands for **Authorization Account Management**.
     scopes:
       azam.r: "Read accounts and account roles."
       azam.w: "Create and edit accounts and account roles.  Delete accounts."
     flow: implicit
-    authorizationUrl: 'https://api.data.amsterdam.nl/oauth2_as/authorization'
+    authorizationUrl: "http://localhost:8112/oauth2/authz_admin/authorization"
 
 
 definitions:
@@ -76,7 +80,7 @@ definitions:
 
   Link:
     title: Link Object
-    description: |
+    description: >-
       A Link Object represents a hyperlink from the containing resource to a
       URI.
     type: object
@@ -84,7 +88,7 @@ definitions:
       - href
     properties:
       href:
-        description: |
+        description: >-
           Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If
           the value is a URI Template then the Link Object SHOULD have a
           "templated" attribute whose value is true.
@@ -92,26 +96,26 @@ definitions:
         format: url
         example: "http://www.example.com/"
       name:
-        description: |
+        description: >-
           Its value MAY be used as a secondary key for selecting Link Objects
           which share the same relation type.
         type: string
       templated:
-        description: |
+        description: >-
           Its value is boolean and SHOULD be true when the Link Object's "href"
           property is a URI Template. Its value SHOULD be considered false if it
           is undefined or any other value than true.
         type: boolean
         default: false
       type:
-        description: |
+        description: >-
           Its value is a string used as a hint to indicate the media type
           expected when dereferencing the target resource.
         type: string
         pattern: "^[-+\\w.]+/[-+\\w.]+(?:;\\s*\\w+=(?:\"(?:\"\"|[^\"])*\"|[^;,\"][^;,]*)?)*$"
         example: "application/hal+json"
       deprecation:
-        description: |
+        description: >-
           Its presence indicates that the link is to be deprecated (i.e.
           removed) at a future date. Its value is a URL that SHOULD provide
           further information about the deprecation. A client SHOULD provide
@@ -121,18 +125,18 @@ definitions:
           maintainer can easily find information about the deprecation.
         type: string
       profile:
-        description: |
+        description: >-
           Its value is a string which is a URI that hints about the profile
           [RFC6906] of the target resource.
         type: string
         format: url
       title:
-        description: |
+        description: >-
           Its value is a string and is intended for labelling the link with a
           human-readable identifier (as defined by [RFC5988]).
         type: string
       hreflang:
-        description: |
+        description: >-
           Its value is a string and is intended for indicating the language of
           the target resource (as defined by [RFC5988]).
         type: string
@@ -150,7 +154,7 @@ definitions:
 
 
   # CuriesLink:
-  #   description: |
+  #   description: >-
   #     Custom link relation types (Extension Relation Types in [RFC5988]) SHOULD
   #     be URIs that when dereferenced in a web browser provide relevant
   #     documentation, in the form of an HTML page, about the meaning and/or
@@ -168,7 +172,7 @@ definitions:
   #       - templated
   #       properties:
   #         href:
-  #           description: |
+  #           description: >-
   #             Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If
   #             the value is a URI Template then the Link Object SHOULD have a
   #             "templated" attribute whose value is true.
@@ -176,12 +180,12 @@ definitions:
   #           format: url
   #           example: "http://www.example.com/"
   #         name:
-  #           description: |
+  #           description: >-
   #             Its value MAY be used as a secondary key for selecting Link Objects
   #             which share the same relation type.
   #           type: string
   #         templated:
-  #           description: |
+  #           description: >-
   #             Its value is boolean and SHOULD be true when the Link Object's "href"
   #             property is a URI Template. Its value SHOULD be considered false if it
   #             is undefined or any other value than true.
@@ -191,7 +195,7 @@ definitions:
 
   # Resource:
   #   title: Resource Object
-  #   description: |
+  #   description: >-
   #     A Resource Object represents a resource. It has two reserved properties:
   #     (1) "_links" which contain links to other resources, and (2) "_embedded"
   #     which contain embedded resources. All other properties MUST be valid JSON,
@@ -199,7 +203,7 @@ definitions:
   #   type: object
   #   properties:
   #     _links:
-  #       description: |
+  #       description: >-
   #         It is an object whose property names are link relation types (as
   #         defined by [RFC5988]) and values are either a Link Object or an array
   #         of Link Objects.  The subject resource of these links is the Resource
@@ -222,7 +226,7 @@ definitions:
   #         # $ref: '#/definitions/LinkOrLinks'
   #         $ref: '#/definitions/Link'
   #     _embedded:
-  #       description: |
+  #       description: >-
   #         It is an object whose property names are link relation types (as
   #         defined by [RFC5988]) and values are either a Resource Object or an
   #         array of Resource Objects. Embedded Resources MAY be a full, partial,
@@ -238,7 +242,7 @@ definitions:
 
   # ResourceOrResources:
   #   title: Resource Object or list of Resource Objects
-  #   description: |
+  #   description: >-
   #     A Resource Object represents a resource. It has two reserved properties:
   #     (1) "_links" which contain links to other resources, and (2) "_embedded"
   #     which contain embedded resources. All other properties MUST be valid JSON,
@@ -248,6 +252,158 @@ definitions:
   #     $ref: '#/definitions/Resource'
   #   properties:
   #     $ref: '#/definitions/Resource/properties'
+
+
+  IdP:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          accounts:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          accounts:
+            $ref: '#/paths/~1idps~1{idp}~1accounts/get/responses/200/schema'
+      name:
+        type: string
+        maxLength: 120
+        minLength: 1
+      account_schema:
+        type: object
+        description: >-
+          A JSON schema definition with all the account attributes defined by this IdP.
+
+
+  Account:
+    type: object
+    required:
+      - _links
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+          - roles
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          roles:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          roles:
+            type: array
+            items:
+              $ref: '#/definitions/Role'
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+
+
+  Dataset:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          scopes:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          scopes:
+            $ref: '#/paths/~1idps~1{idp}~1scopes/get/responses/200/schema'
+      name:
+        type: string
+        maxLength: 120
+        minLength: 1
+      described_by:
+        type: string
+        format: url
+
+
+  Scope:
+    type: object
+    required:
+      - _links
+      - summary
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          includes:
+            $ref: '#/definitions/Link'
+          included_by:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          includes:
+            $ref: '#/definitions/Scope'
+          included_by:
+            $ref: '#/definitions/Scope'
+      summary:
+        type: string
+        maxLength: 120
+      description:
+        type: string
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+
+
+  Role:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          accounts:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          accounts:
+            $ref: '#/paths/~1roles~1{role}~1accounts/get/responses/200/schema'
+      name:
+        type: string
+        minLength: 1
+        maxLength: 255
+      organization:
+        type: string
+        minLength: 1
+        maxLength: 255
 
 
 paths:
@@ -319,7 +475,7 @@ paths:
                   item:
                     type: array
                     items:
-                      $ref: '#/paths/~1idps~1{idp}/get/responses/200/schema'
+                      $ref: '#/definitions/IdP'
 
 
   "/idps/{idp}":
@@ -340,33 +496,7 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-              - name
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  accounts:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  accounts:
-                    $ref: '#/paths/~1idps~1{idp}~1accounts/get/responses/200/schema'
-              name:
-                type: string
-                maxLength: 120
-                minLength: 1
-              account_schema:
-                type: object
-                description: >
-                  A JSON schema definition with all the account attributes defined by this IdP.
+            $ref: '#/definitions/IdP'
 
 
   "/idps/{idp}/accounts":
@@ -408,7 +538,7 @@ paths:
                   item:
                     type: array
                     items:
-                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
+                      $ref: '#/definitions/Account'
 
 
   "/idps/{idp}/accounts/{account}":
@@ -438,32 +568,7 @@ paths:
               type: string
               pattern: '^(?:W/)?"[^"]+"$'
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                  - roles
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  roles:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  roles:
-                    type: array
-                    items:
-                      $ref: '#/paths/~1roles~1{role}/get/responses/200/schema'
-              _etag:
-                type: string
-                pattern: '^(?:W/)?"[^"]+"$'
+            $ref: '#/definitions/Account'
     put:
       summary: "Register or update an account"
       security:
@@ -516,7 +621,7 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
+            $ref: '#/definitions/Account'
       responses:
         '201':
           description: >-
@@ -587,7 +692,7 @@ paths:
                   item:
                     type: array
                     items:
-                      $ref: '#/paths/~1roles~1{role}/get/responses/200/schema'
+                      $ref: '#/definitions/Role'
 
 
   "/roles/{role}":
@@ -608,33 +713,7 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-              - name
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  accounts:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  accounts:
-                    $ref: '#/paths/~1roles~1{role}~1accounts/get/responses/200/schema'
-              name:
-                type: string
-                minLength: 1
-                maxLength: 255
-              organization:
-                type: string
-                minLength: 1
-                maxLength: 255
+            $ref: '#/definitions/Role'
 
 
   "/roles/{role}/accounts":
@@ -676,7 +755,7 @@ paths:
                   item:
                     type: array
                     items:
-                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
+                      $ref: '#/definitions/Account'
 
 
   "/accounts":
@@ -685,7 +764,7 @@ paths:
       security:
         - OAuth2:
           - 'azam.r'
-      description: >
+      description: >-
         In the response body, `#/_links/account` will be an array of links to
         account resources.  Each link will have a `title` attribute, which
         contains a type-ahead completion.
@@ -720,4 +799,128 @@ paths:
                   account:
                     type: array
                     items:
-                      $ref: '#/paths/~1idps~1{idp}~1accounts~1{account}/get/responses/200/schema'
+                      $ref: '#/definitions/Account'
+
+
+  "/datasets":
+    get:
+      summary: "Collection of all datasets we connect with"
+      security:
+        - OAuth2:
+          - 'azam.r'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Dataset'
+
+
+  "/datasets/{dataset}":
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: "^\\w{1,32}$"
+    get:
+      summary: "One of the datasets we connect with"
+      security:
+        - OAuth2:
+          - 'azam.r'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Dataset'
+
+
+  "/datasets/{dataset}/scopes":
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: "^\\w{1,32}$"
+    get:
+      summary: "Collection of all scopes of this dataset"
+      security:
+        - OAuth2:
+          - 'azam.r'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Scope'
+
+
+  "/datasets/{dataset}/scopes/{scope}":
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: "^\\w{1,32}$"
+      - name: scope
+        in: path
+        required: true
+        type: string
+        pattern: "^\\w{1,32}$"
+    get:
+      summary: "One scope in dataset `{dataset}`"
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Scope'

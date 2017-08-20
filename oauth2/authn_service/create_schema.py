@@ -37,7 +37,8 @@ def metadata() -> sa.MetaData:
     sa.Table(
         'AuditLog', result,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('created_at', sa.DateTime, server_default=sa_functions.now(), index=True, nullable=False),
+        sa.Column('created_at', sa.DateTime, index=True, nullable=False,
+                  server_default=sa_functions.now()),
         sa.Column('created_by', sa.Integer, index=True, nullable=False),
         sa.Column('table_name', sa.String, index=True, nullable=False),
         sa.Column('foreign_key', sa.Integer, index=True, nullable=False),
@@ -49,24 +50,23 @@ def metadata() -> sa.MetaData:
     sa.Table(
         'Users', result,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('email', sa.String(255), nullable=False, index=True, unique=True),
-        sa.Column('password', sa.String(255), nullable=False, index=True),
-        sa.Column('name', sa.Unicode(255), nullable=True),
-        sa.Column('is_active', sa.Boolean, nullable=False, index=True, default=True),
-        audit_id()
+        sa.Column('idp_id', sa.Integer, index=True, nullable=False),
+        sa.Column('idp_user_id', sa.Integer, nullable=False),
+        audit_id(),
+        sa.UniqueConstraint('idp_id', 'idp_user_id')
     )
 
     sa.Table(
         'UserRoles', result,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('user_id', sa.Integer, sa.ForeignKey('Users.id', ondelete='CASCADE'), index=True, nullable=False),
-        sa.Column('role_id', sa.String, index=True, nullable=False),
+        sa.Column('user_id', sa.Integer,
+                  sa.ForeignKey('Users.id', ondelete='CASCADE'),
+                  index=True, nullable=False),
+        sa.Column('role_id', sa.String,
+                  index=True, nullable=False),
         sa.Column('grounds', sa.UnicodeText, nullable=False),
-        sa.Column('function', sa.Unicode(255), nullable=True),
-        sa.Column('organization', sa.Unicode(255), nullable=True),
-        sa.Column('is_active', sa.Boolean, nullable=False, index=True, default=True),
         audit_id(),
-        sa.UniqueConstraint('user_id', 'role_id')
+        sa.UniqueConstraint('user_id', 'role_id'),
     )
 
     return result

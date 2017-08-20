@@ -23,6 +23,7 @@ setup(
         'aiohttp',
         'aiohttp-jinja2',
         'aiopg',
+        'alembic',
         'cchardet', # Recommended by aiohttp docs
         'jsonschema',
         'mimeparse',
