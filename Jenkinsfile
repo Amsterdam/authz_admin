@@ -31,6 +31,7 @@ node {
         }
     }
 
+
     stage("Build image") {
         tryStep "build", {
             def image = docker.build("build.datapunt.amsterdam.nl:5000/datapunt/oauth2:${env.BUILD_NUMBER}")
