@@ -22,8 +22,10 @@
     "authz_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bind_host", "bind_port", "idps", "root_path"],
+      "required": ["api_key", "access_secret", "bind_host", "bind_port", "idps", "root_path"],
       "properties": {
+        "api_key": {"type": "string"},
+        "access_secret": {"type": "string"},
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
         "external_fqdn": {"type": "string"},
@@ -122,28 +124,6 @@
         }
       }
     },
-
-    "client_admin_service": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["bind_host", "bind_port", "prefix"],
-      "properties": {
-        "bind_host": {"type": "string"},
-        "bind_port": {"type": "integer"},
-        "prefix": {"type": "string"}
-      }
-    },
-
-    "jwt": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["refreshtokens", "accesstokens"],
-      "properties": {
-        "refreshtokens": {"$ref": "#/definitions/jwtconfig"},
-        "accesstokens": {"$ref": "#/definitions/jwtconfig"}
-      }
-    },
-
 
     "postgres": {
       "type": "object",

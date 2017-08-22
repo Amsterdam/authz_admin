@@ -1,14 +1,6 @@
-authz_service:
-  root_path: /oauth2
-  bind_host: localhost
-  bind_port: 8110
-  idps:
-    tma_oauth2:
-      client_id: ${TMA_OAUTH2_CLIENT_ID:-undefined}
-      authorization_uri: ${TMA_OAUTH2_AUTHZ_URI:-undefined}
-
-
 authz_admin_service:
+  api_key: ${AUTHZ_ADMIN_API_KEY}
+  access_secret: ${JWT_ACCESS_SECRET}
   bind_host: localhost
   bind_port: 8112
   roles:
@@ -69,22 +61,6 @@ authz_admin_service:
             rollen van een ADW account te verwijderen.
 
 
-
-client_admin_service:
-  prefix: /client_admin
-  bind_host: localhost
-  bind_port: 8111
-
-
-jwt:
-  refreshtokens:
-    secret: refresh_testsecret
-    algorithm: HS256
-    lifetime: ${JWT_LIFETIME:-43200}  # 12 × 3600
-  accesstokens:
-    secret: access_testsecret
-    algorithm: HS256
-    lifetime: 300
 
 postgres:
   host: ${DB_HOST:-localhost}

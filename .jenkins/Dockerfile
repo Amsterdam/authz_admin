@@ -1,0 +1,18 @@
+FROM amsterdam/docker_python:latest
+MAINTAINER datapunt@amsterdam.nl
+
+ENV PYTHONUNBUFFERED 1
+
+EXPOSE 8112
+
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && adduser --system datapunt
+
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir .[test]
+
+USER datapunt
+
+CMD authz_admin_service

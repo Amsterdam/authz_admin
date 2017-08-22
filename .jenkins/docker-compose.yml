@@ -1,5 +1,14 @@
-oauth2-test:
-  build: ../
+database:
+  image: postgres:9.5
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_DB=oauth2
+    - POSTGRES_USER=oauth2
+    - POSTGRES_PASSWORD=oauth2
+
+oauth2:
+  build: ./
   environment:
     JWT_REFRESH_SECRET: refreshsecret
     JWT_ACCESS_SECRET: accesssecret
