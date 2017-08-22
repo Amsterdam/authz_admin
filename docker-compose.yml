@@ -1,23 +1,37 @@
-database:
-  image: postgres:9.5
-  ports:
-    - "5432:5432"
-  environment:
-    - POSTGRES_DB=oauth2
-    - POSTGRES_USER=oauth2
-    - POSTGRES_PASSWORD=oauth2
+version: '3'
 
-oauth2:
-  build: .
-  links:
-    - database:database
-  ports:
-    - "8000:8000"
-  environment:
-    JWT_REFRESH_SECRET: refreshsecret
-    JWT_ACCESS_SECRET: accesssecret
-    DB_HOST: database
-    TMA_OAUTH2_AUTHZ_URI: ${TMA_OAUTH2_AUTHZ_URI}
-    TMA_OAUTH2_TOKEN_URI: ${TMA_OAUTH2_TOKEN_URI}
-    TMA_OAUTH2_CLIENT_ID: ${TMA_OAUTH2_CLIENT_ID}
+services:
+
+  database:
+    image: postgres:9.5
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=oauth2
+      - POSTGRES_USER=oauth2
+      - POSTGRES_PASSWORD=oauth2
+
+  authz_admin:
+    build: .
+    links:
+      - database:database
+    ports:
+      - "8000:8000"
+    environment:
+      JWT_REFRESH_SECRET: refreshsecret
+      JWT_ACCESS_SECRET: accesssecret
+      DB_HOST: database
+
+  authz_admin_test:
+    build:
+      context: .
+      dockerfile: Dockerfile_test
+    links:
+      - database:database
+    ports:
+      - "8000:8000"
+    environment:
+      JWT_REFRESH_SECRET: refreshsecret
+      JWT_ACCESS_SECRET: accesssecret
+      DB_HOST: database
 

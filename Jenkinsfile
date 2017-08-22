@@ -24,17 +24,17 @@ node {
 
     stage('Test') {
         tryStep "test", {
-            sh "docker-compose -p oauth2 -f .jenkins/docker-compose.yml build && " +
-               "docker-compose -p oauth2 -f .jenkins/docker-compose.yml run -u root --rm echo Alle tests geslaagd"
+            sh "docker-compose -p authz_admin -f ./docker-compose.yml build --no-cache --pull && " +
+               "docker-compose -p authz_admin -f ./docker-compose.yml run -u root --rm authz_admin_test echo Alle tests geslaagd"
         }, {
-            sh "docker-compose -p oauth2 -f .jenkins/docker-compose.yml down"
+            sh "docker-compose -p authz_admin -f ./docker-compose.yml down"
         }
     }
 
 
     stage("Build image") {
         tryStep "build", {
-            def image = docker.build("build.datapunt.amsterdam.nl:5000/datapunt/oauth2:${env.BUILD_NUMBER}")
+            def image = docker.build("build.datapunt.amsterdam.nl:5000/datapunt/authz_admin:${env.BUILD_NUMBER}")
             image.push()
         }
     }
@@ -47,7 +47,7 @@ if (BRANCH == "master") {
     node {
         stage('Push acceptance image') {
             tryStep "image tagging", {
-                def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/oauth2:${env.BUILD_NUMBER}")
+                def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/authz_admin:${env.BUILD_NUMBER}")
                 image.pull()
                 image.push("acceptance")
             }
@@ -60,7 +60,7 @@ if (BRANCH == "master") {
             build job: 'Subtask_Openstack_Playbook',
             parameters: [
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
-                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-oauth2.yml'],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-authz-admin.yml'],
                 ]
             }
         }
@@ -75,7 +75,7 @@ if (BRANCH == "master") {
     node {
         stage('Push production image') {
         tryStep "image tagging", {
-            def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/oauth2:${env.BUILD_NUMBER}")
+            def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/authz_admin:${env.BUILD_NUMBER}")
             image.pull()
                 image.push("production")
                 image.push("latest")
@@ -89,7 +89,7 @@ if (BRANCH == "master") {
                 build job: 'Subtask_Openstack_Playbook',
                 parameters: [
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
-                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-oauth2.yml'],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-authz-admin.yml'],
                 ]
             }
         }

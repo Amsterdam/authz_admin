@@ -1,9 +1,9 @@
-import aiopg
 import contextlib
+import logging
+
+import aiopg
 import psycopg2
 import psycopg2.errorcodes
-import logging
-import sys
 
 _logger = logging.getLogger(__name__)
 
