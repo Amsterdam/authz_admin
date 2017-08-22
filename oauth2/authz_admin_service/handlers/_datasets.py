@@ -15,7 +15,7 @@ class Datasets(view.OAuth2View):
         return self.request.app['etag']
 
     @property
-    def title(self):
+    def link_title(self):
         return 'Datasets'
 
     async def all_links(self):
@@ -36,11 +36,11 @@ class Dataset(view.OAuth2View):
         super().__init__(*args, **kwargs)
         datasets = self.request.app['config']['authz_admin_service']['datasets']
         if self['dataset'] not in datasets:
-            raise web.HTTPNotFound
+            raise web.HTTPNotFound()
         self._dataset = datasets[self['dataset']]
 
     @property
-    def title(self):
+    def link_title(self):
         return self._dataset['name']
 
     @property

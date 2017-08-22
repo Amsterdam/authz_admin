@@ -24,3 +24,6 @@ __pycache__
 # Downloaded intersphinx inventory files:
 /docs/*.inv
 /docs/*.inv.txt
+
+/swagger-ui/.git
+/hal-browser/.git

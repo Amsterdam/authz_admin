@@ -40,11 +40,11 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def title(self) -> str:
+    def link_title(self) -> str:
         pass
 
     @property
     def to_link(self):
         result = super().to_link
-        result['title'] = self.title
+        result['title'] = self.link_title
         return result

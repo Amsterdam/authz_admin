@@ -70,6 +70,8 @@ def add_routes(app: web.Application):
     handlers.Dataset.add_to_router(app.router, base_path + '/datasets/{dataset}')
     handlers.Scopes.add_to_router(app.router, base_path + '/datasets/{dataset}/scopes')
     handlers.Scope.add_to_router(app.router, base_path + '/datasets/{dataset}/scopes/{scope}')
+    handlers.Roles.add_to_router(app.router, base_path + '/roles')
+    handlers.Role.add_to_router(app.router, base_path + '/roles/{role}')
 
 
 def on_response_prepare(request: web.Request, response: web.Response):

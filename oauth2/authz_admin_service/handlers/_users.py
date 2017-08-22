@@ -20,12 +20,8 @@ class Users(view.OAuth2View):
         return None
 
     @property
-    def name(self):
-        return '%s.users' % self['idp']
-
-    @property
-    def title(self):
-        return "Users in IdP %s" % self._idp['name']
+    def link_title(self):
+        return "Users in IdP %s" % self['idp']
 
     async def all_links(self):
         items = [
@@ -56,14 +52,14 @@ class User(view.OAuth2View):
         self._user = users[self['user']]
 
     @property
-    def name(self):
+    def link_name(self):
         return "%s.%s" % (
             self['idp'],
             self['user'],
         )
 
     @property
-    def title(self):
+    def link_title(self):
         return "%s (for idp %s)" % (
             self._user['name'],
             self._idp['name']

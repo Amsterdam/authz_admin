@@ -1,4 +1,4 @@
-auth-test:
+oauth2-test:
   build: ../
   environment:
     JWT_REFRESH_SECRET: refreshsecret

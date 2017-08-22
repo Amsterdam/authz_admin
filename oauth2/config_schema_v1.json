@@ -47,11 +47,31 @@
     "authz_admin_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bind_host", "bind_port", "prefix"],
+      "required": ["bind_host", "bind_port", "datasets", "roles"],
       "properties": {
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
-        "prefix": {"type": "string", "format": "url"},
+        "roles": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^\\w+$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxlength": 120
+                },
+                "description": {
+                  "type": "string",
+                  "format": "rst"
+                }
+              }
+            }
+          }
+        },
         "datasets": {
           "type": "object",
           "additionalProperties": false,
@@ -81,7 +101,8 @@
                           "type": "string"
                         },
                         "description": {
-                          "type": "string"
+                          "type": "string",
+                          "format": "rst"
                         },
                         "includes": {
                           "type": "string",

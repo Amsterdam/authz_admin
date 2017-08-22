@@ -82,10 +82,12 @@ class View(web.View):
     @property
     def to_link(self) -> T.Dict[str, str]:
         """The HAL JSON link object to this resource."""
-        return {
-            'href': str(self.canonical_rel_url),
-            'name': self.name
-        }
+        result = {'href': str(self.canonical_rel_url)}
+        if self.link_name is not None:
+            result['name'] = self.link_name
+        if self.link_title is not None:
+            result['title'] = self.link_title
+        return result
 
     @property
     def etag(self) -> T.Union[None, bool, str]:
@@ -180,8 +182,35 @@ class View(web.View):
         return cls._resource
 
     @property
-    def name(self) -> str:
-        return self.rel_url.name or self.rel_url.parent.name
+    def link_name(self) -> T.Optional[str]:
+        # language=rst
+        """A more or less unique name for the resource.
+
+        This default implementation returns the last path segment of the url of
+        this resource if that last path segment is templated.  Otherwise `None`
+        is returned (in which case there's no `name` attribute in link objects
+        for this resource).  See also :meth:`to_link`.
+
+        Subclasses can override this default implementation.
+
+        """
+        formatter = self._resource.get_info().get('formatter')
+        if formatter is not None and re.match(r'\}[^/]*/?$', formatter):
+            return self.rel_url.name or self.rel_url.parent.name
+        return None
+
+    @property
+    def link_title(self) -> T.Optional[str]:
+        # language=rst
+        """The title of this resource, to be used in link objects.
+
+        This default implementation returns `None`, and there's no `title`
+        attribute in HAL link objects.  See also :meth:`to_link`.
+
+        Subclasses can override this default implementation.
+
+        """
+        return None
 
     async def attributes(self):
         # language=rst
@@ -283,7 +312,7 @@ class View(web.View):
             response.headers.add('ETag', self.etag)
         response.content_type = self.request[BEST_CONTENT_TYPE]
         response.enable_compression()
-        if self.canonical_rel_url != self.request.rel_url:
+        if str(self.canonical_rel_url) != str(self.request.rel_url):
             response.headers.add('Content-Location', str(self.canonical_rel_url))
         await response.prepare(self.request)
         async for chunk in _json.json_encode(data):

@@ -22,11 +22,7 @@ class Scopes(view.OAuth2View):
         return self.request.app['etag']
 
     @property
-    def name(self):
-        return '%s.scopes' % self['dataset']
-
-    @property
-    def title(self):
+    def link_title(self):
         return "Scopes in dataset %s" % self._dataset['name']
 
     async def all_links(self):
@@ -55,15 +51,15 @@ class Scope(view.OAuth2View):
         self._scope = scopes[self['scope']]
 
     @property
-    def name(self):
+    def link_name(self):
         return "%s.%s" % (
             self['dataset'],
             self['scope'],
         )
 
     @property
-    def title(self):
-        return "%s (for dataset %s)" % (
+    def link_title(self):
+        return "%s (for dataset '%s')" % (
             self._scope['name'],
             self._dataset['name']
         )

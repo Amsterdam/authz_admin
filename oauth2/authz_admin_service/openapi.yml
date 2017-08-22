@@ -6,10 +6,10 @@ info:
   contact:
     name: Datapunt Amsterdam
     url: https://data.amsterdam.nl/
-    email: datapunt.ois@amsterdam.nl
+    email: datapunt@amsterdam.nl
   # license:
   #   name: Datapunt Public License
-  #   url: https://datapunt.amsterdam.nl/license
+  #   url: https://data.amsterdam.nl/license
   version: '1.0.0'
 
 host: "localhost:8112"
@@ -27,7 +27,9 @@ consumes:
   - 'application/json'
   - 'application/hal+json'
 
+
 parameters:
+
   page:
     name: page
     in: query
@@ -37,6 +39,7 @@ parameters:
     required: false
     type: string
     pattern: '^[1-9]\\d*$'
+
   items:
     name: page_items
     in: query
@@ -44,6 +47,7 @@ parameters:
     required: false
     type: string
     pattern: '^(?:0|[1-9]\\d*)$'
+
   embed:
     name: embed
     in: query
@@ -60,6 +64,28 @@ parameters:
     type: string
     pattern: '^(?:,?[a-z_]\\w*|,?\\)|\\()+$'
 
+  if-match:
+    name: 'If-Match'
+    description: >-
+      This request header is required if the client intends to *update* an
+      existing `account` resource.  The value *must* be the current `ETag`
+      of the account resource, as last seen by the client.  This prevents
+      lost updates if multiple clients are concurrently editing the same
+      resource.
+    in: header
+    type: string
+    pattern: '^(?:W/)?"[^"]+"$'
+
+  if-none-match:
+    name: 'If-None-Match'
+    description: >-
+      This request header is required if the client intends to *create* a
+      new `account` resource.  This prevents lost updates if multiple
+      clients are concurrently creating the same resource.
+    in: header
+    type: string
+    enum: ['*']
+
 
 securityDefinitions:
 
@@ -69,14 +95,22 @@ securityDefinitions:
       Authorization through our own Authorization Service.  Scope names all start
       with `azam`, which stands for **Authorization Account Management**.
     scopes:
-      azam.r: "Read accounts and account roles."
-      azam.w: "Create and edit accounts and account roles.  Delete accounts."
+      azam.r: "Read account roles."
+      azam.w: "Create and edit account roles."
     flow: implicit
     authorizationUrl: "http://localhost:8112/oauth2/authz_admin/authorization"
 
 
-definitions:
+  API-key:
+    type: apiKey
+    description: |
+      Use `apikey` as the authorization scheme.
+      For example: `Authorization: apikey foo...bar`.
+    in: header
+    name: Authorization
 
+
+definitions:
 
   Link:
     title: Link Object
@@ -254,11 +288,10 @@ definitions:
   #     $ref: '#/definitions/Resource/properties'
 
 
-  IdP:
+  Collection:
     type: object
     required:
       - _links
-      - name
     properties:
       _links:
         type: object
@@ -267,21 +300,24 @@ definitions:
         properties:
           self:
             $ref: '#/definitions/Link'
-          accounts:
-            $ref: '#/definitions/Link'
-      _embedded:
-        type: object
+          item:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+
+
+  Accounts:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
         properties:
-          accounts:
-            $ref: '#/paths/~1idps~1{idp}~1accounts/get/responses/200/schema'
-      name:
-        type: string
-        maxLength: 120
-        minLength: 1
-      account_schema:
-        type: object
-        description: >-
-          A JSON schema definition with all the account attributes defined by this IdP.
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Account'
 
 
   Account:
@@ -313,6 +349,20 @@ definitions:
         pattern: '^(?:W/)?"[^"]+"$'
 
 
+  Datasets:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Dataset'
+
+
   Dataset:
     type: object
     required:
@@ -332,7 +382,7 @@ definitions:
         type: object
         properties:
           scopes:
-            $ref: '#/paths/~1idps~1{idp}~1scopes/get/responses/200/schema'
+            $ref: '#/paths/~1datasets~1{dataset}~1scopes/get/responses/200/schema'
       name:
         type: string
         maxLength: 120
@@ -340,6 +390,20 @@ definitions:
       described_by:
         type: string
         format: url
+
+
+  Scopes:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Scope'
 
 
   Scope:
@@ -374,6 +438,20 @@ definitions:
       _etag:
         type: string
         pattern: '^(?:W/)?"[^"]+"$'
+
+
+  Roles:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Role'
 
 
   Role:
@@ -429,137 +507,68 @@ paths:
                 properties:
                   self:
                     $ref: '#/definitions/Link'
-                  idps:
+                  accounts:
                     $ref: '#/definitions/Link'
-                  me:
+                  datasets:
                     $ref: '#/definitions/Link'
                   roles:
                     $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
                   accounts:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  idps:
-                    $ref: '#/paths/~1idps/get/responses/200/schema'
+                    $ref: '#/paths/~1accounts/get/responses/200/schema'
+                  datasets:
+                    $ref: '#/paths/~1datasets/get/responses/200/schema'
+                  roles:
+                    $ref: '#/paths/~1roles/get/responses/200/schema'
 
 
-  "/idps":
+  "/accounts":
     get:
-      summary: "Collection of all IdPs we connect with"
+      summary: "Collection of all ADW accounts we know of"
       security:
         - OAuth2:
           - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
+        - name: filter
+          in: query
+          type: string
+          description: >-
+            Type-ahead functionality.
+
+            Can't be combined with the `embed` parameter.  Results are returned
+            as HAL link objects, where the `title` field contains a type-ahead
+            suggestion.
       responses:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/IdP'
+            $ref: '#/definitions/Accounts'
 
 
-  "/idps/{idp}":
+  "/accounts/{account}":
     parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
-    get:
-      summary: "One of the IdPs we connect with"
-      security:
-        - OAuth2:
-          - 'azam.r'
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            $ref: '#/definitions/IdP'
-
-
-  "/idps/{idp}/accounts":
-    parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
-    get:
-      summary: "Collection of all accounts of this IdP"
-      security:
-        - OAuth2:
-          - 'azam.r'
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Account'
-
-
-  "/idps/{idp}/accounts/{account}":
-    parameters:
-      - name: idp
-        in: path
-        required: true
-        type: string
-        pattern: "^\\w{1,32}$"
       - name: account
         in: path
         required: true
         type: string
         pattern: "^.{1,255}$"
+        description: >-
+          The unique ID of this account in ADW.
+
+          Unfortunately, TMA returns the email address as unique identifier,
+          instead of ADW's true internal unique ID, which consists of the user's
+          last name plus three digits.
     get:
-      summary: "One account in IdP `{idp}`"
+      summary: "One account in ADW"
       security:
         - OAuth2:
           - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
+        - $ref: '#/parameters/if-none-match'
       responses:
         '200':
           description: "OK"
@@ -570,15 +579,15 @@ paths:
           schema:
             $ref: '#/definitions/Account'
     put:
-      summary: "Register or update an account"
+      summary: "Register or update an ADW account"
       security:
         - OAuth2:
           - 'azam.r'
           - 'azam.w'
       description: >-
-        When **registering a new account**, provide the `If-None-Match: *` request
-        header. When **updating an existing account**, provide the `If-Match: "«etag»"`
-        request header.
+        When **registering a new account**, provide the `If-None-Match: *`
+        request header. When **updating an existing account**, provide the
+        `If-Match: "«etag»"` request header.
 
         - The attributes allowed/required in the request body JSON object depend
           on the IdP.  The client may send a list of associated roles when
@@ -587,7 +596,7 @@ paths:
         - The body doesn't have to be a valid HAL+JSON object: only top-level
           attributes and the list of associated roles are relevant.
 
-        Example request body:
+        Example request body::
 
             {
               "_links": {
@@ -600,24 +609,8 @@ paths:
               "last_name": "Doe"
             }
       parameters:
-        - name: If-Match
-          description: >-
-            This request header is required if the client intends to *update* an
-            existing `account` resource.  The value *must* be the current `ETag`
-            of the account resource, as last seen by the client.  This prevents
-            lost updates if multiple clients are concurrently editing the same
-            resource.
-          in: header
-          type: string
-          pattern: '^(?:W/)?"[^"]+"$'
-        - name: If-None-Match
-          description: >-
-            This request header is required if the client intends to *create* a
-            new `account` resource.  This prevents lost updates if multiple
-            clients are concurrently creating the same resource.
-          in: header
-          type: string
-          enum: ['*']
+        - $ref: '#/parameters/if-match'
+        - $ref: '#/parameters/if-none-match'
         - name: body
           in: body
           schema:
@@ -673,26 +666,7 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Role'
+            $ref: '#/definitions/Roles'
 
 
   "/roles/{role}":
@@ -701,7 +675,7 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
     get:
       summary: "One of the roles we have defined"
       security:
@@ -722,7 +696,7 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
     get:
       summary: "Collection of all accounts with this role"
       security:
@@ -734,72 +708,51 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Account'
+            $ref: '#/definitions/Accounts'
 
 
-  "/accounts":
-    get:
-      summary: "List of typeahead suggestions."
-      security:
-        - OAuth2:
-          - 'azam.r'
-      description: >-
-        In the response body, `#/_links/account` will be an array of links to
-        account resources.  Each link will have a `title` attribute, which
-        contains a type-ahead completion.
-      parameters:
-        - name: typeahead
-          in: query
-          type: string
-          required: true
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                  - accounts
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  account:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  account:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Account'
+#  "/accounts":
+#    get:
+#      summary: "List of typeahead suggestions."
+#      security:
+#        - OAuth2:
+#          - 'azam.r'
+#      description: >-
+#        In the response body, `#/_links/account` will be an array of links to
+#        account resources.  Each link will have a `title` attribute, which
+#        contains a type-ahead completion.
+#      parameters:
+#        - name: typeahead
+#          in: query
+#          type: string
+#          required: true
+#      responses:
+#        '200':
+#          description: "OK"
+#          schema:
+#            type: object
+#            required:
+#              - _links
+#            properties:
+#              _links:
+#                type: object
+#                required:
+#                  - self
+#                  - accounts
+#                properties:
+#                  self:
+#                    $ref: '#/definitions/Link'
+#                  account:
+#                    type: array
+#                    items:
+#                      $ref: '#/definitions/Link'
+#              _embedded:
+#                type: object
+#                properties:
+#                  account:
+#                    type: array
+#                    items:
+#                      $ref: '#/definitions/Account'
 
 
   "/datasets":
@@ -814,26 +767,7 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Dataset'
+            $ref: '#/definitions/Datasets'
 
 
   "/datasets/{dataset}":
@@ -842,7 +776,7 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
     get:
       summary: "One of the datasets we connect with"
       security:
@@ -863,7 +797,7 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
     get:
       summary: "Collection of all scopes of this dataset"
       security:
@@ -875,28 +809,7 @@ paths:
         '200':
           description: "OK"
           schema:
-            type: object
-            required:
-              - _links
-            properties:
-              _links:
-                type: object
-                required:
-                  - self
-                properties:
-                  self:
-                    $ref: '#/definitions/Link'
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Link'
-              _embedded:
-                type: object
-                properties:
-                  item:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Scope'
+            $ref: '#/definitions/Scopes'
 
 
   "/datasets/{dataset}/scopes/{scope}":
@@ -905,12 +818,12 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
       - name: scope
         in: path
         required: true
         type: string
-        pattern: "^\\w{1,32}$"
+        pattern: '^\\w{1,32}$'
     get:
       summary: "One scope in dataset `{dataset}`"
       parameters:
