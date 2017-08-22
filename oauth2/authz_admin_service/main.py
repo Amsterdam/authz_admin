@@ -13,7 +13,6 @@ from aiohttp import web
 
 import rest_utils
 from oauth2 import config
-from oauth2 import database
 from . import handlers
 
 _logger = logging.getLogger(__name__)
@@ -96,14 +95,12 @@ def application(argv):
     )
     app['config'] = config.load()
     app['etag'] = rest_utils.ETagGenerator().update(app['config']).etag
-    app['connection_pool'] = database.ConnectionPool(app['config']['postgres'])
     swagger_path = os.path.join(os.path.dirname(__file__), 'openapi.yml')
     _logger.info("Loading swagger file '%s'", swagger_path)
     app['swagger'] = swagger_parser.SwaggerParser(
         swagger_path=swagger_path
     )
     add_routes(app)
-    app.on_startup.append(database.put_schema)
     app.on_response_prepare.append(on_response_prepare)
     return app
 
