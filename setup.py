@@ -30,6 +30,7 @@ setup(
         'PyYaml',
         'PyJWT',
         'SQLAlchemy',
+        'swagger-parser',
         'uvloop', # Recommended by aiohttp docs
     ],
     extras_require={
