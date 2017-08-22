@@ -1,7 +1,0 @@
-[submodule "hal-browser"]
-	path = hal-browser
-	url = git@github.com:mikekelly/hal-browser.git
-[submodule "swagger-ui"]
-	path = swagger-ui
-	url = git@github.com:DatapuntAmsterdam/swagger-ui.git
-	branch = datapunt
