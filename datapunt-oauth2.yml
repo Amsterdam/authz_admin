@@ -1,7 +1,6 @@
 authz_admin_service:
   api_key: ${AUTHZ_ADMIN_API_KEY}
   access_secret: ${JWT_ACCESS_SECRET}
-  bind_host: localhost
   bind_port: 8112
   roles:
     EMPLOYEE:

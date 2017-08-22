@@ -47,11 +47,10 @@
     "authz_admin_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["api_key", "access_secret","bind_host", "bind_port", "datasets", "roles"],
+      "required": ["api_key", "access_secret", "bind_port", "datasets", "roles"],
       "properties": {
         "api_key": {"type": "string"},
-	"access_secret": {"type": "string"},
-        "bind_host": {"type": "string"},
+        "access_secret": {"type": "string"},
         "bind_port": {"type": "integer"},
         "roles": {
           "type": "object",

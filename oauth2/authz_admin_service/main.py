@@ -124,7 +124,6 @@ def main():
     SERVICE_CONFIG = app['config']['authz_admin_service']
     web.run_app(
         app,
-        host=SERVICE_CONFIG['bind_host'],
         port=SERVICE_CONFIG['bind_port']
     )
     return 0
