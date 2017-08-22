@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "required": ["jwt", "postgres"],
+  "required": ["authz_admin_service", "postgres", "logging"],
   "properties": {
 
     "authn_service": {
@@ -22,10 +22,8 @@
     "authz_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["api_key", "access_secret", "bind_host", "bind_port", "idps", "root_path"],
+      "required": ["bind_host", "bind_port", "idps", "root_path"],
       "properties": {
-        "api_key": {"type": "string"},
-        "access_secret": {"type": "string"},
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
         "external_fqdn": {"type": "string"},
@@ -49,8 +47,10 @@
     "authz_admin_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bind_host", "bind_port", "datasets", "roles"],
+      "required": ["api_key", "access_secret","bind_host", "bind_port", "datasets", "roles"],
       "properties": {
+        "api_key": {"type": "string"},
+	"access_secret": {"type": "string"},
         "bind_host": {"type": "string"},
         "bind_port": {"type": "integer"},
         "roles": {

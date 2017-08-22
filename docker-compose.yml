@@ -21,17 +21,4 @@ services:
       JWT_REFRESH_SECRET: refreshsecret
       JWT_ACCESS_SECRET: accesssecret
       DB_HOST: database
-
-  authz_admin_test:
-    build:
-      context: .
-      dockerfile: Dockerfile_test
-    links:
-      - database:database
-    ports:
-      - "8000:8000"
-    environment:
-      JWT_REFRESH_SECRET: refreshsecret
-      JWT_ACCESS_SECRET: accesssecret
-      DB_HOST: database
-
+      AUTHZ_ADMIN_API_KEY: apikey
