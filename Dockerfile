@@ -13,3 +13,5 @@ COPY . /app
 RUN pip install --no-cache-dir .
 
 USER datapunt
+
+CMD authz_admin_service

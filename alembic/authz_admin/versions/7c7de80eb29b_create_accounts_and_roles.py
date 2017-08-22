@@ -50,7 +50,7 @@ def upgrade():
                   index=True, nullable=False),
         sa.Column('grounds', sa.UnicodeText, nullable=False),
         audit_id(),
-        sa.UniqueConstraint('user_id', 'role_id')
+        sa.UniqueConstraint('account_id', 'role_id')
     )
 
 
