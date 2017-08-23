@@ -10,8 +10,13 @@ RUN apt-get clean \
 
 WORKDIR /app
 COPY . /app
+
+# This is needed for the ./run.sh script, that copies the right swagger
+# definition file into swagger-ui.
+RUN chown -r datapunt /app/swagger-ui/dist
+
 RUN pip install --no-cache-dir -e .
 
 USER datapunt
 
-CMD authz_admin_service
+CMD ./run.sh

@@ -21,3 +21,4 @@ services:
       JWT_ACCESS_SECRET: accesssecret
       DB_HOST: database
       AUTHZ_ADMIN_API_KEY: apikey
+      DATAPUNT_ENVIRONMENT: dev

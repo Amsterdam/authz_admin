@@ -3,7 +3,6 @@ import logging
 from aiohttp import web
 
 from oauth2 import view
-from . import _idps
 
 _logger = logging.getLogger(__name__)
 

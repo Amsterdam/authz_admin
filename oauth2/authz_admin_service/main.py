@@ -61,7 +61,6 @@ async def authorization_handler(request: web.Request) -> web.Response:
 
 def add_routes(app: web.Application):
     base_path = app['swagger'].base_path
-    app.router.add_static(base_path + '/hal', 'hal-browser')
     app.router.add_static(base_path + '/swagger-ui', 'swagger-ui/dist', follow_symlinks=True)
     app.router.add_route('GET', base_path + '/authorization', authorization_handler, name='authorization')
     handlers.Root.add_to_router(app.router, base_path + '/')
