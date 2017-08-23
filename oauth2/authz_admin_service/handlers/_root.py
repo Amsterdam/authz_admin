@@ -13,7 +13,7 @@ class Root(view.OAuth2View):
         return self.request.app['etag']
 
     @property
-    def title(self):
+    def link_title(self):
         return 'Authorization Administration API'
 
     async def all_links(self):
