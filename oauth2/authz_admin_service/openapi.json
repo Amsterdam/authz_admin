@@ -5,14 +5,14 @@
     "contact": {
       "name": "Datapunt Amsterdam",
       "url": "https://data.amsterdam.nl/",
-      "email": "datapunt.ois@amsterdam.nl"
+      "email": "datapunt@amsterdam.nl"
     },
     "version": "1.0.0"
   },
-  "host": "localhost:8112",
-  "basePath": "/oauth2/authz_admin",
+  "host": "api.data.amsterdam.nl",
+  "basePath": "/authz_admin",
   "schemes": [
-    "http"
+    "https"
   ],
   "produces": [
     "application/hal+json",
@@ -72,7 +72,7 @@
         "azam.w": "Create and edit account roles."
       },
       "flow": "implicit",
-      "authorizationUrl": "http://localhost:8112/oauth2/authz_admin/authorization"
+      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
     },
     "API-key": {
       "type": "apiKey",
@@ -129,10 +129,6 @@
           "type": "string"
         }
       }
-    },
-    "ETag": {
-      "type": "string",
-      "pattern": "^(?:W/)?\"[^\"]+\"$"
     },
     "Collection": {
       "type": "object",
@@ -218,7 +214,8 @@
           }
         },
         "_etag": {
-          "$ref": "#/definitions/ETag"
+          "type": "string",
+          "pattern": "^(?:W/)?\"[^\"]+\"$"
         }
       }
     },
@@ -270,7 +267,7 @@
           "type": "object",
           "properties": {
             "scopes": {
-              "$ref": "#/definitions/Scopes"
+              "$ref": "#/paths/~1datasets~1{dataset}~1scopes/get/responses/200/schema"
             }
           }
         },
@@ -332,6 +329,9 @@
             }
           }
         },
+        "_embedded": {
+          "type": "object"
+        },
         "summary": {
           "type": "string",
           "maxLength": 120
@@ -340,7 +340,8 @@
           "type": "string"
         },
         "_etag": {
-          "$ref": "#/definitions/ETag"
+          "type": "string",
+          "pattern": "^(?:W/)?\"[^\"]+\"$"
         }
       }
     },
@@ -392,7 +393,7 @@
           "type": "object",
           "properties": {
             "accounts": {
-              "$ref": "#/definitions/Accounts"
+              "$ref": "#/paths/~1roles~1{role}~1accounts/get/responses/200/schema"
             }
           }
         },
@@ -451,13 +452,13 @@
                   "type": "object",
                   "properties": {
                     "accounts": {
-                      "$ref": "#/definitions/Accounts"
+                      "$ref": "#/paths/~1accounts/get/responses/200/schema"
                     },
                     "datasets": {
-                      "$ref": "#/definitions/Datasets"
+                      "$ref": "#/paths/~1datasets/get/responses/200/schema"
                     },
                     "roles": {
-                      "$ref": "#/definitions/Roles"
+                      "$ref": "#/paths/~1roles/get/responses/200/schema"
                     }
                   }
                 }
@@ -657,9 +658,50 @@
         }
       }
     },
+    "/roles/{role}/accounts": {
+      "parameters": [
+        {
+          "name": "role",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,32}$"
+        }
+      ],
+      "get": {
+        "summary": "Collection of all accounts with this role",
+        "security": [
+          {
+            "OAuth2": [
+              "azam.r"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Accounts"
+            }
+          }
+        }
+      }
+    },
     "/datasets": {
       "get": {
-        "summary": "Collection of all datasets we offer",
+        "summary": "Collection of all datasets we connect with",
+        "security": [
+          {
+            "OAuth2": [
+              "azam.r"
+            ]
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -686,7 +728,14 @@
         }
       ],
       "get": {
-        "summary": "One of our datasets",
+        "summary": "One of the datasets we connect with",
+        "security": [
+          {
+            "OAuth2": [
+              "azam.r"
+            ]
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -713,7 +762,14 @@
         }
       ],
       "get": {
-        "summary": "Collection of all scopes defined for this dataset",
+        "summary": "Collection of all scopes of this dataset",
+        "security": [
+          {
+            "OAuth2": [
+              "azam.r"
+            ]
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"

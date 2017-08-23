@@ -12,12 +12,12 @@ info:
   #   url: https://data.amsterdam.nl/license
   version: '1.0.0'
 
-host: "api.data.amsterdam.nl"
+host: "localhost:8000"
 
 basePath: "/authz_admin"
 
 schemes:
-  - https
+  - http
 
 produces:
   - 'application/hal+json'
@@ -98,7 +98,7 @@ securityDefinitions:
       azam.r: "Read account roles."
       azam.w: "Create and edit account roles."
     flow: implicit
-    authorizationUrl: "http://localhost:8112/oauth2/authz_admin/authorization"
+    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
 
 
   API-key:
@@ -425,11 +425,6 @@ definitions:
             $ref: '#/definitions/Link'
       _embedded:
         type: object
-        properties:
-          includes:
-            $ref: '#/definitions/Scope'
-          included_by:
-            $ref: '#/definitions/Scope'
       summary:
         type: string
         maxLength: 120
