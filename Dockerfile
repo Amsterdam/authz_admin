@@ -13,7 +13,7 @@ COPY . /app
 
 # This is needed for the ./run.sh script, that copies the right swagger
 # definition file into swagger-ui.
-RUN chown -r datapunt /app/swagger-ui/dist
+RUN chown -R datapunt /app/swagger-ui/dist
 
 RUN pip install --no-cache-dir -e .
 
