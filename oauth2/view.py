@@ -1,6 +1,8 @@
-import typing as T
 import abc
 import logging
+import typing as T
+
+from aiohttp import web
 
 import rest_utils
 
@@ -12,6 +14,7 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
 
     @property
     def default_query_params(self: rest_utils.View) -> T.Dict[str, str]:
+        # language=rst
         """
 
         See :func:`rest_utils.View.default_query_params`.
@@ -48,3 +51,18 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
         result = super().to_link
         result['title'] = self.link_title
         return result
+
+    async def options(self):
+        # language=rst
+        """Dummy implementation.
+
+        .. todo:: Fetch the actual allowed methods from the swagger definition,
+        .and return all the operation items for this path in the body.
+
+        """
+
+        return web.Response(
+            status=204, headers={
+                'Allow': 'GET,HEAD,OPTIONS,PATCH,POST,PUT'
+            }
+        )

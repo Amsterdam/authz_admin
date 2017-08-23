@@ -318,6 +318,7 @@ class View(web.View):
         async for chunk in _json.json_encode(data):
             response.write(chunk)
         response.write_eof()
+        del self.request['GET_IN_PROGRESS']
         return response
 
     async def to_dict(self):
