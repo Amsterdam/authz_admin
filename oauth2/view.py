@@ -62,7 +62,9 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
         """
 
         return web.Response(
-            status=204, headers={
+            text='GET,HEAD,OPTIONS,PATCH,POST,PUT',
+            status=200,
+            headers={
                 'Allow': 'GET,HEAD,OPTIONS,PATCH,POST,PUT'
             }
         )
