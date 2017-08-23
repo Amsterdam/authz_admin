@@ -443,7 +443,7 @@
                     "datasets": {
                       "$ref": "#/definitions/Link"
                     },
-                    "role": {
+                    "roles": {
                       "$ref": "#/definitions/Link"
                     }
                   }

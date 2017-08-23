@@ -35,7 +35,9 @@ class Root(view.OAuth2View):
             embed=self.embed.get('roles')
         )
         return {
-            'datasets': datasets
+            'accounts': accounts,
+            'datasets': datasets,
+            'roles': roles
         }
 
     # _INSTANCE = None
