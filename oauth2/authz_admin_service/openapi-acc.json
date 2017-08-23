@@ -9,10 +9,10 @@
     },
     "version": "1.0.0"
   },
-  "host": "localhost:8120",
+  "host": "acc.api.data.amsterdam.nl",
   "basePath": "/authz_admin",
   "schemes": [
-    "http"
+    "https"
   ],
   "produces": [
     "application/hal+json",
@@ -72,7 +72,7 @@
         "azam.w": "Create and edit account roles."
       },
       "flow": "implicit",
-      "authorizationUrl": "http://localhost:8120/authz_admin/authorization"
+      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
     },
     "API-key": {
       "type": "apiKey",
