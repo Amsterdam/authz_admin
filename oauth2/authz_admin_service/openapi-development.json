@@ -66,10 +66,10 @@
   "securityDefinitions": {
     "OAuth2": {
       "type": "oauth2",
-      "description": "Authorization through our own Authorization Service.  Scope names all start with `azam`, which stands for **Authorization Account Management**.",
+      "description": "Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.",
       "scopes": {
-        "azam.r": "Read account roles.",
-        "azam.w": "Create and edit account roles."
+        "AUR.r": "Read account roles.",
+        "AUR.w": "Create and edit account roles."
       },
       "flow": "implicit",
       "authorizationUrl": "http://localhost:8120/authz_admin/authorization"
@@ -474,8 +474,11 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r"
+              "AUR.r"
             ]
+          },
+          {
+            "API-key": []
           }
         ],
         "parameters": [
@@ -515,8 +518,11 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r"
+              "AUR.r"
             ]
+          },
+          {
+            "API-key": []
           }
         ],
         "parameters": [
@@ -547,8 +553,8 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r",
-              "azam.w"
+              "AUR.r",
+              "AUR.w"
             ]
           }
         ],
@@ -605,8 +611,11 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r"
+              "AUR.r"
             ]
+          },
+          {
+            "API-key": []
           }
         ],
         "parameters": [
@@ -639,8 +648,11 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r"
+              "AUR.r"
             ]
+          },
+          {
+            "API-key": []
           }
         ],
         "parameters": [
@@ -673,8 +685,11 @@
         "security": [
           {
             "OAuth2": [
-              "azam.r"
+              "AUR.r"
             ]
+          },
+          {
+            "API-key": []
           }
         ],
         "parameters": [
@@ -695,13 +710,6 @@
     "/datasets": {
       "get": {
         "summary": "Collection of all datasets we connect with",
-        "security": [
-          {
-            "OAuth2": [
-              "azam.r"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -729,13 +737,6 @@
       ],
       "get": {
         "summary": "One of the datasets we connect with",
-        "security": [
-          {
-            "OAuth2": [
-              "azam.r"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -763,13 +764,6 @@
       ],
       "get": {
         "summary": "Collection of all scopes of this dataset",
-        "security": [
-          {
-            "OAuth2": [
-              "azam.r"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"

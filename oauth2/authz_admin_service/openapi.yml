@@ -12,7 +12,7 @@ info:
   #   url: https://data.amsterdam.nl/license
   version: '1.0.0'
 
-host: "localhost:8000"
+host: "localhost:8120"
 
 basePath: "/authz_admin"
 
@@ -92,13 +92,13 @@ securityDefinitions:
   OAuth2:
     type: oauth2
     description: >-
-      Authorization through our own Authorization Service.  Scope names all start
-      with `azam`, which stands for **Authorization Account Management**.
+      Authorization through our own Authorization Service.  Scope names all
+      start with `AUR`, which stands for **ADW User Roles**.
     scopes:
-      azam.r: "Read account roles."
-      azam.w: "Create and edit account roles."
+      AUR.r: "Read account roles."
+      AUR.w: "Create and edit account roles."
     flow: implicit
-    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
+    authorizationUrl: "http://localhost:8120/authz_admin/authorization"
 
 
   API-key:
@@ -524,7 +524,8 @@ paths:
       summary: "Collection of all ADW accounts we know of"
       security:
         - OAuth2:
-          - 'azam.r'
+          - 'AUR.r'
+        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
         - name: filter
@@ -560,7 +561,8 @@ paths:
       summary: "One account in ADW"
       security:
         - OAuth2:
-          - 'azam.r'
+          - 'AUR.r'
+        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
         - $ref: '#/parameters/if-none-match'
@@ -577,8 +579,8 @@ paths:
       summary: "Register or update an ADW account"
       security:
         - OAuth2:
-          - 'azam.r'
-          - 'azam.w'
+          - 'AUR.r'
+          - 'AUR.w'
       description: >-
         When **registering a new account**, provide the `If-None-Match: *`
         request header. When **updating an existing account**, provide the
@@ -654,7 +656,8 @@ paths:
       summary: "All roles we have defined"
       security:
         - OAuth2:
-          - 'azam.r'
+          - 'AUR.r'
+        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -675,7 +678,8 @@ paths:
       summary: "One of the roles we have defined"
       security:
         - OAuth2:
-          - 'azam.r'
+          - 'AUR.r'
+        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -696,7 +700,8 @@ paths:
       summary: "Collection of all accounts with this role"
       security:
         - OAuth2:
-          - 'azam.r'
+          - 'AUR.r'
+        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -711,7 +716,7 @@ paths:
 #      summary: "List of typeahead suggestions."
 #      security:
 #        - OAuth2:
-#          - 'azam.r'
+#          - 'AUR.r'
 #      description: >-
 #        In the response body, `#/_links/account` will be an array of links to
 #        account resources.  Each link will have a `title` attribute, which
@@ -753,9 +758,6 @@ paths:
   "/datasets":
     get:
       summary: "Collection of all datasets we connect with"
-      security:
-        - OAuth2:
-          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -774,9 +776,6 @@ paths:
         pattern: '^\\w{1,32}$'
     get:
       summary: "One of the datasets we connect with"
-      security:
-        - OAuth2:
-          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -795,9 +794,6 @@ paths:
         pattern: '^\\w{1,32}$'
     get:
       summary: "Collection of all scopes of this dataset"
-      security:
-        - OAuth2:
-          - 'azam.r'
       parameters:
         - $ref: '#/parameters/embed'
       responses:
