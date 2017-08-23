@@ -25,7 +25,7 @@ class Scopes(view.OAuth2View):
     def link_title(self):
         return "Scopes in dataset %s" % self._dataset['name']
 
-    async def all_links(self):
+    async def _links(self):
         items = [
             Scope(
                 self.request,
@@ -68,7 +68,7 @@ class Scope(view.OAuth2View):
     def etag(self):
         return self.request.app['etag']
 
-    async def all_links(self):
+    async def _links(self):
         result = {
             'dataset': _datasets.Dataset(self.request, self.match_dict, embed=self.embed.get('dataset'))
         }

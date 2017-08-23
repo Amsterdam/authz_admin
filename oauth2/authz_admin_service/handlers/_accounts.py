@@ -3,88 +3,66 @@ import logging
 from aiohttp import web
 
 from oauth2 import view
-from . import _idps
+from rest_utils import etag_from_int
+from ._roles import Role
 
 _logger = logging.getLogger(__name__)
+_ACCOUNTS = {
+    'p.van.beek@amsterdam.nl': ['EMPLOYEE', 'EMPLOYEE_PLUS'],
+    'e.lammerts@amsterdam.nl': ['EMPLOYEE'],
+    'loetje.hanglip@amsterdam.nl': []
+}
 
 
-class Users(view.OAuth2View):
+class Accounts(view.OAuth2View):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # TODO: implement
-
-    @property
-    def etag(self):
-        # TODO: implement
-        return None
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # TODO: implement
 
     @property
     def link_title(self):
-        return "Users in IdP %s" % self['idp']
+        return "ADW accounts"
 
-    async def all_links(self):
+    async def _links(self):
         items = [
-            User(
+            Account(
                 self.request,
-                {'idp': self['idp'], 'user': name},
+                {'account': name},
                 self.embed.get('item')
             )
-            for name in self._idp['users']
+            for name in _ACCOUNTS
         ]
-        return {
-            'item': items,
-            'up': _idps.IdP(self.request, self.match_dict, self.embed.get('up'))
-        }
+        return {'item': items}
 
 
-class User(view.OAuth2View):
+class Account(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        idps = self.request.app['config']['idps']
-        if self['idp'] not in idps:
-            raise web.HTTPNotFound(text="No such idp")
-        self._idp = idps[self['idp']]
-        users = self._idp['users']
-        if self['user'] not in users:
-            raise web.HTTPNotFound(text="No such user")
-        self._user = users[self['user']]
+        self._account = _ACCOUNTS.get(self['account'])
 
     @property
     def link_name(self):
-        return "%s.%s" % (
-            self['idp'],
-            self['user'],
-        )
+        return self['account']
 
     @property
     def link_title(self):
-        return "%s (for idp %s)" % (
-            self._user['name'],
-            self._idp['name']
-        )
+        return "Account '%s'" % self['account']
 
     @property
     def etag(self):
-        return self.request.app['etag']
+        if self._account:
+            return etag_from_int(hash(tuple(self._account)))
+        return False
 
-    async def all_links(self):
-        result = {
-            'idp': _idps.IdP(self.request, self.match_dict, embed=self.embed.get('idp')),
-            'up': Users(self.request, self.match_dict, self.embed.get('up'))
-        }
-        for fieldname in ('includes', 'included_by'):
-            if fieldname in self._user:
-                result[fieldname] = User(
+    async def _links(self):
+        return {
+            'role': [
+                Role(
                     self.request,
-                    {'idp': self['idp'], 'user': self._user[fieldname]},
-                    embed=self.embed.get(fieldname)
-                )
-        return result
-
-    async def attributes(self):
-        result = await super().attributes()
-        if 'description' in self._user:
-            result['description'] = self._user['description']
-        return result
+                    {'role': name},
+                    self.embed.get('roles')
+                ) for name in self._account
+            ]
+        }

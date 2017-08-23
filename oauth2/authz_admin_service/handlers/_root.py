@@ -16,7 +16,7 @@ class Root(view.OAuth2View):
     def link_title(self):
         return 'Authorization Administration API'
 
-    async def all_links(self):
+    async def _links(self):
         datasets = _datasets.Datasets(
             self.request,
             self.match_dict,

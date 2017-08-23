@@ -188,13 +188,13 @@
           "type": "object",
           "required": [
             "self",
-            "roles"
+            "role"
           ],
           "properties": {
             "self": {
               "$ref": "#/definitions/Link"
             },
-            "roles": {
+            "role": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/Link"
@@ -205,7 +205,7 @@
         "_embedded": {
           "type": "object",
           "properties": {
-            "roles": {
+            "role": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/Role"
@@ -443,7 +443,7 @@
                     "datasets": {
                       "$ref": "#/definitions/Link"
                     },
-                    "roles": {
+                    "role": {
                       "$ref": "#/definitions/Link"
                     }
                   }

@@ -329,11 +329,11 @@ definitions:
         type: object
         required:
           - self
-          - roles
+          - role
         properties:
           self:
             $ref: '#/definitions/Link'
-          roles:
+          role:
             type: array
             items:
               $ref: '#/definitions/Link'

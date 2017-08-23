@@ -21,7 +21,7 @@ class Roles(view.OAuth2View):
     def link_title(self):
         return "ADW Rollen"
 
-    async def all_links(self):
+    async def _links(self):
         items = [
             Role(
                 self.request,

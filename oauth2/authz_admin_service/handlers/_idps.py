@@ -18,7 +18,7 @@ class IdPs(view.OAuth2View):
     def title(self):
         return 'IdPs'
 
-    async def all_links(self):
+    async def _links(self):
         # TODO: implement
         items = []
         return {
@@ -44,7 +44,7 @@ class IdP(view.OAuth2View):
     def etag(self):
         return self.request.app['etag']
 
-    async def all_links(self):
+    async def _links(self):
         users = _users.Users(self.request, self.match_dict, embed=self.embed.get('users'))
         result = {
             'up': IdPs(self.request, {}, embed=self.embed.get('up')),

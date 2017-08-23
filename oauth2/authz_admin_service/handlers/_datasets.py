@@ -18,7 +18,7 @@ class Datasets(view.OAuth2View):
     def link_title(self):
         return 'Datasets'
 
-    async def all_links(self):
+    async def _links(self):
         items = [
             Dataset(
                 self.request,
@@ -47,7 +47,7 @@ class Dataset(view.OAuth2View):
     def etag(self):
         return self.request.app['etag']
 
-    async def all_links(self):
+    async def _links(self):
         scopes = _scopes.Scopes(
             self.request,
             self.match_dict,

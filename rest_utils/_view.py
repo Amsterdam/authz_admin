@@ -97,7 +97,7 @@ class View(web.View):
         Return values have the following meanings:
 
         ``True``
-            Resource exists and doesn have an ETag.
+            Resource exists and doesn't support ETags
         ``False``
             Resource doesn't exist.
         ``None``
@@ -136,8 +136,8 @@ class View(web.View):
 
         .. deprecated:: v0
 
-            Only used by :meth:`PlainView.all_links` and
-            :meth:`DynamicView.all_links`, which are themselves deprecated.
+            Only used by :meth:`PlainView._links` and
+            :meth:`DynamicView._links`, which are themselves deprecated.
 
         """
         for resource in request.app.router.resources():
@@ -224,7 +224,7 @@ class View(web.View):
         """
         return {}
 
-    async def all_links(self) -> T.Dict[str, T.Any]:
+    async def _links(self) -> T.Dict[str, T.Any]:
         # language=rst
         """
 
@@ -250,8 +250,8 @@ class View(web.View):
 
     async def embedded(self) -> T.Dict[str, T.Any]:
         result = {}
-        all_links = await self.all_links()
-        for key, value in all_links.items():
+        _links = await self._links()
+        for key, value in _links.items():
             if key in self.embed:
                 if (inspect.isasyncgen(value) or
                     inspect.isgenerator(value) or
@@ -265,8 +265,8 @@ class View(web.View):
 
     async def links(self) -> T.Dict[str, T.Any]:
         result = {}
-        all_links = await self.all_links()
-        for key, value in all_links.items():
+        _links = await self._links()
+        for key, value in _links.items():
             if key == 'item':
                 key = 'item'
             if isinstance(value, View):

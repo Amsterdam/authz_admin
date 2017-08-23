@@ -66,6 +66,8 @@ def add_routes(app: web.Application):
     handlers.Root.add_to_router(app.router, base_path + '/')
     handlers.Datasets.add_to_router(app.router, base_path + '/datasets')
     handlers.Dataset.add_to_router(app.router, base_path + '/datasets/{dataset}')
+    handlers.Accounts.add_to_router(app.router, base_path + '/accounts')
+    handlers.Account.add_to_router(app.router, base_path + '/accounts/{account}')
     handlers.Scopes.add_to_router(app.router, base_path + '/datasets/{dataset}/scopes')
     handlers.Scope.add_to_router(app.router, base_path + '/datasets/{dataset}/scopes/{scope}')
     handlers.Roles.add_to_router(app.router, base_path + '/roles')

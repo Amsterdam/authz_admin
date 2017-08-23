@@ -117,20 +117,20 @@ def assert_preconditions(request: web.Request):
 
 
 def etaggify(v: str, weak: bool) -> str:
+    assert '"' not in v
     weak = 'W/' if weak else ''
     return weak + '"' + v + '"'
 
 
 def etag_from_int(value: int, weak=False) -> str:
-    assert value >= 0
-    if value <= 0xff:
-        format = 'B'
-    elif value <= 0xffff:
-        format = 'H'
-    elif value <= 0xffffffff:
-        format = 'L'
+    if -0x80 <= value < 0x80:
+        format = 'b'
+    elif -0x8000 <= value < 0x8000:
+        format = 'h'
+    elif -0x80000000 <= value < 0x80000000:
+        format = 'l'
     else:
-        format = 'Q'
+        format = 'q'
     return etaggify(
         base64.urlsafe_b64encode(struct.pack(format, value)).decode(),
         weak
