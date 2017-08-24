@@ -83,8 +83,30 @@ class Account(view.OAuth2View):
                         self.request.content_type):
             raise web.HTTPUnsupportedMediaType()
         try:
-            request_body_json = json_loads(self.request.text())
+            request_body_json = json_loads(await self.request.text())
         except:
             raise web.HTTPBadRequest()
         # self.request.app['swagger'].validate_definition('Account', request_body_json)
-        raise web.HTTPNotImplemented
+        existing_roles = set(self.request.app['config']['authz_admin_service']['roles'].keys())
+        try:
+            roles = request_body_json['_links']['role']
+            assert isinstance(roles, list)
+        except:
+            raise web.HTTPBadRequest(
+                text="No '#/_links/role' array in request."
+            )
+        new_roles = set()
+        try:
+            for link_object in roles:
+                role = web.URL(link_object['href']).name
+                assert role in existing_roles
+                new_roles.add(role)
+        except:
+            raise web.HTTPBadRequest(
+                text="Not all roles are valid HALJSON link objects to an existing role."
+            )
+        status_code = 204 if self['account'] in _ACCOUNTS else 201
+        _ACCOUNTS[self['account']] = new_roles
+        response_headers = {} if status_code == 204 else \
+            {'Location': self.rel_url.raw_path}
+        return web.Response(status=status_code, headers=response_headers)

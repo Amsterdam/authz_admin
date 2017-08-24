@@ -53,7 +53,14 @@
       "type": "string",
       "pattern": "^(?:W/)?\"[^\"]+\"$"
     },
-    "if-none-match": {
+    "if-none-match-GET": {
+      "name": "If-None-Match",
+      "description": "This request header can make the request conditional. You'll get a `304 Not Modified` if you're cached version is still up-to-date.",
+      "in": "header",
+      "type": "string",
+      "pattern": "^(?:W/)?\"[^\"]+\"(?:\\\\s,\\\\s(?:W/)?\"[^\"]+\")*$"
+    },
+    "if-none-match-PUT": {
       "name": "If-None-Match",
       "description": "This request header is required if the client intends to *create* a new `account` resource.  This prevents lost updates if multiple clients are concurrently creating the same resource.",
       "in": "header",
@@ -72,7 +79,7 @@
         "AUR.w": "Create and edit account roles."
       },
       "flow": "implicit",
-      "authorizationUrl": "https://acc.api.datapunt.amsterdam.nl/authz_admin/authorization"
+      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
     },
     "API-key": {
       "type": "apiKey",
@@ -530,7 +537,7 @@
             "$ref": "#/parameters/embed"
           },
           {
-            "$ref": "#/parameters/if-none-match"
+            "$ref": "#/parameters/if-none-match-GET"
           }
         ],
         "responses": {
@@ -564,7 +571,7 @@
             "$ref": "#/parameters/if-match"
           },
           {
-            "$ref": "#/parameters/if-none-match"
+            "$ref": "#/parameters/if-none-match-PUT"
           },
           {
             "name": "body",
