@@ -1,10 +1,15 @@
 import logging
+from json import loads as json_loads
+import re
 
 from aiohttp import web
+import jsonschema
 
 from oauth2 import view
-from rest_utils import etag_from_int
+from rest_utils import etag_from_int, assert_preconditions
+
 from ._roles import Role
+
 
 _logger = logging.getLogger(__name__)
 _ACCOUNTS = {
@@ -57,6 +62,8 @@ class Account(view.OAuth2View):
         return False
 
     async def _links(self):
+        if self._account is None:
+            raise web.HTTPNotFound()
         return {
             'role': [
                 Role(
@@ -66,3 +73,18 @@ class Account(view.OAuth2View):
                 ) for name in self._account
             ]
         }
+
+    async def put(self):
+        if ('if-match' not in self.request.headers and
+                'if-none-match' not in self.request.headers):
+            raise web.HTTPPreconditionRequired()
+        assert_preconditions(self.request, self.etag)
+        if not re.match(r'application/(?:hal\+)json(?:$|;)',
+                        self.request.content_type):
+            raise web.HTTPUnsupportedMediaType()
+        try:
+            request_body_json = json_loads(self.request.text())
+        except:
+            raise web.HTTPBadRequest()
+        # self.request.app['swagger'].validate_definition('Account', request_body_json)
+        raise web.HTTPNotImplemented

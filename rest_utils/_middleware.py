@@ -23,7 +23,6 @@ async def middleware(app: web.Application, handler):
 
     """
     async def middleware_handler(request: web.Request):
-        request[ASSERT_PRECONDITIONS] = assert_preconditions(request)
         request[BEST_CONTENT_TYPE] = best_content_type(request)
         return await handler(request)
     return middleware_handler

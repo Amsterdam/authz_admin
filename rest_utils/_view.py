@@ -10,6 +10,7 @@ from multidict import MultiDict
 from . import _json
 from ._middleware import BEST_CONTENT_TYPE, ASSERT_PRECONDITIONS
 from ._parse_embed import parse_embed
+from ._etags import assert_preconditions
 
 _logger = logging.getLogger(__name__)
 
@@ -97,16 +98,16 @@ class View(web.View):
         Return values have the following meanings:
 
         ``True``
-            Resource exists and doesn't support ETags
+            Resource exists but doesn't support ETags
         ``False``
-            Resource doesn't exist.
+            Resource doesn't exist and doesn't support ETags
         ``None``
-            Resource may or may not exist and doesn't support ETags.
+            Resource doesn't exist and supports ETags.
         ETag string:
             Resource exists and supports ETags.
 
         """
-        return None
+        return True
 
     @property
     def query(self):
@@ -303,10 +304,12 @@ class View(web.View):
         return result
 
     async def get(self) -> web.StreamResponse:
+
+        # Assert we're not calling `get()` recursively within a single request:
         assert 'GET_IN_PROGRESS' not in self.request
         self.request['GET_IN_PROGRESS'] = True
-        self.request[ASSERT_PRECONDITIONS](self.etag)
-        data = await self.to_dict()
+
+        assert_preconditions(self.request, self.etag)
         response = web.StreamResponse()
         if isinstance(self.etag, str):
             response.headers.add('ETag', self.etag)
@@ -315,11 +318,16 @@ class View(web.View):
         if str(self.canonical_rel_url) != str(self.request.rel_url):
             response.headers.add('Content-Location', str(self.canonical_rel_url))
         await response.prepare(self.request)
-        async for chunk in _json.json_encode(data):
-            response.write(chunk)
+        if self.request.method == 'GET':
+            data = await self.to_dict()
+            async for chunk in _json.json_encode(data):
+                response.write(chunk)
         response.write_eof()
         del self.request['GET_IN_PROGRESS']
         return response
+
+    async def head(self):
+        return await self.get()
 
     async def to_dict(self):
         result = await self.attributes()
