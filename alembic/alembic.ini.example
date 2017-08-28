@@ -73,7 +73,7 @@ script_location = authz_admin
 # are written from script.py.mako
 # output_encoding = utf-8
 
-sqlalchemy.url = postgresql+psycopg2://oauth2:oeyooshoo4pievaeTi5o@localhost:5434/oauth2
+sqlalchemy.url = postgresql+psycopg2://oauth2:password@localhost:5434/oauth2
 
 
 # Logging configuration

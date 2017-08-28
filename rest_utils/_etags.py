@@ -16,7 +16,7 @@ _ETAGS_PATTERN = re.compile(
     r'\s*(?:W/)?"[\x21\x23-\x7e\x80-\xff]+"(?:\s*,\s*(?:W/)?"[\x21\x23-\x7e\x80-\xff]+")*'
 )
 _ETAG_ITER_PATTERN = re.compile(
-    r'\s*,\s*((?:W/)?"[\x21\x23-\x7e\x80-\xff]+")'
+    r'((?:W/)?"[\x21\x23-\x7e\x80-\xff]+")'
 )
 _STAR = '*'
 _STAR_TYPE = str
@@ -28,6 +28,8 @@ def _parse_if_header(request: web.Request, header_name: str) -> T.Union[None, T.
     if header_name not in request.headers:
         return None
     header = ','.join(request.headers.getall(header_name))
+    if header == '':
+        return None
     if header == _STAR:
         return _STAR
     if not _ETAGS_PATTERN.fullmatch(header):

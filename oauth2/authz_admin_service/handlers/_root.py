@@ -2,7 +2,7 @@ import logging
 
 from oauth2 import view
 from ._accounts import Accounts
-from ._datasets import Datasets
+from ._datasets import Scopesets
 from ._roles import Roles
 
 _logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class Root(view.OAuth2View):
             self.match_dict,
             embed=self.embed.get('accounts')
         )
-        datasets = Datasets(
+        datasets = Scopesets(
             self.request,
             self.match_dict,
             embed=self.embed.get('datasets')

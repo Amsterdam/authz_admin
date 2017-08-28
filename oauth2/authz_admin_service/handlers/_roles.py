@@ -3,6 +3,7 @@ import logging
 from aiohttp import web
 
 from oauth2 import view
+from . import _profiles, _accounts
 
 _logger = logging.getLogger(__name__)
 
@@ -55,3 +56,21 @@ class Role(view.OAuth2View):
         if 'description' in self._role:
             result['description'] = self._role['description']
         return result
+
+    async def _links(self):
+        return {
+            'profile': [
+                _profiles.Profile(
+                    self.request,
+                    {'profile': profile},
+                    self.embed.get('profile')
+                ) for profile in self._role['profiles']
+            ],
+            'account': [
+                _accounts.Account(
+                    self.request,
+                    {'account': account_name},
+                    self.embed.get('account')
+                ) for account_name in await _accounts.account_names_with_role(self['role'])
+            ]
+        }

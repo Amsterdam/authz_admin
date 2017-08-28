@@ -44,21 +44,32 @@
       "in": "query",
       "description": "Linked resources to embed.  For example: `foo(bar,baz())`.  This would embed all resources with link relation `foo`.\n* In these `foo`-resources, all resources of link types `bar` and `baz`\n  will be embedded.\n\n* In the `bar` resource(s), the default embedding will occur.\n* In the `baz` resource(s), no embedding will occur.",
       "type": "string",
-      "pattern": "^(?:,?[a-z_]\\\\w*|,?\\\\)|\\\\()+$"
+      "pattern": "^(?:,?[a-z_]\\\\w*|,?\\\\)|\\\\()+$",
+      "required": false
     },
-    "if-match": {
+    "if-match-OPTIONAL": {
       "name": "If-Match",
       "description": "This request header is required if the client intends to *update* an existing `account` resource.  The value *must* be the current `ETag` of the account resource, as last seen by the client.  This prevents lost updates if multiple clients are concurrently editing the same resource.",
       "in": "header",
       "type": "string",
-      "pattern": "^(?:W/)?\"[^\"]+\"$"
+      "pattern": "^(?:W/)?\"[^\"]+\"$",
+      "required": false
+    },
+    "if-match-REQUIRED": {
+      "name": "If-Match",
+      "description": "This request header is required if the client intends to *update* an existing `account` resource.  The value *must* be the current `ETag` of the account resource, as last seen by the client.  This prevents lost updates if multiple clients are concurrently editing the same resource.",
+      "in": "header",
+      "type": "string",
+      "pattern": "^(?:W/)?\"[^\"]+\"$",
+      "required": true
     },
     "if-none-match-GET": {
       "name": "If-None-Match",
       "description": "This request header can make the request conditional. You'll get a `304 Not Modified` if you're cached version is still up-to-date.",
       "in": "header",
       "type": "string",
-      "pattern": "^(?:W/)?\"[^\"]+\"(?:\\\\s,\\\\s(?:W/)?\"[^\"]+\")*$"
+      "pattern": "^(?:W/)?\"[^\"]+\"(?:\\\\s,\\\\s(?:W/)?\"[^\"]+\")*$",
+      "required": false
     },
     "if-none-match-PUT": {
       "name": "If-None-Match",
@@ -67,7 +78,8 @@
       "type": "string",
       "enum": [
         "*"
-      ]
+      ],
+      "required": false
     }
   },
   "securityDefinitions": {
@@ -250,46 +262,41 @@
       ]
     },
     "Dataset": {
-      "type": "object",
-      "required": [
-        "_links",
-        "name"
-      ],
-      "properties": {
-        "_links": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Collection"
+        },
+        {
           "type": "object",
           "required": [
-            "self"
+            "name"
           ],
           "properties": {
-            "self": {
-              "$ref": "#/definitions/Link"
+            "_embedded": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Scope"
+                  }
+                }
+              }
             },
-            "scopes": {
-              "$ref": "#/definitions/Link"
+            "name": {
+              "type": "string",
+              "maxLength": 120,
+              "minLength": 1
+            },
+            "described_by": {
+              "type": "string",
+              "format": "url"
             }
           }
-        },
-        "_embedded": {
-          "type": "object",
-          "properties": {
-            "scopes": {
-              "$ref": "#/paths/~1datasets~1{dataset}~1scopes/get/responses/200/schema"
-            }
-          }
-        },
-        "name": {
-          "type": "string",
-          "maxLength": 120,
-          "minLength": 1
-        },
-        "described_by": {
-          "type": "string",
-          "format": "url"
         }
-      }
+      ]
     },
-    "Scopes": {
+    "Profiles": {
       "allOf": [
         {
           "$ref": "#/definitions/Collection"
@@ -303,7 +310,7 @@
                 "item": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/Scope"
+                    "$ref": "#/definitions/Profile"
                   }
                 }
               }
@@ -312,11 +319,12 @@
         }
       ]
     },
-    "Scope": {
+    "Profile": {
       "type": "object",
       "required": [
         "_links",
-        "summary"
+        "name",
+        "description"
       ],
       "properties": {
         "_links": {
@@ -328,27 +336,46 @@
             "self": {
               "$ref": "#/definitions/Link"
             },
-            "includes": {
-              "$ref": "#/definitions/Link"
+            "scope": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Link"
+              }
             },
-            "included_by": {
-              "$ref": "#/definitions/Link"
+            "role": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Link"
+              }
             }
           }
         },
         "_embedded": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Scope"
+              }
+            },
+            "role": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Role"
+              }
+            }
+          }
         },
-        "summary": {
+        "name": {
           "type": "string",
+          "minLength": 1,
           "maxLength": 120
         },
         "description": {
-          "type": "string"
-        },
-        "_etag": {
           "type": "string",
-          "pattern": "^(?:W/)?\"[^\"]+\"$"
+          "format": "rst",
+          "description": "Volledige omschrijving van deze doelbinding."
         }
       }
     },
@@ -391,28 +418,87 @@
             "self": {
               "$ref": "#/definitions/Link"
             },
-            "accounts": {
-              "$ref": "#/definitions/Link"
+            "account": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Link"
+              }
+            },
+            "profile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Link"
+              }
             }
           }
         },
         "_embedded": {
           "type": "object",
           "properties": {
-            "accounts": {
-              "$ref": "#/paths/~1roles~1{role}~1accounts/get/responses/200/schema"
+            "account": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Account"
+              }
+            },
+            "profile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Profile"
+              }
             }
           }
         },
         "name": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 255
+          "maxLength": 120
         },
-        "organization": {
+        "description": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 255
+          "format": "rst",
+          "description": "Volledige omschrijving van deze rol."
+        }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "required": [
+        "_links",
+        "name"
+      ],
+      "properties": {
+        "_links": {
+          "type": "object",
+          "required": [
+            "self"
+          ],
+          "properties": {
+            "self": {
+              "$ref": "#/definitions/Link"
+            },
+            "includes": {
+              "$ref": "#/definitions/Link"
+            },
+            "included_by": {
+              "$ref": "#/definitions/Link"
+            }
+          }
+        },
+        "_embedded": {
+          "type": "object"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "format": "rst"
+        },
+        "_etag": {
+          "type": "string",
+          "pattern": "^(?:W/)?\"[^\"]+\"$"
         }
       }
     }
@@ -447,7 +533,7 @@
                     "accounts": {
                       "$ref": "#/definitions/Link"
                     },
-                    "datasets": {
+                    "scopesets": {
                       "$ref": "#/definitions/Link"
                     },
                     "roles": {
@@ -459,13 +545,13 @@
                   "type": "object",
                   "properties": {
                     "accounts": {
-                      "$ref": "#/paths/~1accounts/get/responses/200/schema"
+                      "$ref": "#/definitions/Accounts"
                     },
-                    "datasets": {
-                      "$ref": "#/paths/~1datasets/get/responses/200/schema"
+                    "scopesets": {
+                      "$ref": "#/definitions/Datasets"
                     },
                     "roles": {
-                      "$ref": "#/paths/~1roles/get/responses/200/schema"
+                      "$ref": "#/definitions/Roles"
                     }
                   }
                 }
@@ -516,7 +602,8 @@
           "in": "path",
           "required": true,
           "type": "string",
-          "pattern": "^.{1,255}$",
+          "minLength": 1,
+          "maxLength": 255,
           "description": "The unique ID of this account in ADW.\nUnfortunately, TMA returns the email address as unique identifier, instead of ADW's true internal unique ID, which consists of the user's last name plus three digits."
         }
       ],
@@ -555,6 +642,28 @@
           }
         }
       },
+      "delete": {
+        "summary": "Remove an ADW account from the authorization database.",
+        "description": "This does **not** remove an account from ADW.  It just removes the authorizations assigned to this occount.",
+        "security": [
+          {
+            "OAuth2": [
+              "AUR.r",
+              "AUR.w"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/if-match-REQUIRED"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
       "put": {
         "summary": "Register or update an ADW account",
         "security": [
@@ -568,7 +677,7 @@
         "description": "When **registering a new account**, provide the `If-None-Match: *` request header. When **updating an existing account**, provide the `If-Match: \"«etag»\"` request header.\n- The attributes allowed/required in the request body JSON object depend\n  on the IdP.  The client may send a list of associated roles when\n  creating or updating an account resource.\n\n- The body doesn't have to be a valid HAL+JSON object: only top-level\n  attributes and the list of associated roles are relevant.\n\nExample request body::\n\n    {\n      \"_links\": {\n        \"roles\": [\n          { \"href\": \"/roles/role1\" },\n          { \"href\": \"/roles/role2\" }\n        ]\n      },\n      \"first_name\": \"Jane\",\n      \"last_name\": \"Doe\"\n    }",
         "parameters": [
           {
-            "$ref": "#/parameters/if-match"
+            "$ref": "#/parameters/if-match-OPTIONAL"
           },
           {
             "$ref": "#/parameters/if-none-match-PUT"
@@ -608,6 +717,150 @@
           },
           "428": {
             "description": "**Precondition Required**\nThe client didn't provide an `If-None-Match` or `If-Match` request header."
+          }
+        }
+      }
+    },
+    "/datasets": {
+      "get": {
+        "summary": "Collection of all scopesets we connect with",
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Datasets"
+            }
+          }
+        }
+      }
+    },
+    "/datasets/{dataset}": {
+      "parameters": [
+        {
+          "name": "dataset",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,4}$"
+        }
+      ],
+      "get": {
+        "summary": "One of the datasets we shield",
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Dataset"
+            }
+          }
+        }
+      }
+    },
+    "/datasets/{dataset}/{scope}": {
+      "parameters": [
+        {
+          "name": "dataset",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,4}$"
+        },
+        {
+          "name": "scope",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,4}$"
+        }
+      ],
+      "get": {
+        "summary": "One scope in dataset `{dataset}`",
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Scope"
+            }
+          }
+        }
+      }
+    },
+    "/profiles": {
+      "get": {
+        "summary": "All profiles we have defined",
+        "security": [
+          {
+            "OAuth2": [
+              "AUR.r"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Profile"
+            }
+          }
+        }
+      }
+    },
+    "/profiles/{profile}": {
+      "parameters": [
+        {
+          "name": "profile",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,32}$"
+        }
+      ],
+      "get": {
+        "summary": "One of the profiles we have defined",
+        "security": [
+          {
+            "OAuth2": [
+              "AUR.r"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Profiles"
+            }
           }
         }
       }
@@ -672,155 +925,6 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/Role"
-            }
-          }
-        }
-      }
-    },
-    "/roles/{role}/accounts": {
-      "parameters": [
-        {
-          "name": "role",
-          "in": "path",
-          "required": true,
-          "type": "string",
-          "pattern": "^\\\\w{1,32}$"
-        }
-      ],
-      "get": {
-        "summary": "Collection of all accounts with this role",
-        "security": [
-          {
-            "OAuth2": [
-              "AUR.r"
-            ]
-          },
-          {
-            "API-key": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/parameters/embed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Accounts"
-            }
-          }
-        }
-      }
-    },
-    "/datasets": {
-      "get": {
-        "summary": "Collection of all datasets we connect with",
-        "parameters": [
-          {
-            "$ref": "#/parameters/embed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Datasets"
-            }
-          }
-        }
-      }
-    },
-    "/datasets/{dataset}": {
-      "parameters": [
-        {
-          "name": "dataset",
-          "in": "path",
-          "required": true,
-          "type": "string",
-          "pattern": "^\\\\w{1,32}$"
-        }
-      ],
-      "get": {
-        "summary": "One of the datasets we connect with",
-        "parameters": [
-          {
-            "$ref": "#/parameters/embed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Dataset"
-            }
-          }
-        }
-      }
-    },
-    "/datasets/{dataset}/scopes": {
-      "parameters": [
-        {
-          "name": "dataset",
-          "in": "path",
-          "required": true,
-          "type": "string",
-          "pattern": "^\\\\w{1,32}$"
-        }
-      ],
-      "get": {
-        "summary": "Collection of all scopes of this dataset",
-        "parameters": [
-          {
-            "$ref": "#/parameters/embed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Scopes"
-            }
-          }
-        }
-      }
-    },
-    "/datasets/{dataset}/scopes/{scope}": {
-      "parameters": [
-        {
-          "name": "dataset",
-          "in": "path",
-          "required": true,
-          "type": "string",
-          "pattern": "^\\\\w{1,32}$"
-        },
-        {
-          "name": "scope",
-          "in": "path",
-          "required": true,
-          "type": "string",
-          "pattern": "^\\\\w{1,32}$"
-        }
-      ],
-      "get": {
-        "summary": "One scope in dataset `{dataset}`",
-        "parameters": [
-          {
-            "$ref": "#/parameters/embed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {
-              "ETag": {
-                "type": "string",
-                "pattern": "^(?:W/)?\"[^\"]+\"$"
-              }
-            },
-            "schema": {
-              "$ref": "#/definitions/Scope"
             }
           }
         }

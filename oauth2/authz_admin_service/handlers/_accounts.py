@@ -1,6 +1,7 @@
 import logging
 from json import loads as json_loads
 import re
+import typing as T
 
 from aiohttp import web
 import jsonschema
@@ -19,6 +20,12 @@ _ACCOUNTS = {
 }
 
 
+async def account_names_with_role(role: str):
+    return [
+        account_name for account_name, account in _ACCOUNTS.items() if role in account
+    ]
+
+
 class Accounts(view.OAuth2View):
 
     # def __init__(self, *args, **kwargs):
@@ -29,8 +36,8 @@ class Accounts(view.OAuth2View):
     def link_title(self):
         return "ADW accounts"
 
-    async def _links(self):
-        items = [
+    async def accounts(self):
+        return [
             Account(
                 self.request,
                 {'account': name},
@@ -38,14 +45,16 @@ class Accounts(view.OAuth2View):
             )
             for name in _ACCOUNTS
         ]
-        return {'item': items}
+
+    async def _links(self):
+        return {'item': await self.accounts()}
 
 
 class Account(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._account = _ACCOUNTS.get(self['account'])
+        self._roles = _ACCOUNTS.get(self['account'])
 
     @property
     def link_name(self):
@@ -53,33 +62,40 @@ class Account(view.OAuth2View):
 
     @property
     def link_title(self):
-        return "Account '%s'" % self['account']
+        return "ADW account with email address <%s>" % self['account']
 
     @property
     def etag(self):
-        if self._account:
-            return etag_from_int(hash(tuple(self._account)))
-        return False
+        if self._roles is None:
+            return None
+        return etag_from_int(hash(tuple(self._roles)))
+
+    async def roles(self):
+        return [
+            Role(
+                self.request,
+                {'role': role_name},
+                self.embed.get('roles')
+            ) for role_name in await self.role_names()
+        ]
+
+    async def role_names(self) -> T.List[str]:
+        return self._roles or []
 
     async def _links(self):
-        if self._account is None:
+        if self._roles is None:
             raise web.HTTPNotFound()
         return {
-            'role': [
-                Role(
-                    self.request,
-                    {'role': name},
-                    self.embed.get('roles')
-                ) for name in self._account
-            ]
+            'role': await self.roles()
         }
 
     async def put(self):
-        if ('if-match' not in self.request.headers and
-                'if-none-match' not in self.request.headers):
+        if_match = self.request.headers.get('if-match', '')
+        if_none_match = self.request.headers.get('if-none-match', '')
+        if if_match == '' and if_none_match == '':
             raise web.HTTPPreconditionRequired()
         assert_preconditions(self.request, self.etag)
-        if not re.match(r'application/(?:hal\+)json(?:$|;)',
+        if not re.match(r'application/(?:hal\+)?json(?:$|;)',
                         self.request.content_type):
             raise web.HTTPUnsupportedMediaType()
         try:
@@ -110,3 +126,11 @@ class Account(view.OAuth2View):
         response_headers = {} if status_code == 204 else \
             {'Location': self.rel_url.raw_path}
         return web.Response(status=status_code, headers=response_headers)
+
+    async def delete(self) -> web.Response:
+        if_match = self.request.headers.get('if-match', '')
+        if if_match == '':
+            raise web.HTTPPreconditionRequired()
+        assert_preconditions(self.request, self.etag)
+        del _ACCOUNTS[self['account']]
+        return web.Response(status=204)

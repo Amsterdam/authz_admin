@@ -63,8 +63,9 @@ parameters:
       * In the `baz` resource(s), no embedding will occur.
     type: string
     pattern: '^(?:,?[a-z_]\\w*|,?\\)|\\()+$'
+    required: false
 
-  if-match:
+  if-match-OPTIONAL:
     name: 'If-Match'
     description: >-
       This request header is required if the client intends to *update* an
@@ -75,6 +76,20 @@ parameters:
     in: header
     type: string
     pattern: '^(?:W/)?"[^"]+"$'
+    required: false
+
+  if-match-REQUIRED:
+    name: 'If-Match'
+    description: >-
+      This request header is required if the client intends to *update* an
+      existing `account` resource.  The value *must* be the current `ETag`
+      of the account resource, as last seen by the client.  This prevents
+      lost updates if multiple clients are concurrently editing the same
+      resource.
+    in: header
+    type: string
+    pattern: '^(?:W/)?"[^"]+"$'
+    required: true
 
   if-none-match-GET:
     name: 'If-None-Match'
@@ -84,6 +99,7 @@ parameters:
     in: header
     type: string
     pattern: '^(?:W/)?"[^"]+"(?:\\s,\\s(?:W/)?"[^"]+")*$'
+    required: false
 
 
   if-none-match-PUT:
@@ -95,6 +111,7 @@ parameters:
     in: header
     type: string
     enum: ['*']
+    required: false
 
 
 securityDefinitions:
@@ -374,35 +391,29 @@ definitions:
 
 
   Dataset:
-    type: object
-    required:
-      - _links
-      - name
-    properties:
-      _links:
-        type: object
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
         required:
-          - self
+          - name
         properties:
-          self:
-            $ref: '#/definitions/Link'
-          scopes:
-            $ref: '#/definitions/Link'
-      _embedded:
-        type: object
-        properties:
-          scopes:
-            $ref: '#/paths/~1datasets~1{dataset}~1scopes/get/responses/200/schema'
-      name:
-        type: string
-        maxLength: 120
-        minLength: 1
-      described_by:
-        type: string
-        format: url
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Scope'
+          name:
+            type: string
+            maxLength: 120
+            minLength: 1
+          described_by:
+            type: string
+            format: url
 
 
-  Scopes:
+  Profiles:
     allOf:
       - $ref: '#/definitions/Collection'
       - type: object
@@ -413,14 +424,15 @@ definitions:
               item:
                 type: array
                 items:
-                  $ref: '#/definitions/Scope'
+                  $ref: '#/definitions/Profile'
 
 
-  Scope:
+  Profile:
     type: object
     required:
       - _links
-      - summary
+      - name
+      - description
     properties:
       _links:
         type: object
@@ -429,20 +441,33 @@ definitions:
         properties:
           self:
             $ref: '#/definitions/Link'
-          includes:
-            $ref: '#/definitions/Link'
-          included_by:
-            $ref: '#/definitions/Link'
+          scope:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
       _embedded:
         type: object
-      summary:
+        properties:
+          scope:
+            type: array
+            items:
+              $ref: '#/definitions/Scope'
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Role'
+      name:
         type: string
+        minLength: 1
         maxLength: 120
       description:
         type: string
-      _etag:
-        type: string
-        pattern: '^(?:W/)?"[^"]+"$'
+        format: 'rst'
+        description: "Volledige omschrijving van deze doelbinding."
 
 
   Roles:
@@ -472,21 +497,63 @@ definitions:
         properties:
           self:
             $ref: '#/definitions/Link'
-          accounts:
-            $ref: '#/definitions/Link'
+          account:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+          profile:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
       _embedded:
         type: object
         properties:
-          accounts:
-            $ref: '#/paths/~1roles~1{role}~1accounts/get/responses/200/schema'
+          account:
+            type: array
+            items:
+              $ref: '#/definitions/Account'
+          profile:
+            type: array
+            items:
+              $ref: '#/definitions/Profile'
       name:
         type: string
         minLength: 1
-        maxLength: 255
-      organization:
+        maxLength: 120
+      description:
         type: string
-        minLength: 1
-        maxLength: 255
+        format: 'rst'
+        description: "Volledige omschrijving van deze rol."
+
+
+  Scope:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          includes:
+            $ref: '#/definitions/Link'
+          included_by:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+      name:
+        type: string
+        maxLength: 120
+      description:
+        type: string
+        format: 'rst'
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
 
 
 paths:
@@ -514,7 +581,7 @@ paths:
                     $ref: '#/definitions/Link'
                   accounts:
                     $ref: '#/definitions/Link'
-                  datasets:
+                  scopesets:
                     $ref: '#/definitions/Link'
                   roles:
                     $ref: '#/definitions/Link'
@@ -522,11 +589,11 @@ paths:
                 type: object
                 properties:
                   accounts:
-                    $ref: '#/paths/~1accounts/get/responses/200/schema'
-                  datasets:
-                    $ref: '#/paths/~1datasets/get/responses/200/schema'
+                    $ref: '#/definitions/Accounts'
+                  scopesets:
+                    $ref: '#/definitions/Datasets'
                   roles:
-                    $ref: '#/paths/~1roles/get/responses/200/schema'
+                    $ref: '#/definitions/Roles'
 
 
   "/accounts":
@@ -560,7 +627,8 @@ paths:
         in: path
         required: true
         type: string
-        pattern: "^.{1,255}$"
+        minLength: 1
+        maxLength: 255
         description: >-
           The unique ID of this account in ADW.
 
@@ -585,6 +653,19 @@ paths:
               pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Account'
+    delete:
+      summary: "Remove an ADW account from the authorization database."
+      description: >-
+        This does **not** remove an account from ADW.  It just removes the authorizations assigned to this occount.
+      security:
+        - OAuth2:
+          - 'AUR.r'
+          - 'AUR.w'
+      parameters:
+        - $ref: '#/parameters/if-match-REQUIRED'
+      responses:
+        '204':
+          description: "No Content"
     put:
       summary: "Register or update an ADW account"
       security:
@@ -616,7 +697,7 @@ paths:
               "last_name": "Doe"
             }
       parameters:
-        - $ref: '#/parameters/if-match'
+        - $ref: '#/parameters/if-match-OPTIONAL'
         - $ref: '#/parameters/if-none-match-PUT'
         - name: body
           in: body
@@ -661,6 +742,99 @@ paths:
             The client didn't provide an `If-None-Match` or `If-Match` request header.
 
 
+  "/datasets":
+    get:
+      summary: "Collection of all scopesets we connect with"
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Datasets'
+
+
+  "/datasets/{dataset}":
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+    get:
+      summary: "One of the datasets we shield"
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Dataset'
+
+
+  "/datasets/{dataset}/{scope}":
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+      - name: scope
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+    get:
+      summary: "One scope in dataset `{dataset}`"
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Scope'
+
+
+  "/profiles":
+    get:
+      summary: "All profiles we have defined"
+      security:
+        - OAuth2:
+          - 'AUR.r'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Profile'
+
+
+  "/profiles/{profile}":
+    parameters:
+      - name: profile
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,32}$'
+    get:
+      summary: "One of the profiles we have defined"
+      security:
+        - OAuth2:
+          - 'AUR.r'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            $ref: '#/definitions/Profiles'
+
+
   "/roles":
     get:
       summary: "All roles we have defined"
@@ -697,144 +871,3 @@ paths:
           description: "OK"
           schema:
             $ref: '#/definitions/Role'
-
-
-  "/roles/{role}/accounts":
-    parameters:
-      - name: role
-        in: path
-        required: true
-        type: string
-        pattern: '^\\w{1,32}$'
-    get:
-      summary: "Collection of all accounts with this role"
-      security:
-        - OAuth2:
-          - 'AUR.r'
-        - API-key: []
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Accounts'
-
-
-#  "/accounts":
-#    get:
-#      summary: "List of typeahead suggestions."
-#      security:
-#        - OAuth2:
-#          - 'AUR.r'
-#      description: >-
-#        In the response body, `#/_links/account` will be an array of links to
-#        account resources.  Each link will have a `title` attribute, which
-#        contains a type-ahead completion.
-#      parameters:
-#        - name: typeahead
-#          in: query
-#          type: string
-#          required: true
-#      responses:
-#        '200':
-#          description: "OK"
-#          schema:
-#            type: object
-#            required:
-#              - _links
-#            properties:
-#              _links:
-#                type: object
-#                required:
-#                  - self
-#                  - accounts
-#                properties:
-#                  self:
-#                    $ref: '#/definitions/Link'
-#                  account:
-#                    type: array
-#                    items:
-#                      $ref: '#/definitions/Link'
-#              _embedded:
-#                type: object
-#                properties:
-#                  account:
-#                    type: array
-#                    items:
-#                      $ref: '#/definitions/Account'
-
-
-  "/datasets":
-    get:
-      summary: "Collection of all datasets we connect with"
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Datasets'
-
-
-  "/datasets/{dataset}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: '^\\w{1,32}$'
-    get:
-      summary: "One of the datasets we connect with"
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Dataset'
-
-
-  "/datasets/{dataset}/scopes":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: '^\\w{1,32}$'
-    get:
-      summary: "Collection of all scopes of this dataset"
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Scopes'
-
-
-  "/datasets/{dataset}/scopes/{scope}":
-    parameters:
-      - name: dataset
-        in: path
-        required: true
-        type: string
-        pattern: '^\\w{1,32}$'
-      - name: scope
-        in: path
-        required: true
-        type: string
-        pattern: '^\\w{1,32}$'
-    get:
-      summary: "One scope in dataset `{dataset}`"
-      parameters:
-        - $ref: '#/parameters/embed'
-      responses:
-        '200':
-          description: "OK"
-          headers:
-            ETag:
-              type: string
-              pattern: '^(?:W/)?"[^"]+"$'
-          schema:
-            $ref: '#/definitions/Scope'

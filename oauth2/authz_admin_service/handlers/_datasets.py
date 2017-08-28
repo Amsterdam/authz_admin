@@ -8,7 +8,7 @@ from . import _scopes
 _logger = logging.getLogger(__name__)
 
 
-class Datasets(view.OAuth2View):
+class Scopesets(view.OAuth2View):
 
     @property
     def etag(self):
@@ -20,7 +20,7 @@ class Datasets(view.OAuth2View):
 
     async def _links(self):
         items = [
-            Dataset(
+            Scopeset(
                 self.request,
                 {'dataset': name},
                 self.embed.get('item')
@@ -30,7 +30,7 @@ class Datasets(view.OAuth2View):
         return {'item': items}
 
 
-class Dataset(view.OAuth2View):
+class Scopeset(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

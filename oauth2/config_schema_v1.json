@@ -52,27 +52,6 @@
         "api_key": {"type": "string"},
         "access_secret": {"type": "string"},
         "bind_port": {"type": "integer"},
-        "roles": {
-          "type": "object",
-          "additionalProperties": false,
-          "patternProperties": {
-            "^\\w+$": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["name"],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "maxlength": 120
-                },
-                "description": {
-                  "type": "string",
-                  "format": "rst"
-                }
-              }
-            }
-          }
-        },
         "datasets": {
           "type": "object",
           "additionalProperties": false,
@@ -115,6 +94,64 @@
                         }
                       }
                     }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^\\w{1,32}$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxlength": 120
+                },
+                "description": {
+                  "type": "string",
+                  "format": "rst"
+                },
+                "scopes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^\\w{1,4}/\\w{1,4}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "roles": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^\\w{1,32}$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxlength": 120
+                },
+                "description": {
+                  "type": "string",
+                  "format": "rst"
+                },
+                "profiles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^\\w{1,32}$"
                   }
                 }
               }

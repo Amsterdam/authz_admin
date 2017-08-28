@@ -33,14 +33,6 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
             if 'default' in param_info
         })
 
-    async def attributes(self):
-        return {}
-        # swagger = self.request.app['swagger']
-        # _, path_spec = swagger.get_path_spec(self.rel_url.raw_path)
-        # return {
-        #     'swagger': path_spec
-        # }
-
     @property
     @abc.abstractmethod
     def link_title(self) -> str:

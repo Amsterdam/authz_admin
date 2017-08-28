@@ -2,23 +2,6 @@ authz_admin_service:
   api_key: ${AUTHZ_ADMIN_API_KEY}
   access_secret: ${JWT_ACCESS_SECRET}
   bind_port: 8120
-  roles:
-    EMPLOYEE:
-      name: Employee
-      description: >-
-        Medewerker Gemeente Amsterdam
-
-        Deze rol is tijdelijk.
-
-        .. todo:: vervangen door nauwkeuriger rolverdeling
-    EMPLOYEE_PLUS:
-      name: Employee+
-      description: >-
-        Medewerker Gemeente Amsterdam met speciale bevoegdheden
-
-        Deze rol is tijdelijk.
-
-        .. todo:: vervangen door nauwkeuriger rolverdeling
   datasets:
     CA:
       name: Datacatalogus Amsterdam
@@ -58,7 +41,56 @@ authz_admin_service:
           description: >-
             Geeft het recht om rollen aan een ADW account toe te voegen en
             rollen van een ADW account te verwijderen.
+  profiles:
+    AZB:
+      name: Autorizatiebeheer
+      description:
+        Het toekennen van rollen aan ADW accounts, om de eigenaars van deze
+        accounts toegang te geven tot voor hen relevante data.
+      scopes:
+        - AUR/r
+        - AUR/w
+    GA_020:
+      name: Gemeenteambtenaar
+      description: >-
+        Gewone beheertaken.
 
+        .. todo:: vervangen door nauwkeuriger profiel
+      scopes:
+        - CA/L1
+        - CA/L2
+    SA_020:
+      name: Superambtenaar
+      description: >-
+        Handhaving en opsporing
+
+        .. todo:: vervangen door nauwkeuriger profiel
+      scopes:
+        - CA/L1
+        - CA/L2
+  roles:
+    EMPLOYEE:
+      name: Medewerker gemeente Amsterdam
+      description: >-
+        Deze rol is tijdelijk.
+
+        .. todo:: vervangen door nauwkeuriger rolverdeling
+      profiles:
+        - GA_020
+    EMPLOYEE_PLUS:
+      name: Medewerker Plus bij gemeente Amsterdam
+      description: >-
+        Deze rol is tijdelijk.
+
+        .. todo:: vervangen door nauwkeuriger rolverdeling
+      profiles:
+        - SA_020
+    DPB:
+      name: Beheerder bij Datapunt
+      description: >-
+        Deze beheerders voeren onder andere het accountbeheer uit.
+      profiles:
+        - AZB
 
 
 postgres:
