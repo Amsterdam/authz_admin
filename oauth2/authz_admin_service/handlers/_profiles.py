@@ -1,5 +1,4 @@
 import logging
-import re
 
 from aiohttp import web
 

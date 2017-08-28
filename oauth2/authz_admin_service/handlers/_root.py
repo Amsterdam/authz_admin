@@ -1,9 +1,7 @@
 import logging
 
 from oauth2 import view
-from ._accounts import Accounts
-from ._datasets import Scopesets
-from ._roles import Roles
+from . import _accounts, _scopes, _roles
 
 _logger = logging.getLogger(__name__)
 
@@ -19,17 +17,17 @@ class Root(view.OAuth2View):
         return 'Authorization Administration API'
 
     async def _links(self):
-        accounts = Accounts(
+        accounts = _accounts.Accounts(
             self.request,
             self.match_dict,
             embed=self.embed.get('accounts')
         )
-        datasets = Scopesets(
+        datasets = _scopes.Datasets(
             self.request,
             self.match_dict,
             embed=self.embed.get('datasets')
         )
-        roles = Roles(
+        roles = _roles.Roles(
             self.request,
             self.match_dict,
             embed=self.embed.get('roles')

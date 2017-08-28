@@ -4,12 +4,10 @@ import re
 import typing as T
 
 from aiohttp import web
-import jsonschema
-
-from oauth2 import view
 from rest_utils import etag_from_int, assert_preconditions
 
-from ._roles import Role
+from oauth2 import view
+from . import _roles
 
 
 _logger = logging.getLogger(__name__)
@@ -72,7 +70,7 @@ class Account(view.OAuth2View):
 
     async def roles(self):
         return [
-            Role(
+            _roles.Role(
                 self.request,
                 {'role': role_name},
                 self.embed.get('roles')
