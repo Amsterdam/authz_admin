@@ -76,7 +76,7 @@ def add_routes(app: web.Application):
 
 
 # noinspection PyUnusedLocal
-def on_response_prepare(request: web.Request, response: web.Response):
+async def on_response_prepare(request: web.Request, response: web.Response):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
 
@@ -108,16 +108,13 @@ def application(argv):
     return app
 
 
-async def run(app):
-    async with database.create_engine(app['config']['postgres']) as engine:
-        app['engine'] = engine
+async def on_startup(app):
+    app['engine'] = await database.create_engine(app['config']['postgres'])
 
-        SERVICE_CONFIG = app['config']['authz_admin_service']
-        web.run_app(
-            app,
-            port=SERVICE_CONFIG['bind_port']
-        )
-    return 0
+
+async def on_shutdown(app):
+    app['engine'].close()
+    await app['engine'].wait_closed()
 
 
 def main():
@@ -148,9 +145,16 @@ def main():
     )
     add_routes(app)
     app.on_response_prepare.append(on_response_prepare)
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
 
     # run server
-    return asyncio.get_event_loop().run_until_complete(run(app))
+    SERVICE_CONFIG = app['config']['authz_admin_service']
+    web.run_app(
+        app,
+        port=SERVICE_CONFIG['bind_port']
+    )
+    return 0
 
 
 if __name__ == '__main__':

@@ -69,5 +69,6 @@ def create_engine(config):
 
 
 async def all_account_ids(request: web.Request):
-    engine = request.app['engine']
+    async with request.app['engine'] as conn:
+        pass
 
