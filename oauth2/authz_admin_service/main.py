@@ -75,6 +75,7 @@ def add_routes(app: web.Application):
     handlers.Role.add_to_router(app.router, base_path + '/roles/{role}')
 
 
+# noinspection PyUnusedLocal
 def on_response_prepare(request: web.Request, response: web.Response):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
@@ -107,6 +108,18 @@ def application(argv):
     return app
 
 
+async def run(app):
+    async with database.create_engine(app['config']['postgres']) as engine:
+        app['engine'] = engine
+
+        SERVICE_CONFIG = app['config']['authz_admin_service']
+        web.run_app(
+            app,
+            port=SERVICE_CONFIG['bind_port']
+        )
+    return 0
+
+
 def main():
     # language=rst
     """The entry point of the authorization administration service.
@@ -120,15 +133,24 @@ def main():
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     # Build the application
-    app = application([])
+    app = web.Application(
+        middlewares=[
+            rest_utils.middleware,
+            web.normalize_path_middleware()
+        ]
+    )
+    app['config'] = config.load()
+    app['etag'] = rest_utils.ETagGenerator().update(app['config']).etag
+    swagger_path = os.path.join(os.path.dirname(__file__), 'openapi.yml')
+    _logger.info("Loading swagger file '%s'", swagger_path)
+    app['swagger'] = swagger_parser.SwaggerParser(
+        swagger_path=swagger_path
+    )
+    add_routes(app)
+    app.on_response_prepare.append(on_response_prepare)
 
     # run server
-    SERVICE_CONFIG = app['config']['authz_admin_service']
-    web.run_app(
-        app,
-        port=SERVICE_CONFIG['bind_port']
-    )
-    return 0
+    return asyncio.get_event_loop().run_until_complete(run(app))
 
 
 if __name__ == '__main__':

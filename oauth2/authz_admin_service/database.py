@@ -59,18 +59,15 @@ def metadata() -> sa.MetaData:
 
 def create_engine(config):
     return aiopg.sa.create_engine(
-        sa_url.URL(
-            'postgresql+psycopg2',
-            username=config['user'],
-            password=config['password'],
-            host=config['host'],
-            port=config['port'],
-            database=config['dbname']
-        ),
-        # isolation_level='SERIALIZABLE',
+        user=config['user'],
+        database=config['dbname'],
+        host=config['host'],
+        port=config['port'],
+        password=config['password'],
         client_encoding='utf8'
     )
 
 
 async def all_account_ids(request: web.Request):
-    pass
+    engine = request.app['engine']
+
