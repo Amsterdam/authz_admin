@@ -1,4 +1,5 @@
 import logging
+from docutils.core import publish_parts
 
 from aiohttp import web
 
@@ -54,7 +55,7 @@ class Profile(view.OAuth2View):
     async def attributes(self):
         result = await super().attributes()
         if 'description' in self._profile:
-            result['description'] = self._profile['description']
+            result['description'] = publish_parts(self._profile['description'], writer_name='html')['fragment']
         return result
 
     async def _links(self):

@@ -25,8 +25,8 @@ authz_admin_service:
           name: Onbeperkt aantal bevragingen
           description: >-
             Deze permissie geeft gebruikers het recht onbeperkt informatie op te
-            vragen (anonieme gebruikers mogen maximaal X [TODO --PvB] bevragingen
-            per dag doen).
+            vragen (anonieme gebruikers mogen maximaal X [TODO --PvB]
+            bevragingen per dag doen).
     AUR:
       name: Rollen van ADW accounts
       described_by: 'https://dokuwiki.datapunt.amsterdam.nl/'
@@ -34,8 +34,8 @@ authz_admin_service:
         r:
           name: Rollen van gebruikers bevragen
           description: >-
-            Geeft het recht om de rollen in te zien behorende bij een
-            ADW account.
+            Geeft het recht om de rollen in te zien behorende bij een ADW
+            account.
         w:
           name: Rollen van gebruikers wijzigen
           description: >-
@@ -43,8 +43,8 @@ authz_admin_service:
             rollen van een ADW account te verwijderen.
   profiles:
     AZB:
-      name: Autorizatiebeheer
-      description:
+      name: Autorisatiebeheer
+      description: |-
         Het toekennen van rollen aan ADW accounts, om de eigenaars van deze
         accounts toegang te geven tot voor hen relevante data.
       scopes:
@@ -52,42 +52,46 @@ authz_admin_service:
         - AUR/w
     GA_020:
       name: Gemeenteambtenaar
-      description: >-
+      description: |-
         Gewone beheertaken.
 
-        .. todo:: vervangen door nauwkeuriger profiel
+        To Do
+            vervangen door nauwkeuriger profiel
       scopes:
         - CA/L1
         - CA/L2
     SA_020:
       name: Superambtenaar
-      description: >-
+      description: |-
         Handhaving en opsporing
 
-        .. todo:: vervangen door nauwkeuriger profiel
+        To Do
+            vervangen door nauwkeuriger profiel
       scopes:
         - CA/L1
         - CA/L2
   roles:
-    EMPLOYEE:
-      name: Medewerker gemeente Amsterdam
-      description: >-
+    CDE:
+      name: medewerker
+      description: |-
         Deze rol is tijdelijk.
 
-        .. todo:: vervangen door nauwkeuriger rolverdeling
+        To Do
+            vervangen door nauwkeuriger rolverdeling
       profiles:
         - GA_020
-    EMPLOYEE_PLUS:
-      name: Medewerker Plus bij gemeente Amsterdam
-      description: >-
+    CDE_PLUS:
+      name: speciaal bevoegd
+      description: |-
         Deze rol is tijdelijk.
 
-        .. todo:: vervangen door nauwkeuriger rolverdeling
+        To Do
+            vervangen door nauwkeuriger rolverdeling
       profiles:
         - SA_020
     DPB:
-      name: Beheerder bij Datapunt
-      description: >-
+      name: City Data Beheerder
+      description: |-
         Deze beheerders voeren onder andere het accountbeheer uit.
       profiles:
         - AZB
@@ -116,14 +120,18 @@ logging:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [console]
       propagate: false
+    oauth2.*:
+      level: ${LOGLEVEL:-DEBUG}
+      handlers: [console]
+      propagate: false
     aiohttp.access:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [aiohttp.access]
       propagate: false
     aiohttp:
       propagate: true
-#    aiohttp.*:
-#      propagate: true
+    aiohttp.*:
+      propagate: true
     rest_utils:
       propagate: true
   root:

@@ -25,6 +25,7 @@ from oauth2.config import load as load_config
 def metadata() -> sa.MetaData:
     result = sa.MetaData()
 
+
     def audit_id():
         return sa.Column('audit_id', sa.Integer, sa.ForeignKey('AuditLog.id'), index=True, nullable=False, unique=True)
 

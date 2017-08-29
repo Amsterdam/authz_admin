@@ -4,50 +4,10 @@
   "required": ["authz_admin_service", "postgres", "logging"],
   "properties": {
 
-    "authn_service": {
-      "type": "object",
-      "required": ["roles"],
-      "additionalProperties": false,
-      "properties": {
-        "roles": {
-          "type": "object",
-          "patternProperties": {
-            "^[1-9]\\d*$": {"type": "string"}
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-
-    "authz_service": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["bind_host", "bind_port", "idps", "root_path"],
-      "properties": {
-        "bind_host": {"type": "string"},
-        "bind_port": {"type": "integer"},
-        "external_fqdn": {"type": "string"},
-        "external_port": {"type": "integer"},
-        "external_scheme": {
-          "type": "string",
-          "enum": [ "http", "https" ]},
-        "idps": {
-          "type": "object",
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-zA-Z0-9._]+$": {
-              "type": "object"
-            }
-          }
-        },
-        "root_path": {"type": "string"}
-      }
-    },
-
     "authz_admin_service": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["api_key", "access_secret", "bind_port", "datasets", "roles"],
+      "required": ["api_key", "access_secret", "bind_port", "datasets", "roles", "profiles"],
       "properties": {
         "api_key": {"type": "string"},
         "access_secret": {"type": "string"},
@@ -107,9 +67,7 @@
             "^\\w{1,32}$": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "name"
-              ],
+              "required": ["name", "scopes"],
               "properties": {
                 "name": {
                   "type": "string",
@@ -137,7 +95,7 @@
             "^\\w{1,32}$": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["name"],
+              "required": ["name", "profiles"],
               "properties": {
                 "name": {
                   "type": "string",

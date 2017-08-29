@@ -13,7 +13,7 @@ from aiohttp import web
 
 import rest_utils
 from oauth2 import config
-from . import handlers
+from . import handlers, database
 
 _logger = logging.getLogger(__name__)
 

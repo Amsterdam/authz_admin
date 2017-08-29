@@ -12,8 +12,8 @@ from . import _roles
 
 _logger = logging.getLogger(__name__)
 _ACCOUNTS = {
-    'p.van.beek@amsterdam.nl': ['EMPLOYEE', 'EMPLOYEE_PLUS'],
-    'e.lammerts@amsterdam.nl': ['EMPLOYEE'],
+    'p.van.beek@amsterdam.nl': ['CDE', 'CDE_PLUS'],
+    'e.lammerts@amsterdam.nl': ['CDE'],
     'loetje.hanglip@amsterdam.nl': []
 }
 
