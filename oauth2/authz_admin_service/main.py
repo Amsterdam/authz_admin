@@ -10,6 +10,7 @@ import jwt
 import swagger_parser
 import uvloop
 from aiohttp import web
+import aiopg.sa
 
 import rest_utils
 from oauth2 import config
@@ -109,12 +110,19 @@ def application(argv):
 
 
 async def on_startup(app):
-    app['engine'] = await database.create_engine(app['config']['postgres'])
-
-
-async def on_shutdown(app):
-    app['engine'].close()
-    await app['engine'].wait_closed()
+    dbconf = app['config']['postgres']
+    create_engine = aiopg.sa.create_engine(
+        user=dbconf['user'],
+        database=dbconf['dbname'],
+        host=dbconf['host'],
+        port=dbconf['port'],
+        password=dbconf['password'],
+        client_encoding='utf8'
+    )
+    app['engine'] = await create_engine.__aenter__()
+    async def on_shutdown(app):
+        await create_engine.__aexit__()
+    app.on_shutdown.append(on_shutdown)
 
 
 def main():
@@ -146,7 +154,6 @@ def main():
     add_routes(app)
     app.on_response_prepare.append(on_response_prepare)
     app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
 
     # run server
     SERVICE_CONFIG = app['config']['authz_admin_service']

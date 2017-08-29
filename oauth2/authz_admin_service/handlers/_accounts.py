@@ -35,6 +35,8 @@ class Accounts(view.OAuth2View):
         return "ADW accounts"
 
     async def accounts(self):
+        async with self.request.app['engine'] as conn:
+            pass
         return [
             Account(
                 self.request,
