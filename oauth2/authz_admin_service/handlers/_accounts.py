@@ -5,9 +5,11 @@ import typing as T
 
 from aiohttp import web
 from rest_utils import etag_from_int, assert_preconditions
+import sqlalchemy as sa
 
 from oauth2 import view
 from . import _roles
+from .. import database
 
 
 _logger = logging.getLogger(__name__)
@@ -26,25 +28,29 @@ async def account_names_with_role(role: str):
 
 class Accounts(view.OAuth2View):
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     # TODO: implement
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__cached_accounts = None
 
     @property
     def link_title(self):
         return "ADW accounts"
 
     async def accounts(self):
-        async with self.request.app['engine'] as conn:
-            pass
-        return [
-            Account(
-                self.request,
-                {'account': name},
-                self.embed.get('item')
-            )
-            for name in _ACCOUNTS
-        ]
+        if self.__cached_accounts is None:
+            app = self.request.app
+            metadata: sa.MetaData = app['metadata']
+            async with app['engine'].acquire() as conn:
+                self.__cached_accounts = [
+                    Account(
+                        self.request,
+                        {'account': row['id_from_idp']},
+                        self.embed.get('item'),
+                        row=row
+                    )
+                    async for row in conn.execute(sa.select([metadata.tables['Accounts']]))
+                ]
+        return self.__cached_accounts
 
     async def _links(self):
         return {'item': await self.accounts()}
@@ -52,9 +58,60 @@ class Accounts(view.OAuth2View):
 
 class Account(view.OAuth2View):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, row=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self._roles = _ACCOUNTS.get(self['account'])
+        if row is None:
+            self._id = None
+            # self._id_from_idp = None
+            # self._audit_id = None
+        else:
+            self._id = row['id']
+            self._id_from_idp = row['id_from_idp']
+            self._audit_id = row['audit_id']
+        self._roles = None
+
+    async def id(self):
+        if self._id is None:
+            app = self.request.app
+            table_accounts = app['metadata'].tables['Accounts']
+            async with app['engine'].acquire() as conn:
+                rows = await conn.execute(
+                    sa.select([table_accounts]).where(table_accounts.c.id_from_idp == self['account'])
+                )
+                row = await rows.fetchone()
+                if row is None:
+                    raise web.HTTPNotFound()
+                self._id = row['id']
+                self._id_from_idp = row['id_from_idp']
+                self._audit_id = row['audit_id']
+        return self._id
+
+    async def id_from_idp(self):
+        await self.id()
+        return self._id_from_idp
+
+    async def audit_id(self):
+        await self.id()
+        return self._audit_id
+
+    async def roles(self) -> T.Set[T.Dict]:
+        id = await self.id()
+        if self._roles is None:
+            app = self.request.app
+            table_accountroles = app['metadata'].tables['AccountRoles']
+            async with app['engine'].acquire() as conn:
+                self._roles = set([
+                    {
+                        'id': row['id'],
+                        'role_id': row['role_id'],
+                        'grounds': row['grounds'],
+                        'audit_id': row['audit_id']
+                    } async for row in conn.execute(
+                        sa.select([table_accountroles])
+                        .where(table_accountroles.c.account_id == id)
+                    )
+                ])
+        return self._roles
 
     @property
     def link_name(self):
@@ -66,27 +123,22 @@ class Account(view.OAuth2View):
 
     @property
     def etag(self):
-        if self._roles is None:
+        try:
+            return etag_from_int(hash(self.roles()))
+        except web.HTTPNotFound:
             return None
-        return etag_from_int(hash(tuple(self._roles)))
-
-    async def roles(self):
-        return [
-            _roles.Role(
-                self.request,
-                {'role': role_name},
-                self.embed.get('roles')
-            ) for role_name in await self.role_names()
-        ]
-
-    async def role_names(self) -> T.List[str]:
-        return self._roles or []
 
     async def _links(self):
         if self._roles is None:
             raise web.HTTPNotFound()
         return {
-            'role': await self.roles()
+            'role': [
+                _roles.Role(
+                    self.request,
+                    {'role': role['role_id']},
+                    self.embed.get('role')
+                ) for role in await self.roles()
+            ]
         }
 
     async def put(self):
@@ -134,3 +186,37 @@ class Account(view.OAuth2View):
         assert_preconditions(self.request, self.etag)
         del _ACCOUNTS[self['account']]
         return web.Response(status=204)
+
+class AccountRole(view.OAuth2View):
+
+    def __init__(self, *args, row=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if row is None:
+            pass
+        else:
+            pass
+
+    @property
+    def link_title(self):
+        return self['role']
+
+    async def accounts(self):
+        if self.__cached_accounts is None:
+            app = self.request.app
+            metadata: sa.MetaData = app['metadata']
+            async with app['engine'].acquire() as conn:
+                self.__cached_accounts = [
+                    Account(
+                        self.request,
+                        {'account': row['id_from_idp']},
+                        self.embed.get('item'),
+                        row=row
+                    )
+                    async for row in conn.execute(sa.select([metadata.tables['Accounts']]))
+                ]
+        return self.__cached_accounts
+
+    async def _links(self):
+        return {'item': await self.accounts()}
+
+

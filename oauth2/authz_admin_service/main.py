@@ -121,7 +121,7 @@ async def on_startup(app):
     )
     app['engine'] = await create_engine.__aenter__()
     async def on_shutdown(app):
-        await create_engine.__aexit__()
+        await create_engine.__aexit__(None, None, None)
     app.on_shutdown.append(on_shutdown)
 
 
@@ -151,12 +151,14 @@ def main():
     app['swagger'] = swagger_parser.SwaggerParser(
         swagger_path=swagger_path
     )
+    app['metadata'] = database.metadata()
     add_routes(app)
     app.on_response_prepare.append(on_response_prepare)
     app.on_startup.append(on_startup)
 
     # run server
     SERVICE_CONFIG = app['config']['authz_admin_service']
+    _logger.debug("about to start")
     web.run_app(
         app,
         port=SERVICE_CONFIG['bind_port']

@@ -120,20 +120,18 @@ logging:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [console]
       propagate: false
-    oauth2.*:
-      level: ${LOGLEVEL:-DEBUG}
-      handlers: [console]
-      propagate: false
     aiohttp.access:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [aiohttp.access]
       propagate: false
     aiohttp:
       propagate: true
-    aiohttp.*:
-      propagate: true
+#    aiohttp.*:
+#      propagate: true
     rest_utils:
-      propagate: true
+      level: ${LOGLEVEL:-DEBUG}
+      handlers: [console]
+      propagate: false
   root:
     level: ${LOGLEVEL:-WARNING}
     handlers: [console]
