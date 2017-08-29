@@ -25,6 +25,7 @@ setup(
         'aiopg',
         'alembic',
         'cchardet', # Recommended by aiohttp docs
+        'docutils',
         'jsonschema',
         'mimeparse',
         'PyYaml',
