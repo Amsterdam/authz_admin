@@ -198,9 +198,37 @@
       ]
     },
     "Account": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Collection"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "_embedded": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/AccountRole"
+                  }
+                }
+              }
+            },
+            "_etag": {
+              "type": "string",
+              "pattern": "^(?:W/)?\"[^\"]+\"$"
+            }
+          }
+        }
+      ]
+    },
+    "AccountRole": {
       "type": "object",
       "required": [
-        "_links"
+        "_links",
+        "grounds"
       ],
       "properties": {
         "_links": {
@@ -214,23 +242,15 @@
               "$ref": "#/definitions/Link"
             },
             "role": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Link"
-              }
+              "$ref": "#/definitions/Link"
             }
           }
         },
         "_embedded": {
-          "type": "object",
-          "properties": {
-            "role": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Role"
-              }
-            }
-          }
+          "type": "object"
+        },
+        "grounds": {
+          "type": "string"
         },
         "_etag": {
           "type": "string",
@@ -717,6 +737,48 @@
           },
           "428": {
             "description": "**Precondition Required**\nThe client didn't provide an `If-None-Match` or `If-Match` request header."
+          }
+        }
+      }
+    },
+    "/accounts/{account}/{accountrole}": {
+      "parameters": [
+        {
+          "name": "account",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "The unique ID of this account in ADW.\nUnfortunately, TMA returns the email address as unique identifier, instead of ADW's true internal unique ID, which consists of the user's last name plus three digits."
+        },
+        {
+          "name": "accountrole",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "pattern": "^\\\\w{1,32}$"
+        }
+      ],
+      "get": {
+        "summary": "A role assigned to a certain `{account}`",
+        "parameters": [
+          {
+            "$ref": "#/parameters/embed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/AccountRole"
+            }
           }
         }
       }

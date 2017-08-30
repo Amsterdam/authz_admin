@@ -5,6 +5,7 @@ from aiohttp import web
 
 from oauth2 import view
 from . import _profiles, _accounts
+from .. import database
 
 _logger = logging.getLogger(__name__)
 
@@ -15,8 +16,7 @@ class Roles(view.OAuth2View):
     #     super().__init__(*args, **kwargs)
     #     # TODO: implement
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property
@@ -44,8 +44,7 @@ class Role(view.OAuth2View):
             raise web.HTTPNotFound()
         self._role = roles[self['role']]
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property
@@ -72,6 +71,6 @@ class Role(view.OAuth2View):
                     self.request,
                     {'account': account_name},
                     self.embed.get('account')
-                ) for account_name in await _accounts.account_names_with_role(self['role'])
+                ) async for account_name in await database.account_names_with_role(self.request, self['role'])
             ]
         }

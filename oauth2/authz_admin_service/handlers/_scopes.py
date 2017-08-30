@@ -10,8 +10,7 @@ _logger = logging.getLogger(__name__)
 
 class Datasets(view.OAuth2View):
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property
@@ -43,8 +42,7 @@ class Dataset(view.OAuth2View):
     def link_title(self):
         return self._dataset['name']
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     async def _links(self):
@@ -90,8 +88,7 @@ class Scope(view.OAuth2View):
             self['dataset']
         )
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     async def _links(self):

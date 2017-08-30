@@ -15,8 +15,7 @@ class Profiles(view.OAuth2View):
     #     super().__init__(*args, **kwargs)
     #     # TODO: implement
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property
@@ -44,8 +43,7 @@ class Profile(view.OAuth2View):
             raise web.HTTPNotFound()
         self._profile = profiles[self['profile']]
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property

@@ -8,8 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class Root(view.OAuth2View):
 
-    @property
-    def etag(self):
+    async def etag(self):
         return self.request.app['etag']
 
     @property

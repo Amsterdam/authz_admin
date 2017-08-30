@@ -11,7 +11,7 @@ from aiohttp import web
 
 _logger = logging.getLogger(__name__)
 
-ETag = T.Union[str, bool, None]
+ETagType = T.Union[str, bool, None]
 _ETAGS_PATTERN = re.compile(
     r'\s*(?:W/)?"[\x21\x23-\x7e\x80-\xff]+"(?:\s*,\s*(?:W/)?"[\x21\x23-\x7e\x80-\xff]+")*'
 )
@@ -136,7 +136,7 @@ class ETagGenerator:
         return self
 
     @property
-    def etag(self, weak=False):
+    def etag(self, weak=False) -> str:
         return etaggify(
             base64.urlsafe_b64encode(self._hash.digest()).decode(),
             weak

@@ -90,8 +90,7 @@ class View(web.View):
             result['title'] = self.link_title
         return result
 
-    @property
-    def etag(self) -> T.Union[None, bool, str]:
+    async def etag(self) -> T.Union[None, bool, str]:
         # language=rst
         """
 
@@ -309,10 +308,10 @@ class View(web.View):
         assert 'GET_IN_PROGRESS' not in self.request
         self.request['GET_IN_PROGRESS'] = True
 
-        assert_preconditions(self.request, self.etag)
+        assert_preconditions(self.request, await self.etag())
         response = web.StreamResponse()
-        if isinstance(self.etag, str):
-            response.headers.add('ETag', self.etag)
+        if isinstance(await self.etag(), str):
+            response.headers.add('ETag', await self.etag())
         response.content_type = self.request[BEST_CONTENT_TYPE]
         response.enable_compression()
         if str(self.canonical_rel_url) != str(self.request.rel_url):
@@ -331,8 +330,8 @@ class View(web.View):
 
     async def to_dict(self):
         result = await self.attributes()
-        if isinstance(self.etag, str):
-            result['_etag'] = self.etag
+        if isinstance(await self.etag(), str):
+            result['_etag'] = await self.etag()
         result['_links'] = await self.links()
         if 'self' not in result['_links']:
             result['_links']['self'] = self.to_link

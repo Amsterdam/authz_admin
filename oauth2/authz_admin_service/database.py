@@ -8,7 +8,7 @@ import sqlalchemy.engine.url as sa_url
 import sqlalchemy.sql.functions as sa_functions
 from aiohttp import web
 
-from oauth2.config import load as load_config
+from . import handlers
 
 
 _logger = logging.getLogger(__name__)
@@ -68,7 +68,56 @@ def create_engine(config):
     )
 
 
-async def all_account_ids(request: web.Request):
-    async with request.app['engine'] as conn:
-        pass
+async def accounts(request):
+    async with request.app['engine'].acquire() as conn:
+        async for row in conn.execute(
+            sa.select([metadata().tables['Accounts']])
+        ):
+            yield row
 
+
+async def account(request, id_from_idp):
+    accounts_table = metadata().tables['Accounts']
+    async with request.app['engine'].acquire() as conn:
+        result_set = await conn.execute(
+            sa.select([accounts_table])
+            .where(accounts_table.c.id_from_idp == id_from_idp)
+        )
+        return await result_set.fetchone()
+
+
+async def accountroles(request, account_id):
+    table_accountroles = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        async for row in conn.execute(
+            sa.select([table_accountroles])
+            .where(table_accountroles.c.account_id == account_id)
+        ):
+            yield row
+
+
+async def accountrole(request, account_id_from_idp, role_id):
+    accounts_table = metadata().tables['Accounts']
+    accountroles_table = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        result_set = await conn.execute(
+            sa.select([accountroles_table]).select_from(
+                sa.join(accountroles_table, accounts_table)
+            ).where(
+                accounts_table.c.id_from_idp == account_id_from_idp and
+                accountroles_table.c.role_id == role_id
+            )
+        )
+        return await result_set.fetchone()
+
+
+async def account_names_with_role(request, role_id):
+    accounts_table = metadata().tables['Accounts']
+    accountroles_table = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        async for row in conn.execute(
+            sa.select([accounts_table.c.id_from_idp]).select_from(
+                sa.join(accountroles_table, accounts_table)
+            ).where(accountroles_table.c.role_id == role_id)
+        ):
+            yield row['id_from_idp']
