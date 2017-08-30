@@ -85,60 +85,26 @@ class Account(view.OAuth2View):
     def link_title(self):
         return "ADW account voor <%s>" % self['account']
 
-    async def etag(self):
-        if await self.data() is False:
-            return None
-        role_ids = [
-            role['accountrole'] for role in await self.roles()
-        ]
+    @staticmethod
+    def role_ids_to_etag(role_ids):
+        role_ids = list(role_ids)
         role_ids.sort()
         etag_generator = ETagGenerator()
         for role_id in role_ids:
             etag_generator.update(role_id)
         return etag_generator.etag
 
+    async def etag(self):
+        if await self.data() is False:
+            return None
+        return self.role_ids_to_etag([
+            role['accountrole'] for role in await self.roles()
+        ])
+
     async def _links(self):
         return {
             'item': await self.roles()
         }
-
-    async def put(self):
-        if_match = self.request.headers.get('if-match', '')
-        if_none_match = self.request.headers.get('if-none-match', '')
-        if if_match == '' and if_none_match == '':
-            raise web.HTTPPreconditionRequired()
-        assert_preconditions(self.request, await self.etag())
-        if not re.match(r'application/(?:hal\+)?json(?:$|;)',
-                        self.request.content_type):
-            raise web.HTTPUnsupportedMediaType()
-        try:
-            request_body_json = json_loads(await self.request.text())
-        except:
-            raise web.HTTPBadRequest()
-        # self.request.app['swagger'].validate_definition('Account', request_body_json)
-        existing_roles = set(self.request.app['config']['authz_admin_service']['roles'].keys())
-        try:
-            roles = request_body_json['_links']['role']
-            assert isinstance(roles, list)
-        except:
-            raise web.HTTPBadRequest(
-                text="No '#/_links/role' array in request."
-            )
-        new_roles = set()
-        try:
-            for link_object in roles:
-                role = web.URL(link_object['href']).name
-                assert role in existing_roles
-                new_roles.add(role)
-        except:
-            raise web.HTTPBadRequest(
-                text="Not all roles are valid HALJSON link objects to an existing role."
-            )
-        status_code = 204 if self['account'] in _ACCOUNTS else 201
-        _ACCOUNTS[self['account']] = new_roles
-        response_headers = {} if status_code == 204 else \
-            {'Location': self.rel_url.raw_path}
-        return web.Response(status=status_code, headers=response_headers)
 
     async def delete(self) -> web.Response:
         if_match = self.request.headers.get('if-match', '')
@@ -189,4 +155,42 @@ class AccountRole(view.OAuth2View):
             self.embed.get('role')
         )}
 
+
+    async def put(self):
+        if_match = self.request.headers.get('if-match', '')
+        if_none_match = self.request.headers.get('if-none-match', '')
+        if if_match == '' and if_none_match == '':
+            raise web.HTTPPreconditionRequired()
+        assert_preconditions(self.request, await self.etag())
+        if not re.match(r'application/(?:hal\+)?json(?:$|;)',
+                        self.request.content_type):
+            raise web.HTTPUnsupportedMediaType()
+        try:
+            request_body_json = json_loads(await self.request.text())
+        except:
+            raise web.HTTPBadRequest()
+        # self.request.app['swagger'].validate_definition('Account', request_body_json)
+        existing_roles = set(self.request.app['config']['authz_admin_service']['roles'].keys())
+        try:
+            roles = request_body_json['_links']['role']
+            assert isinstance(roles, list)
+        except:
+            raise web.HTTPBadRequest(
+                text="No '#/_links/role' array in request."
+            )
+        new_roles = set()
+        try:
+            for link_object in roles:
+                role = web.URL(link_object['href']).name
+                assert role in existing_roles
+                new_roles.add(role)
+        except:
+            raise web.HTTPBadRequest(
+                text="Not all roles are valid HALJSON link objects to an existing role."
+            )
+        status_code = 204 if self['account'] in _ACCOUNTS else 201
+        _ACCOUNTS[self['account']] = new_roles
+        response_headers = {} if status_code == 204 else \
+            {'Location': self.rel_url.raw_path}
+        return web.Response(status=status_code, headers=response_headers)
 
