@@ -4,7 +4,7 @@ import logging
 
 import aiopg.sa
 import sqlalchemy as sa
-import sqlalchemy.engine.url as sa_url
+from sqlalchemy.dialects import postgresql
 import sqlalchemy.sql.functions as sa_functions
 from aiohttp import web
 
@@ -18,40 +18,25 @@ _logger = logging.getLogger(__name__)
 def metadata() -> sa.MetaData:
     result = sa.MetaData()
 
-    def audit_id():
-        return sa.Column('audit_id', sa.Integer, sa.ForeignKey('AuditLog.id'),
-                         index=True, nullable=False, unique=True)
-
     sa.Table(
-        'AuditLog', result,
-        sa.Column('id', sa.Integer, primary_key=True),
+        'AccountRolesLog', result,
+        sa.Column('id', sa.Integer, index=True, nullable=False, primary_key=True),
         sa.Column('created_at', sa.DateTime, server_default=sa_functions.now(), index=True, nullable=False),
-        sa.Column('created_by', sa.Integer, index=True, nullable=False),
-        sa.Column('table_name', sa.String, index=True, nullable=False),
-        sa.Column('foreign_key', sa.Integer, index=True, nullable=False),
+        sa.Column('created_by', sa.Unicode, index=True, nullable=False),
+        sa.Column('request_info', sa.UnicodeText, nullable=None),
+        sa.Column('account_id', sa.String, index=True, nullable=False),
         sa.Column('action', sa.String(1), index=True, nullable=False),
-        sa.Column('values', sa.UnicodeText, nullable=True),
-        sa.Column('context', sa.UnicodeText, nullable=None)
-    )
-
-    sa.Table(
-        'Accounts', result,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('id_from_idp', sa.String, index=True, nullable=False, unique=True),
-        audit_id()
+        sa.Column('role_ids', postgresql.ARRAY(sa.String(32)), nullable=False),
+        sa.Index('idx_arl_role_ids', 'role_ids', postgresql_using='gin')
     )
 
     sa.Table(
         'AccountRoles', result,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('account_id', sa.Integer,
-                  sa.ForeignKey('Accounts.id', ondelete='CASCADE', onupdate='CASCADE'),
-                  index=True, nullable=False),
-        sa.Column('role_id', sa.String,
-                  index=True, nullable=False),
-        sa.Column('grounds', sa.UnicodeText, nullable=False),
-        audit_id(),
-        sa.UniqueConstraint('account_id', 'role_id')
+        sa.Column('account_id', sa.String, index=True, nullable=False, primary_key=True),
+        sa.Column('role_ids', postgresql.ARRAY(sa.String(32)), nullable=False),
+        sa.Column('log_id', sa.Integer, sa.ForeignKey('AccountRolesLog.id'),
+                  index=True, nullable=False, unique=True),
+        sa.Index('idx_ar_role_ids', 'role_ids', postgresql_using='gin')
     )
 
     return result
@@ -71,53 +56,49 @@ def create_engine(config):
 async def accounts(request):
     async with request.app['engine'].acquire() as conn:
         async for row in conn.execute(
-            sa.select([metadata().tables['Accounts']])
+            sa.select([metadata().tables['AccountRoles']])
         ):
             yield row
 
 
-async def account(request, id_from_idp):
-    accounts_table = metadata().tables['Accounts']
-    async with request.app['engine'].acquire() as conn:
-        result_set = await conn.execute(
-            sa.select([accounts_table])
-            .where(accounts_table.c.id_from_idp == id_from_idp)
-        )
-        return await result_set.fetchone()
-
-
-async def accountroles(request, account_id):
-    table_accountroles = metadata().tables['AccountRoles']
-    async with request.app['engine'].acquire() as conn:
-        async for row in conn.execute(
-            sa.select([table_accountroles])
-            .where(table_accountroles.c.account_id == account_id)
-        ):
-            yield row
-
-
-async def accountrole(request, account_id_from_idp, role_id):
-    accounts_table = metadata().tables['Accounts']
+async def account(request, account_id):
     accountroles_table = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
-        result_set = await conn.execute(
-            sa.select([accountroles_table]).select_from(
-                sa.join(accountroles_table, accounts_table)
-            ).where(
-                accounts_table.c.id_from_idp == account_id_from_idp and
-                accountroles_table.c.role_id == role_id
-            )
+        result_proxy = await conn.execute(
+            sa.select([accountroles_table])
+            .where(accountroles_table.c.account_id == account_id)
         )
-        return await result_set.fetchone()
+        return await result_proxy.fetchone()
 
 
 async def account_names_with_role(request, role_id):
-    accounts_table = metadata().tables['Accounts']
     accountroles_table = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
         async for row in conn.execute(
-            sa.select([accounts_table.c.id_from_idp]).select_from(
-                sa.join(accountroles_table, accounts_table)
-            ).where(accountroles_table.c.role_id == role_id)
+            sa.select([accountroles_table.c.account_id])
+            .where(accountroles_table.c.role_ids.contains(
+                sa.cast([role_id], postgresql.ARRAY(sa.String(32))))
+            )
         ):
-            yield row['id_from_idp']
+            yield row['account_id']
+
+
+# async def delete_account(request, id_from_idp):
+#     accounts_table = metadata().tables['Accounts']
+#     auditlog_table = metadata().tables['AuditLog']
+#     accountroles_table = metadata().tables['AccountRoles']
+#     async with request.app['engine'].acquire() as conn:
+#         async with conn.begin():
+#             result_set = await conn.execute(
+#                 sa.select([accountroles_table.c.audit_id])
+#                 .select_from(
+#                     sa.join(accountroles_table, accounts_table)
+#                 )
+#                 .where(accountroles_table.c.)
+#             )
+#     async for row in conn.execute(
+#         sa.select([accounts_table.c.id_from_idp]).select_from(
+#             sa.join(accountroles_table, accounts_table)
+#         ).where(accountroles_table.c.role_id == role_id)
+#     ):
+#         yield row['id_from_idp']

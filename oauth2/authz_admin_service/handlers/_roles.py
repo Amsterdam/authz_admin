@@ -71,6 +71,6 @@ class Role(view.OAuth2View):
                     self.request,
                     {'account': account_name},
                     self.embed.get('account')
-                ) async for account_name in await database.account_names_with_role(self.request, self['role'])
+                ) async for account_name in database.account_names_with_role(self.request, self['role'])
             ]
         }

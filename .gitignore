@@ -27,4 +27,3 @@ __pycache__
 
 /swagger-ui/.git
 /hal-browser/.git
-/swagger-ui/dist/openapi.json

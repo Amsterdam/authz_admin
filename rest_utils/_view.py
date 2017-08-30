@@ -195,7 +195,7 @@ class View(web.View):
 
         """
         formatter = self._resource.get_info().get('formatter')
-        if formatter is not None and re.match(r'\}[^/]*/?$', formatter):
+        if formatter is not None and re.search(r'\}[^/]*/?$', formatter):
             return self.rel_url.name or self.rel_url.parent.name
         return None
 

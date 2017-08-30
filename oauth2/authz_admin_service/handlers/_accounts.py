@@ -35,9 +35,9 @@ class Accounts(view.OAuth2View):
             self.__cached_accounts = list([
                 Account(
                     self.request,
-                    {'account': row['id_from_idp']},
+                    {'account': row['account_id']},
                     self.embed.get('item'),
-                    row=row
+                    data=row
                 )
                 async for row in database.accounts(self.request)
             ])
@@ -49,33 +49,16 @@ class Accounts(view.OAuth2View):
 
 class Account(view.OAuth2View):
 
-    def __init__(self, *args, row=None,roles=None, **kwargs):
+    def __init__(self, *args, data=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self._data = row
-        self._roles = roles
+        self._data = data
 
     async def data(self):
         if self._data is None:
             self._data = await database.account(self.request, self['account'])
-            if self._data is None:
-                self._data = False
+        if self._data is None:
+            raise web.HTTPNotFound()
         return self._data
-
-    async def roles(self) -> T.Set:
-        data = await self.data()
-        if self._roles is None:
-            self._roles = set([
-                AccountRole(
-                    self.request,
-                    {'account': self['account'], 'accountrole': row['role_id']},
-                    self.embed.get('accountrole'),
-                    row=row
-                ) async for row in database.accountroles(
-                    self.request,
-                    data['id']
-                )
-            ])
-        return self._roles
 
     @property
     def link_name(self):
@@ -85,76 +68,24 @@ class Account(view.OAuth2View):
     def link_title(self):
         return "ADW account voor <%s>" % self['account']
 
-    @staticmethod
-    def role_ids_to_etag(role_ids):
-        role_ids = list(role_ids)
-        role_ids.sort()
-        etag_generator = ETagGenerator()
-        for role_id in role_ids:
-            etag_generator.update(role_id)
-        return etag_generator.etag
-
     async def etag(self):
-        if await self.data() is False:
+        try:
+            data = await self.data()
+        except web.HTTPNotFound:
             return None
-        return self.role_ids_to_etag([
-            role['accountrole'] for role in await self.roles()
-        ])
+        return etag_from_int(data['log_id'])
 
     async def _links(self):
-        return {
-            'item': await self.roles()
-        }
-
-    async def delete(self) -> web.Response:
-        if_match = self.request.headers.get('if-match', '')
-        if if_match == '':
-            raise web.HTTPPreconditionRequired()
-        assert_preconditions(self.request, await self.etag())
-        del _ACCOUNTS[self['account']]
-        return web.Response(status=204)
-
-
-class AccountRole(view.OAuth2View):
-
-    def __init__(self, *args, row=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._data = row
-
-    async def data(self):
-        if self._data is None:
-            self._data = await database.accountrole(self.request, self['account'], self['accountrole'])
-            if self._data is None:
-                self._data = False
-        return self._data
-
-    async def etag(self):
-        data = await self.data()
-        if data is False:
-            return None
-        return etag_from_int(data['id'])
-
-    @property
-    def link_name(self):
-        return self['accountrole']
-
-    @property
-    def link_title(self):
-        return self['accountrole']
-
-    async def attributes(self):
         data = await self.data()
         return {
-            'grounds': data['grounds']
+            'role': [
+                _roles.Role(
+                    self.request,
+                    {'role': role_id},
+                    self.embed.get('role')
+                ) for role_id in data['role_ids']
+            ]
         }
-
-    async def _links(self):
-        return {'role': _roles.Role(
-            self.request,
-            {'role': self['accountrole']},
-            self.embed.get('role')
-        )}
-
 
     async def put(self):
         if_match = self.request.headers.get('if-match', '')
@@ -194,3 +125,10 @@ class AccountRole(view.OAuth2View):
             {'Location': self.rel_url.raw_path}
         return web.Response(status=status_code, headers=response_headers)
 
+    async def delete(self) -> web.Response:
+        if_match = self.request.headers.get('if-match', '')
+        if if_match == '':
+            raise web.HTTPPreconditionRequired()
+        assert_preconditions(self.request, await self.etag())
+        del _ACCOUNTS[self['account']]
+        return web.Response(status=204)

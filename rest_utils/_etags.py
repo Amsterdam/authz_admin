@@ -41,11 +41,16 @@ def _parse_if_header(request: web.Request, header_name: str) -> T.Union[None, T.
     })
 
 
-def _if_match(request: web.Request, etag: T.Union[None, bool, str]):
+def _assert_if_match(request: web.Request, etag: T.Union[None, bool, str], require: bool):
     # The If-Match: header is commonly used in non-safe HTTP requests to prevent
     # lost update problems.
     etags = _parse_if_header(request, 'If-Match')
+
     if etags is None:
+        if require:
+            raise web.HTTPPreconditionRequired(
+                text='If-Match'
+            )
         return
     if etags is _STAR:
         if etag is None or etag is False:
@@ -61,7 +66,7 @@ def _if_match(request: web.Request, etag: T.Union[None, bool, str]):
         raise web.HTTPPreconditionFailed()
 
 
-def _if_none_match(request: web.Request, etag: T.Union[None, bool, str]):
+def _assert_if_none_match(request: web.Request, etag: T.Union[None, bool, str], require: bool):
     # The If-None-Match: header is used in two scenarios:
     # 1. GET requests by a caching client. In this case, the client will
     #    normally provide a list of (cached) ETags.
@@ -69,6 +74,10 @@ def _if_none_match(request: web.Request, etag: T.Union[None, bool, str]):
     #    wants to avoid overwriting an existing resource. In this case, the
     #    client will normally provide only the asterisk "*" character.
     etags = _parse_if_header(request, 'If-None-Match')
+    if require and etags is None:
+        raise web.HTTPPreconditionRequired(
+            text='If-None-Match'
+        )
     if etags is None or etag is False or etag is None:
         return
     if etags is _STAR:
@@ -86,9 +95,10 @@ def _if_none_match(request: web.Request, etag: T.Union[None, bool, str]):
             raise web.HTTPPreconditionFailed()
 
 
-def assert_preconditions(request: web.Request, etag: T.Union[None, bool, str]):
-    _if_match(request, etag)
-    _if_none_match(request, etag)
+def assert_preconditions(request: web.Request, etag: T.Union[None, bool, str],
+                         require_if_match=False, require_if_none_match=False):
+    _assert_if_match(request, etag, require_if_match)
+    _assert_if_none_match(request, etag, require_if_none_match)
 
 
 def etaggify(v: str, weak: bool) -> str:

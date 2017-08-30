@@ -160,6 +160,7 @@ async def _encode(obj, stack):
         try:
             obj = await obj.to_dict()
         except web.HTTPException as e:
+            _logger.error("Unexpected exception", exc_info=e, stack_info=True)
             obj = {
                 '_links': {'self': {'href': 'http://error.com/'}},
                 '_status': e.status_code
