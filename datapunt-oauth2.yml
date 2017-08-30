@@ -1,7 +1,7 @@
 authz_admin_service:
   api_key: ${AUTHZ_ADMIN_API_KEY}
   access_secret: ${JWT_ACCESS_SECRET}
-  bind_port: 8120
+  bind_port: 8000
   datasets:
     CA:
       name: Datacatalogus Amsterdam
