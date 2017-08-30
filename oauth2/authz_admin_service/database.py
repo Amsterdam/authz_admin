@@ -83,6 +83,7 @@ async def account_names_with_role(request, role_id):
             yield row['account_id']
 
 
+
 # async def delete_account(request, id_from_idp):
 #     accounts_table = metadata().tables['Accounts']
 #     auditlog_table = metadata().tables['AuditLog']
