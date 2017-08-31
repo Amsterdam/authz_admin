@@ -31,6 +31,14 @@ class Accounts(view.OAuth2View):
         return "ADW accounts"
 
     async def accounts(self):
+        role_ids = self.request.query.get('roles')
+        if role_ids is not None:
+            role_ids = role_ids.split(',')
+            for role_id in role_ids:
+                if not re.match(r'\w{1,32}$', role_id):
+                    raise web.HTTPBadRequest(
+                        text="Syntax error in query parameter 'roles'."
+                    )
         if self.__cached_accounts is None:
             self.__cached_accounts = list([
                 Account(
@@ -39,7 +47,7 @@ class Accounts(view.OAuth2View):
                     self.embed.get('item'),
                     data=row
                 )
-                async for row in database.accounts(self.request)
+                async for row in database.accounts(self.request, role_ids)
             ])
         return self.__cached_accounts
 

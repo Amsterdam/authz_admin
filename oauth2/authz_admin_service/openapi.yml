@@ -12,7 +12,7 @@ info:
   #   url: https://data.amsterdam.nl/license
   version: '1.0.0'
 
-host: "localhost:8120"
+host: "localhost:8000"
 
 basePath: "/authz_admin"
 
@@ -125,7 +125,7 @@ securityDefinitions:
       AUR.r: "Read account roles."
       AUR.w: "Create and edit account roles."
     flow: implicit
-    authorizationUrl: "http://localhost:8120/authz_admin/authorization"
+    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
 
 
   API-key:
@@ -374,6 +374,8 @@ definitions:
       _etag:
         type: string
         pattern: '^(?:W/)?"[^"]+"$'
+        description: >-
+          Changes when the mapping between this account and its roles changes.
 
 
   Datasets:
@@ -388,6 +390,16 @@ definitions:
                 type: array
                 items:
                   $ref: '#/definitions/Dataset'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: >-
+              Changes when any of the datasets in this collection of datasets changes, including:
+
+              - changes to an individual dataset, including
+                - changes to which set of scopes are in this dataset
+                - changes to any of the scopes in this dataset, including
+                  - changes to which set of profiles contain this scope
 
 
   Dataset:
@@ -411,6 +423,15 @@ definitions:
           described_by:
             type: string
             format: url
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: >-
+              Changes when this dataset changes, including:
+
+              - changes to which set of scopes are in this dataset
+              - changes to any of the scopes in this dataset, including
+                - changes to which set of profiles contain this scope
 
 
   Profiles:
@@ -425,6 +446,11 @@ definitions:
                 type: array
                 items:
                   $ref: '#/definitions/Profile'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: >-
+              Changes when any of the contained profiles changes, including changes in which set of roles are linked with this profile.
 
 
   Profile:
@@ -468,6 +494,11 @@ definitions:
         type: string
         format: 'rst'
         description: "Volledige omschrijving van deze doelbinding."
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+        description: >-
+          Changes when this profile changes, including changes in which set of roles are linked with this profile.
 
 
   Roles:
@@ -482,6 +513,9 @@ definitions:
                 type: array
                 items:
                   $ref: '#/definitions/Role'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
 
 
   Role:
@@ -497,10 +531,6 @@ definitions:
         properties:
           self:
             $ref: '#/definitions/Link'
-          account:
-            type: array
-            items:
-              $ref: '#/definitions/Link'
           profile:
             type: array
             items:
@@ -508,10 +538,6 @@ definitions:
       _embedded:
         type: object
         properties:
-          account:
-            type: array
-            items:
-              $ref: '#/definitions/Account'
           profile:
             type: array
             items:
@@ -524,6 +550,9 @@ definitions:
         type: string
         format: 'rst'
         description: "Volledige omschrijving van deze rol."
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
 
 
   Scope:
@@ -581,7 +610,9 @@ paths:
                     $ref: '#/definitions/Link'
                   accounts:
                     $ref: '#/definitions/Link'
-                  scopesets:
+                  datasets:
+                    $ref: '#/definitions/Link'
+                  profiles:
                     $ref: '#/definitions/Link'
                   roles:
                     $ref: '#/definitions/Link'
@@ -590,8 +621,10 @@ paths:
                 properties:
                   accounts:
                     $ref: '#/definitions/Accounts'
-                  scopesets:
+                  datasets:
                     $ref: '#/definitions/Datasets'
+                  profiles:
+                    $ref: '#/definitions/Profiles'
                   roles:
                     $ref: '#/definitions/Roles'
 
@@ -605,18 +638,27 @@ paths:
         - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
-        - name: filter
+        # - name: filter
+        #   in: query
+        #   type: string
+        #   description: >-
+        #     Type-ahead functionality.
+
+        #     Can't be combined with the `embed` parameter.  Results are returned
+        #     as HAL link objects, where the `title` field contains a type-ahead
+        #     suggestion.
+        - name: roles
           in: query
           type: string
           description: >-
-            Type-ahead functionality.
-
-            Can't be combined with the `embed` parameter.  Results are returned
-            as HAL link objects, where the `title` field contains a type-ahead
-            suggestion.
+            A comma separated list of role identifiers.
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Accounts'
 
@@ -733,8 +775,6 @@ paths:
 
             - If the client sent an `If-None-Match` request header, this means
               that the resource already exists.
-        '422':
-          description: "Unprocessable Entity"
         '428':
           description: >-
             **Precondition Required**
@@ -750,6 +790,10 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Datasets'
 
@@ -768,6 +812,10 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Dataset'
 
@@ -810,6 +858,10 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Profile'
 
@@ -831,6 +883,10 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Profiles'
 
@@ -847,6 +903,10 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Roles'
 
@@ -869,5 +929,9 @@ paths:
       responses:
         '200':
           description: "OK"
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
           schema:
             $ref: '#/definitions/Role'

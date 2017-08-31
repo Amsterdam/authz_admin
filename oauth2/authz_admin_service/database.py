@@ -52,10 +52,16 @@ def create_engine(config):
     )
 
 
-async def accounts(request):
+async def accounts(request, role_ids=None):
+    accountroles = metadata().tables['AccountRoles']
+    statement = sa.select([accountroles])
+    if role_ids is not None:
+        statement = statement.where(accountroles.c.role_ids.contains(
+            sa.cast(role_ids, postgresql.ARRAY(sa.String(32)))
+        ))
     async with request.app['engine'].acquire() as conn:
         async for row in conn.execute(
-            sa.select([metadata().tables['AccountRoles']])
+            statement
         ):
             yield row
 

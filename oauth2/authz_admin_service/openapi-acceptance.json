@@ -234,7 +234,8 @@
         },
         "_etag": {
           "type": "string",
-          "pattern": "^(?:W/)?\"[^\"]+\"$"
+          "pattern": "^(?:W/)?\"[^\"]+\"$",
+          "description": "Changes when the mapping between this account and its roles changes."
         }
       }
     },
@@ -256,6 +257,11 @@
                   }
                 }
               }
+            },
+            "_etag": {
+              "type": "string",
+              "pattern": "^(?:W/)?\"[^\"]+\"$",
+              "description": "Changes when any of the datasets in this collection of datasets changes, including:\n- changes to an individual dataset, including\n  - changes to which set of scopes are in this dataset\n  - changes to any of the scopes in this dataset, including\n    - changes to which set of profiles contain this scope"
             }
           }
         }
@@ -291,6 +297,11 @@
             "described_by": {
               "type": "string",
               "format": "url"
+            },
+            "_etag": {
+              "type": "string",
+              "pattern": "^(?:W/)?\"[^\"]+\"$",
+              "description": "Changes when this dataset changes, including:\n- changes to which set of scopes are in this dataset - changes to any of the scopes in this dataset, including\n  - changes to which set of profiles contain this scope"
             }
           }
         }
@@ -314,6 +325,11 @@
                   }
                 }
               }
+            },
+            "_etag": {
+              "type": "string",
+              "pattern": "^(?:W/)?\"[^\"]+\"$",
+              "description": "Changes when any of the contained profiles changes, including changes in which set of roles are linked with this profile."
             }
           }
         }
@@ -376,6 +392,11 @@
           "type": "string",
           "format": "rst",
           "description": "Volledige omschrijving van deze doelbinding."
+        },
+        "_etag": {
+          "type": "string",
+          "pattern": "^(?:W/)?\"[^\"]+\"$",
+          "description": "Changes when this profile changes, including changes in which set of roles are linked with this profile."
         }
       }
     },
@@ -397,6 +418,10 @@
                   }
                 }
               }
+            },
+            "_etag": {
+              "type": "string",
+              "pattern": "^(?:W/)?\"[^\"]+\"$"
             }
           }
         }
@@ -418,12 +443,6 @@
             "self": {
               "$ref": "#/definitions/Link"
             },
-            "account": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Link"
-              }
-            },
             "profile": {
               "type": "array",
               "items": {
@@ -435,12 +454,6 @@
         "_embedded": {
           "type": "object",
           "properties": {
-            "account": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Account"
-              }
-            },
             "profile": {
               "type": "array",
               "items": {
@@ -458,6 +471,10 @@
           "type": "string",
           "format": "rst",
           "description": "Volledige omschrijving van deze rol."
+        },
+        "_etag": {
+          "type": "string",
+          "pattern": "^(?:W/)?\"[^\"]+\"$"
         }
       }
     },
@@ -533,7 +550,10 @@
                     "accounts": {
                       "$ref": "#/definitions/Link"
                     },
-                    "scopesets": {
+                    "datasets": {
+                      "$ref": "#/definitions/Link"
+                    },
+                    "profiles": {
                       "$ref": "#/definitions/Link"
                     },
                     "roles": {
@@ -547,8 +567,11 @@
                     "accounts": {
                       "$ref": "#/definitions/Accounts"
                     },
-                    "scopesets": {
+                    "datasets": {
                       "$ref": "#/definitions/Datasets"
+                    },
+                    "profiles": {
+                      "$ref": "#/definitions/Profiles"
                     },
                     "roles": {
                       "$ref": "#/definitions/Roles"
@@ -579,15 +602,21 @@
             "$ref": "#/parameters/embed"
           },
           {
-            "name": "filter",
+            "name": "roles",
             "in": "query",
             "type": "string",
-            "description": "Type-ahead functionality.\nCan't be combined with the `embed` parameter.  Results are returned as HAL link objects, where the `title` field contains a type-ahead suggestion."
+            "description": "A comma separated list of role identifiers."
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Accounts"
             }
@@ -712,9 +741,6 @@
           "412": {
             "description": "**Precondition Failed**\n- If the client sent an `If-Match` request header, this means the\n  client doesn't have the latest version of the resource it wants to\n  update.  The client should first `GET` the latest version, merge\n  if possible, and try again.\n\n- If the client sent an `If-None-Match` request header, this means\n  that the resource already exists."
           },
-          "422": {
-            "description": "Unprocessable Entity"
-          },
           "428": {
             "description": "**Precondition Required**\nThe client didn't provide an `If-None-Match` or `If-Match` request header."
           }
@@ -732,6 +758,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Datasets"
             }
@@ -759,6 +791,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Dataset"
             }
@@ -824,6 +862,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Profile"
             }
@@ -858,6 +902,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Profiles"
             }
@@ -886,6 +936,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Roles"
             }
@@ -923,6 +979,12 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "ETag": {
+                "type": "string",
+                "pattern": "^(?:W/)?\"[^\"]+\"$"
+              }
+            },
             "schema": {
               "$ref": "#/definitions/Role"
             }
