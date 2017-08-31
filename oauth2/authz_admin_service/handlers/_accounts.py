@@ -49,15 +49,13 @@ class Accounts(view.OAuth2View):
 
 class Account(view.OAuth2View):
 
-    def __init__(self, *args, data=None, **kwargs):
+    def __init__(self, *args, data=False, **kwargs):
         super().__init__(*args, **kwargs)
         self._data = data
 
     async def data(self):
-        if self._data is None:
+        if self._data is False:
             self._data = await database.account(self.request, self['account'])
-        if self._data is None:
-            raise web.HTTPNotFound()
         return self._data
 
     @property
@@ -69,9 +67,8 @@ class Account(view.OAuth2View):
         return "ADW account voor <%s>" % self['account']
 
     async def etag(self):
-        try:
-            data = await self.data()
-        except web.HTTPNotFound:
+        data = await self.data()
+        if data is None:
             return None
         return etag_from_int(data['log_id'])
 
@@ -108,7 +105,7 @@ class Account(view.OAuth2View):
         except:
             raise web.HTTPBadRequest(
                 text="No '#/_links/role' array in request."
-            )
+            ) from None
         new_roles = set()
         try:
             for link_object in roles:
@@ -118,17 +115,26 @@ class Account(view.OAuth2View):
         except:
             raise web.HTTPBadRequest(
                 text="Not all roles are valid HALJSON link objects to an existing role."
-            )
-        status_code = 204 if self['account'] in _ACCOUNTS else 201
-        _ACCOUNTS[self['account']] = new_roles
-        response_headers = {} if status_code == 204 else \
-            {'Location': self.rel_url.raw_path}
-        return web.Response(status=status_code, headers=response_headers)
+            ) from None
+
+        if await self.data() is None:
+            log_id = await database.create_account(self.request, self['account'], new_roles)
+            status = 201
+            headers = {
+                'Location': self.rel_url.raw_path,
+                'ETag': etag_from_int(log_id)
+            }
+        else:
+            log_id = await database.update_account(self.request, self, new_roles)
+            status = 204
+            headers = {'ETag': etag_from_int(log_id)}
+        return web.Response(status=status, headers=headers)
 
     async def delete(self) -> web.Response:
-        if_match = self.request.headers.get('if-match', '')
-        if if_match == '':
-            raise web.HTTPPreconditionRequired()
-        assert_preconditions(self.request, await self.etag())
-        del _ACCOUNTS[self['account']]
+        assert_preconditions(
+            self.request,
+            await self.etag(),
+            require_if_match=True
+        )
+        await database.delete_account(self.request, self)
         return web.Response(status=204)

@@ -12,7 +12,7 @@ info:
   #   url: https://data.amsterdam.nl/license
   version: '1.0.0'
 
-host: "localhost:8000"
+host: "localhost:8120"
 
 basePath: "/authz_admin"
 
@@ -125,7 +125,7 @@ securityDefinitions:
       AUR.r: "Read account roles."
       AUR.w: "Create and edit account roles."
     flow: implicit
-    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
+    authorizationUrl: "http://localhost:8120/authz_admin/authorization"
 
 
   API-key:

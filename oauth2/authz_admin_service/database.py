@@ -6,9 +6,8 @@ import aiopg.sa
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 import sqlalchemy.sql.functions as sa_functions
+import sqlalchemy.exc as sa_exceptions
 from aiohttp import web
-
-from . import handlers
 
 
 _logger = logging.getLogger(__name__)
@@ -83,23 +82,95 @@ async def account_names_with_role(request, role_id):
             yield row['account_id']
 
 
+async def delete_account(request, account):
+    account_data = await account.data()
+    accountroleslog = metadata().tables['AccountRolesLog']
+    accountroles = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        async with conn.begin():
+            result_set = await conn.execute(
+                accountroleslog.insert().values(
+                    created_by='p.van.beek@amsterdam.nl',
+                    request_info=str(request.headers),
+                    account_id=account['account'],
+                    action='D',
+                    role_ids=account_data['role_ids']
+                ).returning(
+                    accountroleslog.c.id
+                )
+            )
+            row = await result_set.fetchone()
+            log_id = row[0]
+            result_set = await conn.execute(
+                accountroles.delete().where(sa.and_(
+                    accountroles.c.account_id == account['account'],
+                    accountroles.c.log_id == account_data['log_id']
+                ))
+            )
+            if result_set.rowcount != 1:
+                raise web.HTTPPreconditionFailed()
+    return log_id
 
-# async def delete_account(request, id_from_idp):
-#     accounts_table = metadata().tables['Accounts']
-#     auditlog_table = metadata().tables['AuditLog']
-#     accountroles_table = metadata().tables['AccountRoles']
-#     async with request.app['engine'].acquire() as conn:
-#         async with conn.begin():
-#             result_set = await conn.execute(
-#                 sa.select([accountroles_table.c.audit_id])
-#                 .select_from(
-#                     sa.join(accountroles_table, accounts_table)
-#                 )
-#                 .where(accountroles_table.c.)
-#             )
-#     async for row in conn.execute(
-#         sa.select([accounts_table.c.id_from_idp]).select_from(
-#             sa.join(accountroles_table, accounts_table)
-#         ).where(accountroles_table.c.role_id == role_id)
-#     ):
-#         yield row['id_from_idp']
+
+async def update_account(request, account, role_ids):
+    account_data = await account.data()
+    accountroleslog = metadata().tables['AccountRolesLog']
+    accountroles = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        async with conn.begin():
+            result_set = await conn.execute(
+                accountroleslog.insert().values(
+                    created_by='p.van.beek@amsterdam.nl',
+                    request_info=str(request.headers),
+                    account_id=account['account'],
+                    action='U',
+                    role_ids=role_ids
+                ).returning(
+                    accountroleslog.c.id
+                )
+            )
+            row = await result_set.fetchone()
+            log_id = row[0]
+            result_set = await conn.execute(
+                accountroles.update().where(sa.and_(
+                    accountroles.c.account_id == account['account'],
+                    accountroles.c.log_id == account_data['log_id']
+                )).values(
+                    role_ids=role_ids,
+                    log_id=log_id
+                )
+            )
+            if result_set.rowcount != 1:
+                raise web.HTTPPreconditionFailed()
+    return log_id
+
+
+async def create_account(request, account_id, role_ids):
+    accountroleslog = metadata().tables['AccountRolesLog']
+    accountroles = metadata().tables['AccountRoles']
+    async with request.app['engine'].acquire() as conn:
+        async with conn.begin():
+            result_set = await conn.execute(
+                accountroleslog.insert().values(
+                    created_by='p.van.beek@amsterdam.nl',
+                    request_info=str(request.headers),
+                    account_id=account_id,
+                    action='C',
+                    role_ids=role_ids
+                ).returning(accountroleslog.c.id)
+            )
+            row = await result_set.fetchone()
+            log_id = row[0]
+            try:
+                await conn.execute(
+                    accountroles.insert().values(
+                        account_id=account_id,
+                        role_ids=role_ids,
+                        log_id=log_id
+                    )
+                )
+            except sa_exceptions.IntegrityError:
+                raise web.HTTPPreconditionFailed()
+
+    return log_id
+
