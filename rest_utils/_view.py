@@ -35,7 +35,7 @@ class View(web.View):
         if match_dict is None:
             rel_url = request.rel_url
         else:
-            rel_url = self.resource().url_for(**match_dict)
+            rel_url = self.aiohttp_resource().url_for(**match_dict)
         if embed is not None:
             rel_url = rel_url.update_query(embed=embed)
         self.__rel_url = rel_url
@@ -47,7 +47,7 @@ class View(web.View):
             # Ugly: we're using non-public member ``_match()`` of
             # :class:`aiohttp.web.Resource`.  But most alternatives are
             # equally ugly.
-            self.resource()._match(self.rel_url.raw_path)
+            self.aiohttp_resource()._match(self.rel_url.raw_path)
         )
 
     def __getitem__(self, item):
@@ -106,7 +106,7 @@ class View(web.View):
             Resource exists and supports ETags.
 
         """
-        return True
+        return isinstance(self.aiohttp_resource(), web.PlainResource)
 
     @property
     def query(self):
@@ -163,23 +163,23 @@ class View(web.View):
         :param str name:
 
         """
-        cls._resource = router.add_resource(path)
+        cls._aiohttp_resource = router.add_resource(path)
         # Register the current class in the appropriate registry:
-        if isinstance(cls._resource, web.DynamicResource):
-            View.PATTERNS[cls._resource.get_info()['pattern']] = cls
-        elif isinstance(cls._resource, web.PlainResource):
-            View.PATHS[cls._resource.get_info()['path']] = cls
+        if isinstance(cls._aiohttp_resource, web.DynamicResource):
+            View.PATTERNS[cls._aiohttp_resource.get_info()['pattern']] = cls
+        elif isinstance(cls._aiohttp_resource, web.PlainResource):
+            View.PATHS[cls._aiohttp_resource.get_info()['path']] = cls
         else:
-            _logger.critical("aiohttp router method 'add_resource()' returned resource object of unexpected type %s", cls._resource.__class__)
-        cls._resource.rest_utils_class = cls
-        cls._resource.add_route('*', cls, expect_handler=expect_handler)
-        return cls._resource
+            _logger.critical("aiohttp router method 'add_resource()' returned resource object of unexpected type %s", cls._aiohttp_resource.__class__)
+        cls._aiohttp_resource.rest_utils_class = cls
+        cls._aiohttp_resource.add_route('*', cls, expect_handler=expect_handler)
+        return cls._aiohttp_resource
 
     @classmethod
-    def resource(cls) -> T.Union[web.PlainResource, web.DynamicResource]:
-        assert hasattr(cls, '_resource'), \
-            "%s.resource() called before .add_to_router()" % cls
-        return cls._resource
+    def aiohttp_resource(cls) -> T.Union[web.PlainResource, web.DynamicResource]:
+        assert hasattr(cls, '_aiohttp_resource'), \
+            "%s.aiohttp_resource() called before .add_to_router()" % cls
+        return cls._aiohttp_resource
 
     @property
     def link_name(self) -> T.Optional[str]:
@@ -194,7 +194,7 @@ class View(web.View):
         Subclasses can override this default implementation.
 
         """
-        formatter = self._resource.get_info().get('formatter')
+        formatter = self.aiohttp_resource().get_info().get('formatter')
         if formatter is not None and re.search(r'\}[^/]*/?$', formatter):
             return self.rel_url.name or self.rel_url.parent.name
         return None
@@ -308,7 +308,10 @@ class View(web.View):
         assert 'GET_IN_PROGRESS' not in self.request
         self.request['GET_IN_PROGRESS'] = True
 
-        assert_preconditions(self.request, await self.etag())
+        etag = await self.etag()
+        if not etag:
+            raise web.HTTPNotFound()
+        assert_preconditions(self.request, etag)
         response = web.StreamResponse()
         if isinstance(await self.etag(), str):
             response.headers.add('ETag', await self.etag())

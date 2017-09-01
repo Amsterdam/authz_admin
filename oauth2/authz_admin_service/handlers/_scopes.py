@@ -71,7 +71,7 @@ class Scope(view.OAuth2View):
         self._dataset = datasets[self['dataset']]
         scopes = self._dataset['scopes']
         if self['scope'] not in scopes:
-            raise web.HTTPNotFound(text="No such scope")
+            raise web.HTTPNotFound()
         self._scope = scopes[self['scope']]
 
     @property

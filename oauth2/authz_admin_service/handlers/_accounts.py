@@ -81,18 +81,15 @@ class Account(view.OAuth2View):
         return etag_from_int(data['log_id'])
 
     async def _links(self):
-        roles = []
         data = await self.data()
-        if data:
-            roles = [
+        return {
+            'role': [
                 _roles.Role(
                     self.request,
                     {'role': role_id},
                     self.embed.get('role')
                 ) for role_id in data['role_ids']
             ]
-        return {
-            'role': roles
         }
 
     async def put(self):
