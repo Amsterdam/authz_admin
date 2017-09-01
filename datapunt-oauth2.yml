@@ -90,9 +90,12 @@ authz_admin_service:
       profiles:
         - SA_020
     DPB:
-      name: City Data Beheerder
+      name: beheerder gebruikersrollen
       description: |-
         Deze beheerders voeren onder andere het accountbeheer uit.
+
+        To Do
+            vervangen door nauwkeuriger rolverdeling
       profiles:
         - AZB
 
