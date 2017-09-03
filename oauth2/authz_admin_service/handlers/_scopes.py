@@ -83,9 +83,9 @@ class Scope(view.OAuth2View):
 
     @property
     def link_title(self):
-        return "%s (for dataset '%s')" % (
+        return "%s (dataset: %s)" % (
             self._scope['name'],
-            self['dataset']
+            self._dataset['name']
         )
 
     async def etag(self):

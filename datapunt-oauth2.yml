@@ -3,40 +3,70 @@ authz_admin_service:
   access_secret: ${JWT_ACCESS_SECRET}
   bind_port: 8000
   datasets:
-    CA:
-      name: Datacatalogus Amsterdam
-      described_by: 'https://data.amsterdam.nl/#?dsd=catalogus&dsp=1&dsv=CARDS&mpb=topografie'
+    BRP:
+      name: Basis Register Personen
       scopes:
-        L1:
-          name: Level 1
-          included_by: L2
+        R:
+          name: Leesrechten
+    TLLS:
+      name: Tellus
+      scopes:
+        R:
+          name: Leesrechten
+    BRK:
+      name: Kadaster
+      scopes:
+        RS:
+          name: Bevragen Kadastrale Subjecten
           description: >-
-            TODO: beschrijven wat L1 meer heeft dan anoniem.
-        L2:
-          name: Level 2
-          includes: L1
+            TODO
+              - beschrijving. Verschil tussen identiteit en volledige
+                gegevens.
+              - toevoegen alle scopes, samen met Stephan Preeker.
+        RZR:
+          name: Zakelijke Rechten
+    WKPB:
+      name: TODO
+      described_by: 'https://www.amsterdam.nl/stelselpedia/wkpb-index/'
+      scopes:
+        RBDU:
+          name: Lezen URL Brondocument
+
+    WOZ:
+      name: Waardebepaling Onroerende Zaken
+      described_by: 'https://www.amsterdam.nl/stelselpedia/woz-index/'
+      scopes: {}
+    DSEL:
+      name: Dataselectie
+      scopes: {}
+    MON:
+      name: Monumenten
+      described_by: 'https://www.amsterdam.nl/stelselpedia/monumenten-index/'
+      scopes:
+        RC:
+          name: Bevragen Complexen
           description: >-
-            TODO: beschrijven wat L2 meer heeft dan L1.
+            De API serveert *monumenten*, *situeringen* en *complexen*.
+            Monumenten en situeringen zijn publiek; complexen zijn afgeschermd.
     HR:
       name: Handelsregister
       described_by: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
       scopes:
-        INF:
-          name: Onbeperkt aantal bevragingen
+        R:
+          name: Leesrechten
           description: >-
-            Deze permissie geeft gebruikers het recht onbeperkt informatie op te
-            vragen (anonieme gebruikers mogen maximaal X [TODO --PvB]
-            bevragingen per dag doen).
+            De informatie in deze dataset is volgens bronhouder niet publiek.
+            Deze dataset is niet gelijk aan het “officiële” handelsregister.
     AUR:
       name: Rollen van ADW accounts
       described_by: 'https://dokuwiki.datapunt.amsterdam.nl/'
       scopes:
-        r:
+        R:
           name: Rollen van gebruikers bevragen
           description: >-
             Geeft het recht om de rollen in te zien behorende bij een ADW
             account.
-        w:
+        W:
           name: Rollen van gebruikers wijzigen
           description: >-
             Geeft het recht om rollen aan een ADW account toe te voegen en
@@ -48,8 +78,8 @@ authz_admin_service:
         Het toekennen van rollen aan ADW accounts, om de eigenaars van deze
         accounts toegang te geven tot voor hen relevante data.
       scopes:
-        - AUR/r
-        - AUR/w
+        - AUR/R
+        - AUR/W
     GA_020:
       name: Gemeenteambtenaar
       description: |-
@@ -58,8 +88,10 @@ authz_admin_service:
         To Do
             vervangen door nauwkeuriger profiel
       scopes:
-        - CA/L1
-        - CA/L2
+        - HR/R
+        - MON/RC
+        - WKPB/RBDU
+        - BRK/RZR
     SA_020:
       name: Superambtenaar
       description: |-
@@ -68,8 +100,9 @@ authz_admin_service:
         To Do
             vervangen door nauwkeuriger profiel
       scopes:
-        - CA/L1
-        - CA/L2
+        - BRP/R
+        - BRK/RS
+
   roles:
     CDE:
       name: medewerker

@@ -28,6 +28,31 @@ consumes:
   - 'application/hal+json'
 
 
+securityDefinitions:
+
+  OAuth2:
+    type: oauth2
+    description: >-
+      Authorization through our own Authorization Service.  Scope names all
+      start with `AUR`, which stands for **ADW User Roles**.
+    scopes:
+      AUR.r: "Read account roles."
+      AUR.w: "Create and edit account roles."
+    flow: implicit
+    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
+
+
+  AS:
+    type: apiKey
+    description: >-
+      This security definition should be used by the OAuth2 Authorization Service.
+
+      Use `apikey` as the authorization scheme.
+      For example: `Authorization: apikey foo...bar`.
+    in: header
+    name: Authorization
+
+
 parameters:
 
   page:
@@ -112,29 +137,6 @@ parameters:
     type: string
     enum: ['*']
     required: false
-
-
-securityDefinitions:
-
-  OAuth2:
-    type: oauth2
-    description: >-
-      Authorization through our own Authorization Service.  Scope names all
-      start with `AUR`, which stands for **ADW User Roles**.
-    scopes:
-      AUR.r: "Read account roles."
-      AUR.w: "Create and edit account roles."
-    flow: implicit
-    authorizationUrl: "http://localhost:8000/authz_admin/authorization"
-
-
-  API-key:
-    type: apiKey
-    description: |
-      Use `apikey` as the authorization scheme.
-      For example: `Authorization: apikey foo...bar`.
-    in: header
-    name: Authorization
 
 
 definitions:
@@ -635,7 +637,6 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
-        - API-key: []
       parameters:
         - $ref: '#/parameters/embed'
         # - name: filter
@@ -682,7 +683,7 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
-        - API-key: []
+        - AS: []
       parameters:
         - $ref: '#/parameters/embed'
         - $ref: '#/parameters/if-none-match-GET'
@@ -853,6 +854,7 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
+        - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -878,6 +880,7 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
+        - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -897,7 +900,7 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
-        - API-key: []
+        - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -923,7 +926,7 @@ paths:
       security:
         - OAuth2:
           - 'AUR.r'
-        - API-key: []
+        - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:

@@ -22,6 +22,24 @@
     "application/json",
     "application/hal+json"
   ],
+  "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "description": "Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.",
+      "scopes": {
+        "AUR.r": "Read account roles.",
+        "AUR.w": "Create and edit account roles."
+      },
+      "flow": "implicit",
+      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
+    },
+    "AS": {
+      "type": "apiKey",
+      "description": "This security definition should be used by the OAuth2 Authorization Service.\nUse `apikey` as the authorization scheme. For example: `Authorization: apikey foo...bar`.",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
   "parameters": {
     "page": {
       "name": "page",
@@ -80,24 +98,6 @@
         "*"
       ],
       "required": false
-    }
-  },
-  "securityDefinitions": {
-    "OAuth2": {
-      "type": "oauth2",
-      "description": "Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.",
-      "scopes": {
-        "AUR.r": "Read account roles.",
-        "AUR.w": "Create and edit account roles."
-      },
-      "flow": "implicit",
-      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
-    },
-    "API-key": {
-      "type": "apiKey",
-      "description": "Use `apikey` as the authorization scheme.\nFor example: `Authorization: apikey foo...bar`.\n",
-      "in": "header",
-      "name": "Authorization"
     }
   },
   "definitions": {
