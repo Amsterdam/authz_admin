@@ -62,7 +62,9 @@ def _assert_if_match(request: web.Request, etag: T.Union[None, bool, str], requi
             text="Resource doesn't support If-Match header."
         )
     # From here on, `etag` can only be `None` or a valid ETag string:
-    if etag is None or etag not in etags:
+    if etag is None:
+        raise web.HTTPNotFound()
+    if etag not in etags:
         raise web.HTTPPreconditionFailed()
 
 

@@ -1,10 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "required": ["authz_admin_service", "postgres", "logging"],
+  "required": ["authz_admin", "postgres", "logging"],
+  "additionalProperties": false,
   "properties": {
 
-    "authz_admin_service": {
+
+    "authz_admin": {
       "type": "object",
       "additionalProperties": false,
       "required": ["api_key", "access_secret", "bind_port", "datasets", "roles", "profiles"],
@@ -12,6 +14,8 @@
         "api_key": {"type": "string"},
         "access_secret": {"type": "string"},
         "bind_port": {"type": "integer"},
+
+
         "datasets": {
           "type": "object",
           "additionalProperties": false,
@@ -60,6 +64,8 @@
             }
           }
         },
+
+
         "profiles": {
           "type": "object",
           "additionalProperties": false,
@@ -88,6 +94,8 @@
             }
           }
         },
+
+
         "roles": {
           "type": "object",
           "additionalProperties": false,
@@ -119,6 +127,7 @@
       }
     },
 
+
     "postgres": {
       "type": "object",
       "additionalProperties": false,
@@ -130,14 +139,11 @@
         "password": {"type": "string"},
         "dbname": {"type": "string"}
       }
-
     },
 
 
     "logging": {"$ref": "#/definitions/logging.dictconfig"}
   },
-
-  "additionalProperties": false,
 
   "definitions": {
     "jwtconfig": {

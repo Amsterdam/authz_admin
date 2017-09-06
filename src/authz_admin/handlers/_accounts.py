@@ -1,16 +1,12 @@
 import logging
-from json import loads as json_loads
 import re
-import typing as T
+from json import loads as json_loads
 
 from aiohttp import web
-from rest_utils import etag_from_int, assert_preconditions, ETagGenerator
-import sqlalchemy as sa
 
-from oauth2 import view
+from authz_admin import database, view
+from rest_utils import etag_from_int, assert_preconditions
 from . import _roles
-from .. import database
-
 
 _logger = logging.getLogger(__name__)
 _ACCOUNTS = {
@@ -106,7 +102,7 @@ class Account(view.OAuth2View):
         except:
             raise web.HTTPBadRequest()
         # self.request.app['swagger'].validate_definition('Account', request_body_json)
-        existing_roles = set(self.request.app['config']['authz_admin_service']['roles'].keys())
+        existing_roles = set(self.request.app['config']['authz_admin']['roles'].keys())
         try:
             roles = request_body_json['_links']['role']
             assert isinstance(roles, list)

@@ -4,7 +4,7 @@ Recursively freeze mutable dicts, sets and lists.
 
 Example usage::
 
-    from oauth2.frozen import frozen
+    from authz_admin.frozen import frozen
 
     MY_FROZEN_DICT = frozen(my_mutable_dict)
 

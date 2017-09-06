@@ -1,11 +1,11 @@
 import logging
-from docutils.core import publish_parts
 
 from aiohttp import web
+from docutils.core import publish_parts
 
-from oauth2 import view
+from authz_admin import database
+from authz_admin import view
 from . import _profiles, _accounts
-from .. import database
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Roles(view.OAuth2View):
                 {'role': name},
                 self.embed.get('item')
             )
-            for name in self.request.app['config']['authz_admin_service']['roles']
+            for name in self.request.app['config']['authz_admin']['roles']
         ]
         return {'item': items}
 
@@ -39,7 +39,7 @@ class Role(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roles = self.request.app['config']['authz_admin_service']['roles']
+        roles = self.request.app['config']['authz_admin']['roles']
         if self['role'] not in roles:
             raise web.HTTPNotFound()
         self._role = roles[self['role']]

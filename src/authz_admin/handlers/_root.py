@@ -1,12 +1,12 @@
 import logging
 
-from oauth2 import view
-from . import _accounts, _scopes, _roles
+from authz_admin.view import OAuth2View
+from . import _accounts, _scopes, _roles, _profiles
 
 _logger = logging.getLogger(__name__)
 
 
-class Root(view.OAuth2View):
+class Root(OAuth2View):
 
     async def etag(self):
         return self.request.app['etag']
@@ -18,22 +18,28 @@ class Root(view.OAuth2View):
     async def _links(self):
         accounts = _accounts.Accounts(
             self.request,
-            self.match_dict,
+            {},
             embed=self.embed.get('accounts')
         )
         datasets = _scopes.Datasets(
             self.request,
-            self.match_dict,
+            {},
             embed=self.embed.get('datasets')
+        )
+        profiles = _profiles.Profiles(
+            self.request,
+            {},
+            embed=self.embed.get('profiles')
         )
         roles = _roles.Roles(
             self.request,
-            self.match_dict,
+            {},
             embed=self.embed.get('roles')
         )
         return {
             'accounts': accounts,
             'datasets': datasets,
+            'profiles': profiles,
             'roles': roles
         }
 

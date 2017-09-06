@@ -49,7 +49,7 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
         """Dummy implementation.
 
         .. todo:: Fetch the actual allowed methods from the swagger definition,
-        .and return all the operation items for this path in the body.
+            and return all the operation items for this path in the body.
 
         """
 

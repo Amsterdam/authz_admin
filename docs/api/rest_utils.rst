@@ -24,8 +24,8 @@ Conditional Request Handling
     :undoc-members:
 
 
-Asynchronous Streaming JSON Output
-----------------------------------
+Async Streaming JSON Output
+---------------------------
 
 .. automodule:: rest_utils._json
     :no-private-members:
@@ -40,8 +40,8 @@ Middleware
     :undoc-members:
 
 
-Parsing the *embed* query parameter
------------------------------------
+Parsing the *embed* query param
+-------------------------------
 
 .. automodule:: rest_utils._parse_embed
     :no-private-members:

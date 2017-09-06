@@ -9,7 +9,7 @@ See also :mod:`config_loader`.
 
 **Example usage**::
 
-    from oauth2 import config
+    from authz_admin import config
     os.chdir(config.get()['working_directory'])
 
 
@@ -28,16 +28,15 @@ See also :mod:`config_loader`.
 
 """
 
-import pathlib
-import os.path
-import config_loader
-import logging.config
 import logging
+import logging.config
+import os.path
+import pathlib
+import re
 import typing as T
-import functools
 
+import config_loader
 from .frozen import frozen
-
 
 _logger = logging.getLogger(__name__)
 
@@ -52,6 +51,10 @@ DEFAULT_CONFIG_PATHS = [
 CONFIG_SCHEMA_V1_PATH = pathlib.Path(
     os.path.dirname(os.path.abspath(__file__))
 ) / 'config_schema_v1.json'
+
+
+RE_DATASET_ID = re.compile(r'\w{1,4}')
+RE_SCOPE_ID = re.compile(r'\w{1,4}')
 
 
 def _config_path():
@@ -79,6 +82,21 @@ def _config_path():
     return filtered_config_paths[0]
 
 
+def _validate_datasets_and_scope_ids(config):
+    datasets = config['authz_admin']['datasets']
+    for dataset_id, dataset in datasets.items():
+        assert RE_DATASET_ID.fullmatch(dataset_id)
+        dataset_name = dataset['name']
+        assert len(dataset_name) > 0
+        assert len(dataset_name) <= 80
+        scopes = dataset['scopes']
+        for scope_id, scope in scopes.items():
+            assert RE_SCOPE_ID.fullmatch(scope_id)
+            scope_name = scope['name']
+            assert len(scope_name) > 0
+            assert len(scope_name) <= 80
+
+
 def _validate_scopes(config):
     # language=rst
     """
@@ -87,7 +105,7 @@ def _validate_scopes(config):
     :raises: config_loader.ConfigError
 
     """
-    for ds_token, dataset in config.get('datasets', dict()).items():
+    for ds_token, dataset in config['authz_admin']['datasets'].items():
         for scope_token, scope in dataset.get('scopes', dict()).items():
             includes = scope.get('includes')
             included_by = scope.get('included_by')
@@ -122,6 +140,7 @@ def load():
     # above) requires a MutableMapping as its input,
     # so we only freeze config *after* that call:
     config = frozen(config)
+    _validate_datasets_and_scope_ids(config)
     _validate_scopes(config)
     return config
 
@@ -142,7 +161,7 @@ def all_scopes(config: T.Hashable) -> T.FrozenSet[str]:
 
     """
     retval = []
-    for dataset_token, dataset in config['authz_admin_service']['datasets'].items():
+    for dataset_token, dataset in config['authz_admin']['datasets'].items():
         for scope_token in dataset.get('scopes', {}):
             retval.append("{}.{}".format(dataset_token, scope_token))
     return frozenset(retval)

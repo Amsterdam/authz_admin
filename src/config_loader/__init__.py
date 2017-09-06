@@ -23,4 +23,4 @@ that contains a schema definition for a dict that can be passed into
 
 """
 
-from .config_loader import *
+from ._config_loader import *

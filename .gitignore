@@ -8,6 +8,9 @@ __pycache__
 /build
 /dist
 
+# PyTest
+/.cache
+
 # PyDev/Eclipse
 .project
 .pydevproject
@@ -26,4 +29,3 @@ __pycache__
 /docs/*.inv.txt
 
 /swagger-ui/.git
-/hal-browser/.git

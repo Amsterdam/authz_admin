@@ -1,4 +1,4 @@
-authz_admin_service:
+authz_admin:
   api_key: ${AUTHZ_ADMIN_API_KEY}
   access_secret: ${JWT_ACCESS_SECRET}
   bind_port: 8000
@@ -66,11 +66,13 @@ authz_admin_service:
           description: >-
             Geeft het recht om de rollen in te zien behorende bij een ADW
             account.
+          included_by: W
         W:
           name: Rollen van gebruikers wijzigen
           description: >-
             Geeft het recht om rollen aan een ADW account toe te voegen en
             rollen van een ADW account te verwijderen.
+          includes: R
   profiles:
     AZB:
       name: Autorisatiebeheer
@@ -152,7 +154,7 @@ logging:
     aiohttp.access:
       class: logging.StreamHandler
   loggers:
-    oauth2:
+    authz_admin:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [console]
       propagate: false
@@ -165,6 +167,10 @@ logging:
 #    aiohttp.*:
 #      propagate: true
     rest_utils:
+      level: ${LOGLEVEL:-DEBUG}
+      handlers: [console]
+      propagate: false
+    config_loader:
       level: ${LOGLEVEL:-DEBUG}
       handlers: [console]
       propagate: false

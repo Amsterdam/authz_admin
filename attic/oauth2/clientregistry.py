@@ -4,7 +4,7 @@ Will be replaced by an actual (database?) backend down the road.
 
 """
 import collections.abc
-from . import types
+from oauth2 import types
 
 
 #: A registry to loop over (O(N) lookups)

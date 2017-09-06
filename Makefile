@@ -13,17 +13,24 @@ PYTEST = pytest
 #
 #     TESTS=other_tests make test
 #
-PYTEST_OPTS ?= -p no:cacheprovider --capture=no --verbose --cov=src --cov-report=term --no-cov-on-fail
+#PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --capture=no --cov=src --cov-report=term --no-cov-on-fail
+PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider
+PYTEST_COV_OPTS ?= --loop uvloop -p no:cacheprovider --cov=src --cov-report=term --no-cov-on-fail
 TESTS ?= tests
 
 
-authorization_service:
-	. tma.env; \
+authz_admin:
+	. env.sh; \
+	cp -af oauth2/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
+	       swagger-ui/dist/openapi.json &&
 	authorization_service
 
 
 test:
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
+
+cov:
+	$(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
 
 
 testclean:

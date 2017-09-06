@@ -41,15 +41,22 @@ def metadata() -> sa.MetaData:
     return result
 
 
-def create_engine(config):
-    return aiopg.sa.create_engine(
-        user=config['user'],
-        database=config['dbname'],
-        host=config['host'],
-        port=config['port'],
-        password=config['password'],
+async def initialize_app(app):
+    dbconf = app['config']['postgres']
+    _logger.info("Connecting to database: postgres://%s:%i/%s",
+                 dbconf['host'], dbconf['port'], dbconf['dbname'])
+    engine_context = aiopg.sa.create_engine(
+        user=dbconf['user'],
+        database=dbconf['dbname'],
+        host=dbconf['host'],
+        port=dbconf['port'],
+        password=dbconf['password'],
         client_encoding='utf8'
     )
+    app['engine'] = await engine_context.__aenter__()
+    async def on_shutdown(app):
+        await engine_context.__aexit__(None, None, None)
+    app.on_shutdown.append(on_shutdown)
 
 
 async def accounts(request, role_ids=None):

@@ -3,7 +3,7 @@ from docutils.core import publish_parts
 
 from aiohttp import web
 
-from oauth2 import view
+from authz_admin import view
 from . import _roles, _scopes
 
 _logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class Profiles(view.OAuth2View):
                 {'profile': name},
                 self.embed.get('item')
             )
-            for name in self.request.app['config']['authz_admin_service']['profiles']
+            for name in self.request.app['config']['authz_admin']['profiles']
         ]
         return {'item': items}
 
@@ -38,7 +38,7 @@ class Profile(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        profiles = self.request.app['config']['authz_admin_service']['profiles']
+        profiles = self.request.app['config']['authz_admin']['profiles']
         if self['profile'] not in profiles:
             raise web.HTTPNotFound()
         self._profile = profiles[self['profile']]
@@ -65,7 +65,7 @@ class Profile(view.OAuth2View):
                     {'role': role_name},
                     self.embed.get('role')
                 ) for role_name, role
-                in self.request.app['config']['authz_admin_service']['roles'].items()
+                in self.request.app['config']['authz_admin']['roles'].items()
                 if self['profile'] in role['profiles']
             ]}
         for scope_name in self._profile['scopes']:

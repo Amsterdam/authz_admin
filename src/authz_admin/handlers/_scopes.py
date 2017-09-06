@@ -2,7 +2,7 @@ import logging
 
 from aiohttp import web
 
-from oauth2 import view
+from authz_admin import view
 from . import _profiles
 
 _logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class Datasets(view.OAuth2View):
                 {'dataset': name},
                 self.embed.get('item')
             )
-            for name in self.request.app['config']['authz_admin_service']['datasets']
+            for name in self.request.app['config']['authz_admin']['datasets']
         ]
         return {'item': items}
 
@@ -33,7 +33,7 @@ class Dataset(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        datasets = self.request.app['config']['authz_admin_service']['datasets']
+        datasets = self.request.app['config']['authz_admin']['datasets']
         if self['dataset'] not in datasets:
             raise web.HTTPNotFound()
         self._dataset = datasets[self['dataset']]
@@ -65,7 +65,7 @@ class Scope(view.OAuth2View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        datasets = self.request.app['config']['authz_admin_service']['datasets']
+        datasets = self.request.app['config']['authz_admin']['datasets']
         if self['dataset'] not in datasets:
             raise web.HTTPNotFound(text="No such dataset")
         self._dataset = datasets[self['dataset']]
@@ -99,8 +99,8 @@ class Scope(view.OAuth2View):
                     {'profile': profile_name},
                     self.embed.get('profile')
                 ) for profile_name, profile
-                in self.request.app['config']['authz_admin_service']['profiles'].items()
-                if self['scope'] in profile['scopes']
+                in self.request.app['config']['authz_admin']['profiles'].items()
+                if self['dataset'] + '/' + self['scope'] in profile['scopes']
             ]
         }
         for fieldname in ('includes', 'included_by'):
