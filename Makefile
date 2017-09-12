@@ -21,9 +21,9 @@ TESTS ?= tests
 
 authz_admin:
 	. env.sh; \
-	cp -af oauth2/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
-	       swagger-ui/dist/openapi.json &&
-	authorization_service
+	cp -af src/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
+	       swagger-ui/dist/openapi.json && \
+	authz_admin
 
 
 test:

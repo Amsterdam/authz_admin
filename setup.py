@@ -2,13 +2,6 @@
 """See <https://setuptools.readthedocs.io/en/latest/>.
 """
 from setuptools import setup, find_packages
-import logging
-
-tests_require = [
-    'pytest',
-    'pytest-cov',
-    'pytest-aiohttp'
-]
 
 
 setup(
@@ -50,11 +43,11 @@ setup(
 
 
     # Requirements:
-    setup_requires=[
-        'setuptools_git',
-        # Nice if you like setuptools integration for PyTest:
-        #'pytest-runner',
-    ],
+    # setup_requires=[
+    #     'setuptools_git',
+    #     # Nice if you like setuptools integration for PyTest:
+    #     #'pytest-runner',
+    # ],
     install_requires=[
         'aiodns', # Recommended by aiohttp docs
         'aiohttp',
@@ -70,7 +63,6 @@ setup(
         'swagger-parser',
         'uvloop', # Recommended by aiohttp docs
     ],
-    tests_require=tests_require,
     extras_require={
         'docs': [
             'MacFSEvents',
@@ -79,7 +71,11 @@ setup(
             'sphinx-autodoc-typehints',
             'sphinx_rtd_theme',
         ],
-        'test': tests_require,
+        'test': [
+            'pytest',
+            'pytest-cov',
+            'pytest-aiohttp'
+        ],
         'dev': [
             'aiohttp-devtools',
             'alembic',
