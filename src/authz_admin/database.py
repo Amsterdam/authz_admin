@@ -193,7 +193,7 @@ async def initialize_database(engine):
     required_accounts = {
         'p.van.beek@amsterdam.nl': {'DPB'},
         'medewerker@amsterdam.nl': {'CDE'},
-        'medewerker': {'CDE'}
+        'Medewerker': {'CDE'}
     }
     accountroleslog_table = metadata().tables['AccountRolesLog']
     accountroles_table = metadata().tables['AccountRoles']
