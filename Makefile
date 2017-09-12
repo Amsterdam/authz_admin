@@ -27,10 +27,12 @@ authz_admin:
 
 
 test:
+	. env.sh; \
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
 cov:
-	$(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
+	. env.sh; \
+    $(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
 
 
 testclean:
