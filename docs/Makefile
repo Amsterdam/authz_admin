@@ -29,5 +29,5 @@ invclean:
 
 
 publish: html
-	cd gh-pages; $(RM) *; touch .nojekyll
-	cd _build/html; cp -a * ../../gh-pages/
+	cd gh-pages && $(RM) *
+	cd _build/html && cp -a * ../../gh-pages/
