@@ -6,7 +6,6 @@ API Docs
 .. toctree::
     :hidden:
 
+    api/authz_admin
     api/config_loader
-    api/oauth2
-    api/oauth2/authz_admin
     api/rest_utils

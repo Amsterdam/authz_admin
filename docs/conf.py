@@ -90,6 +90,8 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6/', 'python.inv'),
     'sphinx': ('http://www.sphinx-doc.org/en/stable/', 'sphinx.inv'),
     'aiohttp': ('http://aiohttp.readthedocs.io/en/stable/', 'aiohttp.inv'),
+    'aiopg': ('https://aiopg.readthedocs.io/en/stable/', 'aiopg.inv'),
+    'sa': ('http://docs.sqlalchemy.org/en/latest/', 'sa.inv'),
     'jwt': ('https://pyjwt.readthedocs.io/en/latest/', 'jwt.inv'),
 }
 
