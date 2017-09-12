@@ -20,19 +20,16 @@ TESTS ?= tests
 
 
 authz_admin:
-	. env.sh; \
 	cp -af src/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
 	       swagger-ui/dist/openapi.json && \
 	authz_admin
 
 
 test:
-	. env.sh; \
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
 cov:
-	. env.sh; \
-    $(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
+	$(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
 
 
 testclean:
