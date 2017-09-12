@@ -69,8 +69,9 @@ class Role(view.OAuth2View):
             'account': [
                 _accounts.Account(
                     self.request,
-                    {'account': account_name},
-                    self.embed.get('account')
-                ) async for account_name in database.account_names_with_role(self.request, self['role'])
+                    {'account': row['account_id']},
+                    self.embed.get('account'),
+                    data=dict(row)
+                ) async for row in database.accounts(self.request, [self['role']])
             ]
         }

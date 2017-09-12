@@ -20,7 +20,8 @@ __pycache__
 *.iml
 
 # Python virtual environement:
-.venv
+/.venv
+/env.sh
 
 # Generated documentation:
 /docs/_build

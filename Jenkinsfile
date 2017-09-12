@@ -25,7 +25,7 @@ node {
     stage('Test') {
         tryStep "test", {
             sh "docker-compose -p authz_admin -f ./docker-compose.yml build --no-cache --pull && " +
-               "docker-compose -p authz_admin -f ./docker-compose.yml run -u root --rm authz_admin echo All tests successful"
+               "docker-compose -p authz_admin -f ./docker-compose.yml run -u root --rm authz_admin make jenkinstest"
         }, {
             sh "docker-compose -p authz_admin -f ./docker-compose.yml down"
         }

@@ -72,6 +72,7 @@ setup(
             'sphinx_rtd_theme',
         ],
         'test': [
+            'alembic',
             'pytest',
             'pytest-cov',
             'pytest-aiohttp'

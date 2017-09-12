@@ -1,4 +1,4 @@
-.PHONY: test testclean distclean clean authorization_service
+.PHONY: run test jenkinstest cov testclean distclean clean
 
 RM = rm -rf
 
@@ -14,19 +14,33 @@ PYTEST = pytest
 #     TESTS=other_tests make test
 #
 #PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --capture=no --cov=src --cov-report=term --no-cov-on-fail
-PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider
-PYTEST_COV_OPTS ?= --loop uvloop -p no:cacheprovider --cov=src --cov-report=term --no-cov-on-fail
+PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose
+PYTEST_COV_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --cov=src --cov-report=term --no-cov-on-fail
 TESTS ?= tests
 
 
-authz_admin:
+run:
 	cp -af src/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
 	       swagger-ui/dist/openapi.json && \
 	authz_admin
 
 
+schema:
+	cd alembic && alembic upgrade head
+
+
+schema_acc:
+	cd alembic && alembic --name acceptance upgrade head
+
+
 test:
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
+
+
+jenkinstest:
+	cd alembic && alembic -c alembic_jenkins.ini upgrade head
+	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
+
 
 cov:
 	$(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
