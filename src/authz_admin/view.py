@@ -20,9 +20,12 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
         See :func:`rest_utils.View.default_query_params`.
 
         """
+        method = self.request.method.lower()
+        if method == 'head':
+            method = 'get'
         path, path_info = self.request.app['swagger'].get_path_spec(
             self.rel_url.raw_path,
-            action=self.request.method.lower()
+            action=method
         )
         if path is None:
             _logger.error("Couldn't find swagger info for path %s", str(self.rel_url))

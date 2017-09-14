@@ -5,14 +5,13 @@ import os.path
 import sys
 import time
 
-import aiopg.sa
 import jwt
 import swagger_parser
 import uvloop
 from aiohttp import web
 
 import rest_utils
-from . import handlers, database, config
+from . import handlers, database, config, authorization
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +59,8 @@ def build_application(loop=None):
     app = web.Application(
         middlewares=[
             rest_utils.middleware,
-            web.normalize_path_middleware()
+            web.normalize_path_middleware(),
+            authorization.authorization
         ],
         loop=loop
     )

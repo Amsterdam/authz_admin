@@ -1,5 +1,6 @@
 import json
 import pytest
+import re
 
 from authz_admin.main import build_application
 from .helpers import follow_path
@@ -141,3 +142,14 @@ async def test_account_methods(client, base_path):
     })
     assert resp.status == 204
 
+
+async def test_maximum_query_depth(client, base_path):
+    url = base_path + '/?embed=datasets(item(item(profile(role))))'
+    resp = await client.get(url)
+    assert resp.status == 200
+
+    url = base_path + '/?embed=datasets(item(item(profile(role(account)))))'
+    resp = await client.get(url)
+    assert resp.status == 400
+    text = await client.text()
+    assert re.search('query depth', text) is not None
