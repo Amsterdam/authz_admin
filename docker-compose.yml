@@ -7,9 +7,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=oauth2
-      - POSTGRES_USER=oauth2
-      - POSTGRES_PASSWORD=oauth2
+      - POSTGRES_DB=authz_admin
+      - POSTGRES_USER=authz_admin
+      - POSTGRES_PASSWORD=authz_admin
 
   authz_admin:
     build: .

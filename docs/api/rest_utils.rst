@@ -4,15 +4,11 @@
 rest_utils
 ==========
 
-.. automodule:: rest_utils
-    :no-members:
-
 
 Content negotiation
 -------------------
 
 .. automodule:: rest_utils._best_content_type
-    :no-private-members:
     :undoc-members:
 
 

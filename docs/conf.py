@@ -29,6 +29,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.extlinks',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
@@ -121,13 +122,35 @@ autodoc_default_flags = [
 
 # Extract both the class docstring and the docstring in __init__ or __new__.
 # By default, autoclass only extracts the class-level docstring.
-autoclass_content = 'both'
+# See also the `napoleon_include_init_with_doc` parameter.
+#autoclass_content = 'both'
 
 extlinks = {
     'epic': ('https://taiga.datapunt.amsterdam.nl/project/kpaska-datapunt-backend/epic/%s', 'epic #'),
     'story': ('https://taiga.datapunt.amsterdam.nl/project/kpaska-datapunt-backend/us/%s', 'user story #'),
     'task': ('https://taiga.datapunt.amsterdam.nl/project/kpaska-datapunt-backend/task/%s', 'task #'),
 }
+
+
+# Napoleon settings:
+
+#napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+
+# True to list __init___ docstrings separately from the class docstring.  False
+# to fall back to Sphinx’s default behavior, which considers the __init___
+# docstring as part of the class documentation.  Defaults to False.
+napoleon_include_init_with_doc = True
+
+#napoleon_include_private_with_doc = False
+#napoleon_include_special_with_doc = True
+#napoleon_use_admonition_for_examples = False
+#napoleon_use_admonition_for_notes = False
+#napoleon_use_admonition_for_references = False
+#napoleon_use_ivar = False
+#napoleon_use_param = True
+#napoleon_use_keyword = True
+#napoleon_use_rtype = True
 
 
 # -- Options for HTML output ----------------------------------------------

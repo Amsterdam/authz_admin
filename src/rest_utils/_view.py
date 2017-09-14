@@ -154,15 +154,12 @@ class View(web.View):
         return {}
 
     @classmethod
-    def add_to_router(cls, router, path, expect_handler=None):
+    def add_to_router(cls,
+                      router: web.UrlDispatcher,
+                      path: str,
+                      expect_handler: T.Callable=None):
         # language=rst
-        """
-
-        :param aiohttp.web.UrlDispatcher router:
-        :param str path:
-        :param str name:
-
-        """
+        """Adds this View class to the aiohttp router."""
         cls._aiohttp_resource = router.add_resource(path)
         # Register the current class in the appropriate registry:
         if isinstance(cls._aiohttp_resource, web.DynamicResource):

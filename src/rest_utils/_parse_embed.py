@@ -13,12 +13,24 @@ _logger = logging.getLogger(__name__)
 _EMBED_TOKEN = re.compile(r',?[a-z_]\w*|\(|,?\)', flags=re.IGNORECASE)
 """Used only by :func:`_tokenize_embed`."""
 
+MAX_QUERY_DEPTH = 3
+# language=rst
+"""Maximum query depth
 
-def _tokenize_embed(s):
+To mitigate DoS-attack potential, the maximum embedding depth is limited.  You can change the maximum embedding depth from your code::
+
+    import rest_utils
+    
+    rest_utils.MAX_QUERY_DEPTH = 5
+    
+"""
+
+
+def _tokenize_embed(s: str):
     # language=rst
-    """Tokenizer for the 'embed' query parameter.
+    """Tokenizer for the `embed` query parameter.
 
-    Used exclusively by :func:`parse`.
+    Used exclusively by :func:`parse_embed`.
 
     Possible tokens are:
 
@@ -37,7 +49,6 @@ def _tokenize_embed(s):
         list(_tokenize_embed('foo(bar,baz)'))
         >>> [('foo', 0), ('(', 3), ('bar', 4), ('baz', 8), (')', 11)]
 
-    :param str s:
     :yields: tuple(token: str, pos: int)
     :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is
         detected.
@@ -60,19 +71,20 @@ def _tokenize_embed(s):
         )
 
 
-def parse_embed(embed: str) -> T.Dict[str, str]:
+def parse_embed(embed: str) -> T.Dict[str, T.Optional[str]]:
     # language=rst
-    """Parser for the 'embed' query parameter.
+    """Parser for the `embed` query parameter.
 
     Example::
 
-        parse('foo(bar,baz)')
-        >>> {'foo': {'bar': {}, 'baz': {}}}
+        >>> parse_embed('foo(bar,baz),bar')
+        {'foo': 'bar,baz', 'bar': None}
 
     :raises: :ref:`HTTPBadRequest <aiohttp-web-exceptions>` if a syntax error is
         detected.
 
     """
+    assert MAX_QUERY_DEPTH > 0
     result = {}
     if len(embed) == 0:
         return result
@@ -89,6 +101,10 @@ def parse_embed(embed: str) -> T.Dict[str, str]:
                 )
             if len(seen) == 1:
                 sub_query_info = (current, pos + 1)
+            if len(seen) > MAX_QUERY_DEPTH:
+                raise web.HTTPBadRequest(
+                    text="Maximum query depth %i exceeded in query parameter 'embed' at '%s'" % (MAX_QUERY_DEPTH, rest)
+                )
             seen.appendleft(set())
             current = None
         elif token == ')':

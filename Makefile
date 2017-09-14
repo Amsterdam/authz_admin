@@ -25,20 +25,15 @@ run:
 	authz_admin
 
 
-schema:
-	cd alembic && alembic upgrade head
+schema schema_jenkins schema_acc:
+	$(MAKE) -C alembic $@
 
 
-schema_acc:
-	cd alembic && alembic --name acceptance upgrade head
-
-
-test:
+test: schema
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
 
-jenkinstest:
-	cd alembic && alembic -c alembic_jenkins.ini upgrade head
+jenkinstest: schema_jenkins
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
 

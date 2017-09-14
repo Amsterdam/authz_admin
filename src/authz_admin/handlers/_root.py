@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class Root(OAuth2View):
 
     async def etag(self):
-        return self.request.app['etag']
+        return True
 
     @property
     def link_title(self):

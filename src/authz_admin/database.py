@@ -1,3 +1,13 @@
+# language=rst
+"""
+
+.. todo:: Automatic schema creation and schema updates on target platforms.
+
+    Currently, creating or upgrading the database schema on acceptance and
+    production is automated in the deploy lane.
+
+"""
+
 from functools import lru_cache
 
 import logging
@@ -192,7 +202,6 @@ async def create_account(request, account_id, role_ids):
 async def initialize_database(engine):
     required_accounts = {
         'p.van.beek@amsterdam.nl': {'DPB'},
-        'medewerker@amsterdam.nl': {'CDE'},
         'Medewerker': {'CDE'}
     }
     accountroleslog_table = metadata().tables['AccountRolesLog']

@@ -138,17 +138,51 @@ def _json_dumps_default(value):
 
 
 class ETagGenerator:
+    # language=rst
+    """Helper class to facilitate creation of ETags.
+
+    Example:
+        class SomeWebResource(View):
+            def etag(self):
+                return ETagGenerator().update(self.state).etag()
+
+    """
     def __init__(self):
         self._hash = hashlib.sha3_224()
 
-    def update(self, v):
+    def update(self, v: T.Any):
+        # language=rst
+        """Incrementally feeds state to this etag generator.
+
+        Parameters:
+            v: any value that can be serialized to JSON with Python's default json encoder.
+
+        Returns:
+            ETagGenerator: self
+
+        Example:
+            etag_generator = ETagGenerator()
+            etag_generator.update(some_state)
+            etag_generator.update(some_more_state)
+            print(etag_generator.etag())
+
+        """
         self._hash.update(
             json.dumps(v, ensure_ascii=False, sort_keys=True, default=_json_dumps_default).encode()
         )
         return self
 
-    @property
-    def etag(self, weak=False) -> str:
+    def etag(self, weak: bool=False):
+        # language=rst
+        """Returns an ETag, based on the state fed to :meth:`update`.
+
+        Parameters:
+            weak: indicates if a weak ETag should be returned.  See :rfc:`2616`.
+
+        Returns:
+            str: A valid ETag, that can be put into an ``ETag:`` header.
+
+        """
         return etaggify(
             base64.urlsafe_b64encode(self._hash.digest()).decode(),
             weak

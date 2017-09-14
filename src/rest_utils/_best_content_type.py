@@ -9,27 +9,28 @@ _logger = logging.getLogger(__name__)
 # ┃ Content Negotiation ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━┛
 
-AVAILABLE_CONTENT_TYPES = (
+_AVAILABLE_CONTENT_TYPES = (
     "application/hal+json",
     "application/json",
 )
-HAL_JSON_COMPATIBLE = {
+_HAL_JSON_COMPATIBLE = {
     "application/hal+json",
     "application/*",
     "*/*"
 }
 
 
-def best_content_type(request):
+def best_content_type(request: web.Request) -> str:
     # language=rst
     """The best matching Content-Type.
 
-    .. todo:: Generalize. (Now, we only negotiate hal+json and friends.)
+    Todo:
+        Generalize. (Now, we only negotiate hal+json and friends.)
 
-    :param aiohttp.web.Request request:
-    :rtype: str
-    :raises: :ref:`aiohttp.web.HTTPNotAcceptable <aiohttp-web-exceptions>` if
-        none of the available content types are acceptable by the client.
+    Raises:
+        aiohttp.web.HTTPNotAcceptable: if none of the available content types
+            are acceptable by the client.  See :ref:`aiohttp web exceptions
+            <aiohttp-web-exceptions>`.
 
     """
     if 'ACCEPT' not in request.headers:
@@ -38,12 +39,12 @@ def best_content_type(request):
     mime_types = [
         part.split(';', 2)[0].strip() for part in accept.split(',')
     ]
-    if not HAL_JSON_COMPATIBLE.isdisjoint(mime_types):
+    if not _HAL_JSON_COMPATIBLE.isdisjoint(mime_types):
         return "application/hal+json; charset=UTF-8"
     elif "application/json" in mime_types:
         return "application/json; charset=UTF-8"
     else:
-        body = ",".join(AVAILABLE_CONTENT_TYPES).encode('ascii')
+        body = ",".join(_AVAILABLE_CONTENT_TYPES).encode('ascii')
         raise web.HTTPNotAcceptable(
             body=body,
             content_type='text/plain; charset="US-ASCII"'

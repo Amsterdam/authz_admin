@@ -65,7 +65,7 @@ def build_application(loop=None):
         loop=loop
     )
     app['config'] = config.load()
-    app['etag'] = rest_utils.ETagGenerator().update(app['config']['authz_admin']).etag
+    app['etag'] = rest_utils.ETagGenerator().update(app['config']['authz_admin']).etag()
     swagger_path = os.path.join(os.path.dirname(__file__), 'openapi.yml')
     _logger.info("Loading swagger file '%s'", swagger_path)
     app['swagger'] = swagger_parser.SwaggerParser(

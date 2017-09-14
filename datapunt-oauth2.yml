@@ -138,9 +138,9 @@ authz_admin:
 postgres:
   host: ${DB_HOST:-localhost}
   port: ${DB_PORT:-5432}
-  user: ${DB_USER:-oauth2}
-  password: ${DB_PASS:-oauth2}
-  dbname: ${DB_DATABASE:-oauth2}
+  user: ${DB_USER:-authz_admin}
+  password: ${DB_PASS:-authz_admin}
+  dbname: ${DB_DATABASE:-authz_admin}
 
 logging:
   version: 1
