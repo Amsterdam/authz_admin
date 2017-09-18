@@ -55,7 +55,11 @@ def _assert_if_match(request: web.Request, etag: T.Union[None, bool, str], requi
     if etags is _STAR:
         if etag is None or etag is False:
             raise web.HTTPPreconditionFailed()
-        return
+        if etag is True or require is False:
+            return
+        raise web.HTTPPreconditionRequired(
+            text='If-Match: * is too generic for this resource.'
+        )
     # From here on, `etags` can only be a set().
     if etag is True or etag is False:
         raise web.HTTPPreconditionFailed(

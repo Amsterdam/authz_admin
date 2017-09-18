@@ -60,7 +60,7 @@ def build_application(loop=None):
         middlewares=[
             rest_utils.middleware,
             web.normalize_path_middleware(),
-            authorization.authorization
+            authorization.middleware
         ],
         loop=loop
     )

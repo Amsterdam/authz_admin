@@ -4,6 +4,7 @@ import re
 
 from authz_admin.main import build_application
 from .helpers import follow_path
+from .test_fixtures import access_token
 
 
 @pytest.fixture
@@ -19,15 +20,19 @@ def base_path():
     return swagger.base_path
 
 
-async def test_get_base_path(client, base_path):
-    resp = await client.head(base_path + '/')
+async def test_get_base_path(client, base_path, access_token):
+    authz_headers = {'Authorization', 'Bearer ' + access_token}
+    resp = await client.head(base_path + '/', headers=authz_headers)
     assert resp.status == 200
-    resp = await client.get(base_path + '/')
+    resp = await client.get(base_path + '/', headers=authz_headers)
     assert resp.status == 200
     body = json.loads(await resp.text())
     for child_resource_name in ('accounts', 'datasets', 'profiles', 'roles'):
         assert body['_links'][child_resource_name]['href'] == base_path + '/' + child_resource_name
-    resp = await client.get(base_path + '/?embed=accounts(item),datasets(item),profiles(item),roles(item)')
+    resp = await client.get(
+        base_path + '/?embed=accounts(item),datasets(item),profiles(item),roles(item)',
+        headers=authz_headers
+    )
     assert resp.status == 200
     body = json.loads(await resp.text())
     for child_resource_name in ('accounts', 'datasets', 'profiles', 'roles'):

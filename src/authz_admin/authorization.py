@@ -1,4 +1,5 @@
 import logging
+import re
 import typing as T
 
 from aiohttp import web
@@ -7,96 +8,79 @@ import jwt
 _logger = logging.getLogger(__name__)
 
 
-async def _enforce_basic(request: web.Request, securityDefinition):
-    raise web.HTTPNotImplemented()
-
-
-async def _enforce_apiKey(request: web.Request, securityDefinition):
-    raise web.HTTPNotImplemented()
-
-
-async def _enforce_oauth2(request: web.Request,
-                          securityDefinition,
-                          required_scopes: T.List[str]):
-    authorization = request.headers.get('authorization')
-    if authorization is None:
-        return None
-    access_token = jwt.decode(
-        authorization, verify=True,
-        key=request.app['config']['authz_admin']['access_secret'],
-        algorithms=['hs256']
-    )
+async def _extract_scopes(request: web.Request,
+                          _security_scheme: T.Dict[str, T.Any]) -> T.Set:
+    authorization_header = request.headers.get('authorization')
+    if authorization_header is None:
+        return set()
+    match = re.fullmatch(r'Bearer ([-\w]+=*\.[-\w]+=*\.[-\w]+=*)', authorization_header)
+    if not match:
+        raise web.HTTPBadRequest(text='Syntax error in Authorization header')
+    try:
+        access_token = jwt.decode(
+            match[1], verify=True,
+            key=request.app['config']['authz_admin']['access_secret'],
+            algorithms=['hs256']
+        )
+    except jwt.InvalidTokenError as e:
+        raise web.HTTPBadRequest(text='Invalid Bearer token') from None
     if 'scopes' not in access_token or not isinstance(access_token['scopes'], list):
         raise web.HTTPBadRequest(
             text='No scopes in access token'
         )
-    scopes = set(access_token['scopes'])
-    missing_scopes = set(required_scopes) - scopes
-    if len(missing_scopes) > 0:
-        raise web.HTTPUnauthorized(
-            text="Missing scopes: %s" % missing_scopes
-        )
-    return scopes
+    return set(access_token['scopes'])
 
 
-async def _enforce_all_of(request: web.Request,
-                          securityDefinitions: T.Dict[str, T.Any],
-                          policies: T.Dict[str, T.List[str]]):
+async def _extract_api_key_info(_request: web.Request,
+                                _security_scheme: T.Dict[str, T.Any]) -> T.Any:
+    return False
+
+
+async def _extract_authz_info(request: web.Request,
+                              security_definitions: T.Dict[str, T.Dict[str, T.Any]]):
     result = {}
-    for key, value in securityDefinitions.items():
-        securityDefinition = securityDefinitions[key]
-        securityType = securityDefinition['type']
-        if securityType == 'oauth2':
-            authz_info = await _enforce_oauth2(request, securityDefinition, value)
-        elif securityType == 'apiKey':
-            authz_info = await _enforce_apiKey(request, securityDefinition)
-        elif securityType == 'basic':
-            authz_info = await _enforce_basic(request, securityDefinition)
+    for key, security_scheme in security_definitions.items():
+        security_type = security_scheme['type']
+        if security_type == 'oauth2':
+            result[key] = await _extract_scopes(request, security_scheme)
+        elif security_type == 'apiKey':
+            result[key] = await _extract_api_key_info(request, security_scheme)
         else:
-            authz_info = None
-        if authz_info is None:
+            _logger.error('Unknown security type: %s' % security_type)
             raise web.HTTPInternalServerError()
-        result[key] = authz_info
     return result
 
 
-async def _enforce_one_of(request: web.Request, securityDefinitions: T.Dict[str, T.Any], security: T.List):
-    for policy in security:
-        authz_info = _enforce_all_of(request, securityDefinitions, policy)
-        if authz_info is not None:
-            request['authz_info'] = authz_info
+async def middleware(app: web.Application, handler):
+    async def middleware_handler(request: web.Request) -> web.Response:
+        swagger = app['swagger']
+        security_definitions = swagger.specification['securityDefinitions']
+        request['authz_info'] = await _extract_authz_info(request, security_definitions)
+        return await handler(request)
+    return middleware_handler
+
+
+async def enforce_one_of(request: web.Request,
+                         security_requirements: T.List[T.Dict[str, T.Optional[T.Iterable]]]):
+    for security_requirement in security_requirements:
+        if await _enforce_all_of(request, security_requirement):
             return
     raise web.HTTPUnauthorized()
 
 
-# noinspection PyUnusedLocal
-async def authorization(app: web.Application, handler):
-    async def middleware_handler(request: web.Request) -> web.Response:
-        swagger = request.app['swagger']
-        base_path = swagger.base_path
-        paths = swagger.specification['paths']
-        path, _ = swagger.get_path_spec(
-            request.raw_path
-        )
-        if path is None:
-            raise web.HTTPNotFound(
-                text="Path '%s' is not in the openapi definition." % request.path
-            )
-        assert path.startswith(base_path)
-        path = path[len(base_path):]
-        if path not in paths:
-            raise web.HTTPNotFound()
-        method = request.method.lower()
-        if method == 'head':
-            method = 'get'
-        if method not in paths[path]:
-            await handler(request)
-            raise web.HTTPMethodNotAllowed(request.method, paths[path].keys())
-        method_info = paths[path][method]
-        if 'security' in method_info:
-            securityDefinitions = swagger.specification['securityDefinitions']
-            _enforce_one_of(request,
-                            securityDefinitions,
-                            method_info['security'])
-        return await handler(request)
-    return middleware_handler
+async def _enforce_all_of(request: web.Request,
+                          security_requirements: T.Dict[str, T.Optional[T.Iterable]]) -> bool:
+    swagger = request.app['swagger']
+    security_definitions = swagger.specification['securityDefinitions']
+    for requirement, scopes in security_requirements.items():
+        authz_info = request['authz_info'][requirement]
+        security_type = security_definitions[requirement]['type']
+        if security_type == 'oauth2':
+            if len(set(scopes) - authz_info) > 0:
+                return False
+        elif security_type == 'apiKey' and not authz_info:
+            return False
+        else:
+            _logger.error('Unexpected code path')
+            raise web.HTTPInternalServerError()
+    return True

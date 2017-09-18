@@ -5,6 +5,7 @@ import typing as T
 from aiohttp import web
 
 import rest_utils
+from . import authorization
 
 _logger = logging.getLogger(__name__)
 
@@ -63,3 +64,24 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
                 'Allow': 'GET,HEAD,OPTIONS,PATCH,POST,PUT'
             }
         )
+
+    async def to_dict(self):
+        swagger = self.request.app['swagger']
+        base_path = swagger.base_path
+        paths = swagger.specification['paths']
+        path, _ = swagger.get_path_spec(
+            self.rel_url.raw_path
+        )
+        assert path is not None
+        assert path.startswith(base_path)
+        path = path[len(base_path):]
+        if 'get' not in paths[path]:
+            raise web.HTTPMethodNotAllowed(
+                'GET', list([
+                    method.upper() for method in paths[path].keys()
+                ])
+            )
+        method_info = paths[path]['get']
+        if 'security' in method_info:
+            await authorization.enforce_one_of(self.request, method_info['security'])
+        return await super().to_dict()

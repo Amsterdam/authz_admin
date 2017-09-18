@@ -13,8 +13,8 @@ PYTEST = pytest
 #
 #     TESTS=other_tests make test
 #
-#PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --capture=no --cov=src --cov-report=term --no-cov-on-fail
-PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose
+#PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --exitfirst --capture=no --cov=src --cov-report=term --no-cov-on-fail
+PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --exitfirst
 PYTEST_COV_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --cov=src --cov-report=term --no-cov-on-fail
 TESTS ?= tests
 
