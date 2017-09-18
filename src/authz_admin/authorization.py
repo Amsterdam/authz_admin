@@ -9,18 +9,18 @@ _logger = logging.getLogger(__name__)
 
 
 async def _extract_scopes(request: web.Request,
-                          _security_scheme: T.Dict[str, T.Any]) -> T.Set:
+                          _security_scheme: T.Dict) -> T.Set:
     authorization_header = request.headers.get('authorization')
     if authorization_header is None:
         return set()
     match = re.fullmatch(r'Bearer ([-\w]+=*\.[-\w]+=*\.[-\w]+=*)', authorization_header)
     if not match:
-        raise web.HTTPBadRequest(text='Syntax error in Authorization header')
+        return set()
     try:
         access_token = jwt.decode(
             match[1], verify=True,
             key=request.app['config']['authz_admin']['access_secret'],
-            algorithms=['hs256']
+            algorithms=['HS256']
         )
     except jwt.InvalidTokenError as e:
         raise web.HTTPBadRequest(text='Invalid Bearer token') from None
@@ -31,9 +31,17 @@ async def _extract_scopes(request: web.Request,
     return set(access_token['scopes'])
 
 
-async def _extract_api_key_info(_request: web.Request,
-                                _security_scheme: T.Dict[str, T.Any]) -> T.Any:
-    return False
+async def _extract_api_key_info(request: web.Request,
+                                security_scheme: T.Dict) -> T.Any:
+    assert security_scheme['in'] == 'header'
+    assert security_scheme['name'] == 'Authorization'
+    authorization_header = request.headers.get('authorization')
+    if authorization_header is None:
+        return False
+    match = re.fullmatch(r'apikey ([-\w]+=*)', authorization_header)
+    if not match:
+        return False
+    return match[1] == request.app['config']['authz_admin']['api_key']
 
 
 async def _extract_authz_info(request: web.Request,
@@ -78,9 +86,10 @@ async def _enforce_all_of(request: web.Request,
         if security_type == 'oauth2':
             if len(set(scopes) - authz_info) > 0:
                 return False
-        elif security_type == 'apiKey' and not authz_info:
-            return False
+        elif security_type == 'apiKey':
+            if not authz_info:
+                return False
         else:
-            _logger.error('Unexpected code path')
+            _logger.error('Unexpected security type: %s' % security_type)
             raise web.HTTPInternalServerError()
     return True

@@ -101,10 +101,6 @@ def parse_embed(embed: str) -> T.Dict[str, T.Optional[str]]:
                 )
             if len(seen) == 1:
                 sub_query_info = (current, pos + 1)
-            if len(seen) > MAX_QUERY_DEPTH:
-                raise web.HTTPBadRequest(
-                    text="Maximum query depth %i exceeded in query parameter 'embed' at '%s'" % (MAX_QUERY_DEPTH, rest)
-                )
             seen.appendleft(set())
             current = None
         elif token == ')':
@@ -125,6 +121,10 @@ def parse_embed(embed: str) -> T.Dict[str, T.Optional[str]]:
                 message = "Link relation '%s' can not be embedded"
                 raise web.HTTPBadRequest(
                     text= message % token
+                )
+            if len(seen) > MAX_QUERY_DEPTH:
+                raise web.HTTPBadRequest(
+                    text="Maximum query depth %i exceeded in query parameter 'embed' at '%s'" % (MAX_QUERY_DEPTH, rest)
                 )
             seen[0].add(token)
             current = token

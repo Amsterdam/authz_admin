@@ -2,7 +2,6 @@ import re
 import typing as T
 
 from .helpers import follow_path
-from .test_fixtures import aaconfig
 
 
 RE_DATASET_ID = re.compile(r'\w{1,4}')

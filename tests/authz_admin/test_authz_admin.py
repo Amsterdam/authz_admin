@@ -1,27 +1,11 @@
 import json
-import pytest
 import re
 
-from authz_admin.main import build_application
 from .helpers import follow_path
-from .test_fixtures import access_token
-
-
-@pytest.fixture
-def client(loop, test_client):
-    """An aiohttp test_client initialized for our app."""
-    return loop.run_until_complete(test_client(build_application()))
-
-
-@pytest.fixture(scope="session")
-def base_path():
-    app = build_application()
-    swagger = follow_path(app, 'swagger')
-    return swagger.base_path
 
 
 async def test_get_base_path(client, base_path, access_token):
-    authz_headers = {'Authorization', 'Bearer ' + access_token}
+    authz_headers = {'Authorization': 'Bearer ' + access_token}
     resp = await client.head(base_path + '/', headers=authz_headers)
     assert resp.status == 200
     resp = await client.get(base_path + '/', headers=authz_headers)
@@ -42,14 +26,16 @@ async def test_get_base_path(client, base_path, access_token):
 
 
 
-async def test_accounts(client, base_path):
-    resp = await client.get(base_path + '/accounts?roles=DPB')
+async def test_accounts(client, base_path, access_token, api_key):
+    resp = await client.get(base_path + '/accounts?roles=DPB',
+                            headers={'Authorization': 'Bearer ' + access_token})
     assert resp.status == 200
     body = json.loads(await resp.text())
     items = follow_path(body, '_links', 'item')
     assert len(items) > 0
     account_url = follow_path(items[0], 'href')
-    resp = await client.get(account_url + '?roles=DPB&embed=role(profile(scope))')
+    resp = await client.get(account_url + '?embed=role(profile(scope))',
+                            headers={'Authorization': 'apikey ' + api_key})
     assert resp.status == 200
     body = json.loads(await resp.text())
     roles = follow_path(body, '_embedded', 'role')
@@ -61,7 +47,8 @@ async def test_accounts(client, base_path):
     follow_path(scopes[0], '_links', 'self', 'name')
 
 
-async def test_scopes(client, base_path):
+async def test_scopes(client, base_path, access_token):
+    authz_headers = {'Authorization': 'Bearer ' + access_token}
     resp = await client.get(base_path + '/datasets?embed=item(item)')
     assert resp.status == 200
     body = json.loads(await resp.text())
@@ -76,7 +63,10 @@ async def test_scopes(client, base_path):
     scopes = follow_path(datasets[0], '_embedded', 'item')
     assert len(scopes) > 0
 
-    resp = await client.get(base_path + '/datasets/AUR/W?embed=profile(role(account))')
+    resp = await client.get(
+        base_path + '/datasets/AUR/W?embed=profile(role(account))',
+        headers=authz_headers
+    )
     assert resp.status == 200
     body = json.loads(await resp.text())
     print(body)
@@ -88,7 +78,8 @@ async def test_scopes(client, base_path):
     assert len(accounts) > 0
 
 
-async def test_account_methods(client, base_path):
+async def test_account_methods(client, base_path, access_token):
+    authz_headers = {'Authorization': 'Bearer ' + access_token}
     url = base_path + '/accounts/pytest_test_account@amsterdam.nl'
     data = {
         '_links': {
@@ -98,7 +89,7 @@ async def test_account_methods(client, base_path):
             ]
         }
     }
-    resp = await client.get(url)
+    resp = await client.get(url, headers=authz_headers)
     if resp.status == 200:
         etag = follow_path(resp.headers, 'ETag')
         resp = await client.delete(url, headers={
@@ -107,20 +98,22 @@ async def test_account_methods(client, base_path):
         assert resp.status == 204
     else:
         assert resp.status == 404
-    resp = await client.put(url, json=data)
+    resp = await client.put(url, json=data, headers=authz_headers)
     assert resp.status == 428
     resp = await client.put(url, json=data, headers={
+        'Authorization': 'Bearer ' + access_token,
         'If-Match': '"foobar"'
     })
     assert resp.status == 404
     resp = await client.put(url, json=data, headers={
+        'Authorization': 'Bearer ' + access_token,
         'If-None-Match': '*'
     })
     assert resp.status == 201
     location = follow_path(resp.headers, 'Location')
     assert location == url
     etag = follow_path(resp.headers, 'ETag')
-    resp = await client.get(url)
+    resp = await client.get(url, headers=authz_headers)
     body = json.loads(await resp.text())
     roles = follow_path(body, '_links', 'role')
     assert len(roles) == 2
@@ -133,28 +126,32 @@ async def test_account_methods(client, base_path):
         }
     }
     resp = await client.put(url, json=data, headers={
+        'Authorization': 'Bearer ' + access_token,
         'If-Match': etag
     })
     assert resp.status == 204
     new_etag = follow_path(resp.headers, 'ETag')
     assert new_etag != etag
     resp = await client.delete(url, headers={
+        'Authorization': 'Bearer ' + access_token,
         'If-Match': etag
     })
     assert resp.status == 412
     resp = await client.delete(url, headers={
+        'Authorization': 'Bearer ' + access_token,
         'If-Match': new_etag
     })
     assert resp.status == 204
 
 
-async def test_maximum_query_depth(client, base_path):
-    url = base_path + '/?embed=datasets(item(item(profile(role))))'
+async def test_maximum_query_depth(client, base_path, access_token):
+    authz_headers = {'Authorization': 'Bearer ' + access_token}
+    url = base_path + '/?embed=datasets(item(item))'
     resp = await client.get(url)
     assert resp.status == 200
 
-    url = base_path + '/?embed=datasets(item(item(profile(role(account)))))'
-    resp = await client.get(url)
+    url = base_path + '/?embed=datasets(item(item(profile)))'
+    resp = await client.get(url, headers=authz_headers)
     assert resp.status == 400
-    text = await client.text()
+    text = await resp.text()
     assert re.search('query depth', text) is not None

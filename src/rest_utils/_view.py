@@ -309,6 +309,8 @@ class View(web.View):
         if not etag:
             raise web.HTTPNotFound()
         assert_preconditions(self.request, etag)
+        if self.request.method == 'GET':
+            data = await self.to_dict()
         response = web.StreamResponse()
         if isinstance(await self.etag(), str):
             response.headers.add('ETag', await self.etag())
@@ -318,7 +320,6 @@ class View(web.View):
             response.headers.add('Content-Location', str(self.canonical_rel_url))
         await response.prepare(self.request)
         if self.request.method == 'GET':
-            data = await self.to_dict()
             async for chunk in _json.json_encode(data):
                 response.write(chunk)
         response.write_eof()

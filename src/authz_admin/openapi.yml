@@ -36,8 +36,8 @@ securityDefinitions:
       Authorization through our own Authorization Service.  Scope names all
       start with `AUR`, which stands for **ADW User Roles**.
     scopes:
-      AUR.r: "Read account roles."
-      AUR.w: "Create and edit account roles."
+      AUR/R: "Read account roles."
+      AUR/W: "Create and edit account roles."
     flow: implicit
     authorizationUrl: "http://localhost:8000/authz_admin/authorization"
 
@@ -636,7 +636,7 @@ paths:
       summary: "Collection of all ADW accounts we know of"
       security:
         - OAuth2:
-          - 'AUR.r'
+          - 'AUR/R'
       parameters:
         - $ref: '#/parameters/embed'
         # - name: filter
@@ -682,7 +682,7 @@ paths:
       summary: "One account in ADW"
       security:
         - OAuth2:
-          - 'AUR.r'
+          - 'AUR/R'
         - AS: []
       parameters:
         - $ref: '#/parameters/embed'
@@ -702,8 +702,8 @@ paths:
         This does **not** remove an account from ADW.  It just removes the authorizations assigned to this occount.
       security:
         - OAuth2:
-          - 'AUR.r'
-          - 'AUR.w'
+          - 'AUR/R'
+          - 'AUR/W'
       parameters:
         - $ref: '#/parameters/if-match-REQUIRED'
       responses:
@@ -713,8 +713,8 @@ paths:
       summary: "Register or update an ADW account"
       security:
         - OAuth2:
-          - 'AUR.r'
-          - 'AUR.w'
+          - 'AUR/R'
+          - 'AUR/W'
       description: >-
         When **registering a new account**, provide the `If-None-Match: *`
         request header. When **updating an existing account**, provide the
@@ -851,10 +851,10 @@ paths:
   "/profiles":
     get:
       summary: "All profiles we have defined"
-      security:
-        - OAuth2:
-          - 'AUR.r'
-        - AS: []
+      # security:
+      #   - OAuth2:
+      #     - 'AUR/R'
+      #   - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -877,10 +877,10 @@ paths:
         pattern: '^\\w{1,32}$'
     get:
       summary: "One of the profiles we have defined"
-      security:
-        - OAuth2:
-          - 'AUR.r'
-        - AS: []
+      # security:
+      #   - OAuth2:
+      #     - 'AUR/R'
+      #   - AS: []
       parameters:
         - $ref: '#/parameters/embed'
       responses:
@@ -899,7 +899,7 @@ paths:
       summary: "All roles we have defined"
       security:
         - OAuth2:
-          - 'AUR.r'
+          - 'AUR/R'
         - AS: []
       parameters:
         - $ref: '#/parameters/embed'
@@ -925,7 +925,7 @@ paths:
       summary: "One of the roles we have defined"
       security:
         - OAuth2:
-          - 'AUR.r'
+          - 'AUR/R'
         - AS: []
       parameters:
         - $ref: '#/parameters/embed'

@@ -37,8 +37,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     package_data={
-        'oauth2': ['config_schema*.json'],
-        'authz_admin.authz_admin': ['openapi*.json', 'openapi.yml']
+        'authz_admin': ['config_schema*.json', 'openapi*.json', 'openapi.yml']
     },
 
 
