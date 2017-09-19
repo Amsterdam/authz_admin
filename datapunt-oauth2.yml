@@ -146,7 +146,7 @@ logging:
   version: 1
   formatters:
     default:
-      format: '%(asctime)s oauth2 %(levelname)-8s %(module)s:%(lineno)d: %(message)s'
+      format: '%(asctime)s authz_admin %(levelname)-8s %(module)s:%(lineno)d: %(message)s'
   handlers:
     console:
       class: logging.StreamHandler
