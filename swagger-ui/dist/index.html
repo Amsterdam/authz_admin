@@ -77,11 +77,18 @@ window.onload = function() {
     url: "openapi.json",
     oauth2RedirectUrl: "https://acc.api.data.amsterdam.nl/authz_admin/swagger-ui/oauth2-redirect.html",
     dom_id: '#swagger-ui',
+    validatorUrl: null,
+    docExpansion: 'list',
+    jsonEditor: true,
     deepLinking: true,
     presets: [
       SwaggerUIBundle.presets.apis,
       SwaggerUIStandalonePreset
     ],
+    client_id: 'swagger-ui',
+    additionalQueryStringParams: {
+      'idp_id': 'datapunt'
+    },
     plugins: [
       SwaggerUIBundle.plugins.DownloadUrl
     ],
