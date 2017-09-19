@@ -85,14 +85,18 @@ window.onload = function() {
       SwaggerUIBundle.presets.apis,
       SwaggerUIStandalonePreset
     ],
-    client_id: 'swagger-ui',
-    additionalQueryStringParams: {
-      'idp_id': 'datapunt'
-    },
     plugins: [
       SwaggerUIBundle.plugins.DownloadUrl
     ],
     layout: "StandaloneLayout"
+  })
+
+  ui.initOAuth({
+    clientId: "swagger-ui",
+    client_id: "swagger-ui",
+    additionalQueryStringParams: {
+      'idp_id': 'datapunt'
+    }
   })
 
   window.ui = ui
