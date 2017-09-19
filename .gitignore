@@ -30,3 +30,5 @@ __pycache__
 /docs/*.inv.txt
 
 /swagger-ui/.git
+/alembic/alembic.ini
+/aiohttp_openapi_haljson
