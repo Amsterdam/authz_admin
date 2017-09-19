@@ -27,11 +27,11 @@
       "type": "oauth2",
       "description": "Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.",
       "scopes": {
-        "AUR.r": "Read account roles.",
-        "AUR.w": "Create and edit account roles."
+        "AUR/R": "Read account roles.",
+        "AUR/W": "Create and edit account roles."
       },
       "flow": "implicit",
-      "authorizationUrl": "https://acc.api.data.amsterdam.nl/authz_admin/authorization"
+      "authorizationUrl": "http://localhost:8000/authz_admin/authorization"
     },
     "AS": {
       "type": "apiKey",
@@ -590,11 +590,8 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
-          },
-          {
-            "API-key": []
           }
         ],
         "parameters": [
@@ -641,11 +638,11 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
-            "API-key": []
+            "AS": []
           }
         ],
         "parameters": [
@@ -677,8 +674,8 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r",
-              "AUR.w"
+              "AUR/R",
+              "AUR/W"
             ]
           }
         ],
@@ -698,8 +695,8 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r",
-              "AUR.w"
+              "AUR/R",
+              "AUR/W"
             ]
           }
         ],
@@ -847,13 +844,6 @@
     "/profiles": {
       "get": {
         "summary": "All profiles we have defined",
-        "security": [
-          {
-            "OAuth2": [
-              "AUR.r"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -887,13 +877,6 @@
       ],
       "get": {
         "summary": "One of the profiles we have defined",
-        "security": [
-          {
-            "OAuth2": [
-              "AUR.r"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -921,11 +904,11 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
-            "API-key": []
+            "AS": []
           }
         ],
         "parameters": [
@@ -964,11 +947,11 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
-            "API-key": []
+            "AS": []
           }
         ],
         "parameters": [

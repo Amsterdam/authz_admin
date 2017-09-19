@@ -27,8 +27,8 @@
       "type": "oauth2",
       "description": "Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.",
       "scopes": {
-        "AUR.r": "Read account roles.",
-        "AUR.w": "Create and edit account roles."
+        "AUR/R": "Read account roles.",
+        "AUR/W": "Create and edit account roles."
       },
       "flow": "implicit",
       "authorizationUrl": "http://localhost:8000/authz_admin/authorization"
@@ -590,7 +590,7 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           }
         ],
@@ -638,7 +638,7 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
@@ -674,8 +674,8 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r",
-              "AUR.w"
+              "AUR/R",
+              "AUR/W"
             ]
           }
         ],
@@ -695,8 +695,8 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r",
-              "AUR.w"
+              "AUR/R",
+              "AUR/W"
             ]
           }
         ],
@@ -844,16 +844,6 @@
     "/profiles": {
       "get": {
         "summary": "All profiles we have defined",
-        "security": [
-          {
-            "OAuth2": [
-              "AUR.r"
-            ]
-          },
-          {
-            "AS": []
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -887,16 +877,6 @@
       ],
       "get": {
         "summary": "One of the profiles we have defined",
-        "security": [
-          {
-            "OAuth2": [
-              "AUR.r"
-            ]
-          },
-          {
-            "AS": []
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/embed"
@@ -924,7 +904,7 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
@@ -967,7 +947,7 @@
         "security": [
           {
             "OAuth2": [
-              "AUR.r"
+              "AUR/R"
             ]
           },
           {
