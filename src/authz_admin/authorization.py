@@ -13,7 +13,7 @@ async def _extract_scopes(request: web.Request,
     authorization_header = request.headers.get('authorization')
     if authorization_header is None:
         return set()
-    match = re.fullmatch(r'Bearer ([-\w]+=*\.[-\w]+=*\.[-\w]+=*)', authorization_header)
+    match = re.fullmatch(r'bearer ([-\w]+=*\.[-\w]+=*\.[-\w]+=*)', authorization_header, flags='i')
     if not match:
         return set()
     try:
