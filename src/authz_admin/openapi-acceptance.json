@@ -31,7 +31,7 @@
         "AUR/W": "Create and edit account roles."
       },
       "flow": "implicit",
-      "authorizationUrl": "https://acc.api.data.amsterdam.nl/oauth2/authorize"
+      "authorizationUrl": "https://acc.api.data.amsterdam.nl/oauth2/authorize?idp_id=datapunt"
     },
     "AS": {
       "type": "apiKey",
