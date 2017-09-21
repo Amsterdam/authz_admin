@@ -46,13 +46,20 @@ Getting Started
 .. code-block:: bash
 
     # Clone the repository:
-    git clone git@github.com:DatapuntAmsterdam/oauth2.git
-    cd oauth2
-    # Create a virtual environment:
-    python3.6 -m venv --copies --prompt oauth2 .venv
-    pip install -e .[docs,test]
+    git clone git@github.com:Amsterdam/authz_admin.git
+    cd authz_admin
+
+    # Create and activate a virtual environment, for example with:
+    python3.6 -m venv --copies --prompt authz_admin .venv
+    source ./.venv/bin/activate
+
+    pip install -e .[docs,test,dev]
+
     # Start a database server (required for all sub-services):
     docker-compose up -d database
+
+    # To start the service:
+    make run
 
     # To start a documentation server:
     make -C docs server
