@@ -1,5 +1,9 @@
 .. reference this page as :ref:`index` (from which it's included)
 
+
+.. todo:: Cleanup the :file:`README.rst`
+
+
 Datapunt OAuth2 Services
 ========================
 
@@ -57,6 +61,9 @@ Getting Started
 
     # Start a database server (required for all sub-services):
     docker-compose up -d database
+
+    # To test the service:
+    make test
 
     # To start the service:
     make run
