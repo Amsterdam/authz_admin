@@ -21,7 +21,6 @@ __pycache__
 
 # Python virtual environement:
 /.venv
-/env.sh
 
 # Generated documentation:
 /docs/_build
