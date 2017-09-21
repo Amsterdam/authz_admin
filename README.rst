@@ -63,10 +63,10 @@ Getting Started
     docker-compose up -d database
 
     # To test the service:
-    make test
+    source env.sh && make test
 
     # To start the service:
-    make run
+    source env.sh && make run
 
     # To start a documentation server:
     make -C docs server
