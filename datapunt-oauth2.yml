@@ -17,16 +17,25 @@ authz_admin:
       name: Kadaster
       scopes:
         RS:
-          name: Bevragen Kadastrale Subjecten
-          description: >-
-            TODO
-              - beschrijving. Verschil tussen identiteit en volledige
-                gegevens.
-              - toevoegen alle scopes, samen met Stephan Preeker.
+          name: Bevragen niet-natuurlijke Kadastrale Subjecten
+          included_by: RSN
+        RSN:
+          name: Bevragen alle Kadastrale Subjecten
+          includes: RS
         RZR:
           name: Zakelijke Rechten
+        RAT:
+          name: Aantekeningen
+        RW:
+          name: Lezen alle WKPB details van Kadastrale Objecten
+          description: >-
+            - koopsom
+            - koopsom_valuta_code
+            - koopjaar
+            - cultuurcode_onbebouwd
+            - cultuurcode_bebouwd
     WKPB:
-      name: Wet Kenbaarheid Beperkingen
+      name: Wet Kenbaarheid Publiekrechtelijke Beperkingen
       described_by: 'https://www.amsterdam.nl/stelselpedia/wkpb-index/'
       scopes:
         RBDU:
@@ -40,11 +49,24 @@ authz_admin:
       name: Monumenten
       described_by: 'https://www.amsterdam.nl/stelselpedia/monumenten-index/'
       scopes:
-        RC:
-          name: Bevragen Complexen
+        RBC:
+          name: Lezen beschrijvingen van Complexen
           description: >-
-            De API serveert *monumenten*, *situeringen* en *complexen*.
-            Monumenten en situeringen zijn publiek; complexen zijn afgeschermd.
+            Beschrijvingen van complexen bevatten soms (inbraak-)gevoelige
+            informatie.
+        RDM:
+          name: Lezen details van Monumenten
+          description: >-
+            - architect_ontwerp_monument
+            - monumenttype
+            - opdrachtgever_bouw_monument
+            - bouwjaar_start_bouwperiode_monument
+            - bouwjaar_eind_bouwperiode_monument
+            - oorspronkelijke_functie_monument
+            - monumentgeometrie
+            - in_onderzoek
+            - beschrijving_monument
+            - redengevende_omschrijving_monument
     HR:
       name: Handelsregister
       described_by: 'https://www.amsterdam.nl/stelselpedia/hr-index/'
