@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     # Publication Metadata:
-    version='0.1.3',
+    version='0.1.4',
     name='datapunt_authz_admin',
     description="User Role Management Service",
     # long_description="",

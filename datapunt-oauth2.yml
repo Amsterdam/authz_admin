@@ -41,10 +41,10 @@ authz_admin:
         RBDU:
           name: Lezen URL Brondocument
 
-    WOZ:
-      name: Waardebepaling Onroerende Zaken
-      described_by: 'https://www.amsterdam.nl/stelselpedia/woz-index/'
-      scopes: {}
+#    WOZ:
+#      name: Waardebepaling Onroerende Zaken
+#      described_by: 'https://www.amsterdam.nl/stelselpedia/woz-index/'
+#      scopes: {}
     MON:
       name: Monumenten
       described_by: 'https://www.amsterdam.nl/stelselpedia/monumenten-index/'
@@ -110,9 +110,13 @@ authz_admin:
             vervangen door nauwkeuriger profiel
       scopes:
         - HR/R
-        - MON/RC
+        - MON/RBC
+        - MON/RBM
         - WKPB/RBDU
+        - BRK/RS
         - BRK/RZR
+        - BRK/RAT
+        - BRK/RW
     SA_020:
       name: Superambtenaar
       description: |-
@@ -121,8 +125,8 @@ authz_admin:
         To Do
             vervangen door nauwkeuriger profiel
       scopes:
-        - BRP/R
-        - BRK/RS
+        - TLLS/R
+        - BRK/RSN
 
   roles:
     CDE:
@@ -143,6 +147,7 @@ authz_admin:
             vervangen door nauwkeuriger rolverdeling
       profiles:
         - SA_020
+        - GA_020
     DPB:
       name: beheerder gebruikersrollen
       description: |-
