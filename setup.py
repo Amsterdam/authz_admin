@@ -53,7 +53,7 @@ setup(
         'aiohttp-jinja2',
         'aiopg',
         'cchardet', # Recommended by aiohttp docs
-        'https://github.com/Amsterdam/config_loader/releases/download/1.0.0/datapunt_config_loader.tar.gz',
+        'datapunt-config-loader',
         'docutils',
         'jsonschema',
         'mimeparse',
