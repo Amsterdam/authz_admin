@@ -111,7 +111,7 @@ authz_admin:
       scopes:
         - HR/R
         - MON/RBC
-        - MON/RBM
+        - MON/RDM
         - WKPB/RBDU
         - BRK/RS
         - BRK/RZR

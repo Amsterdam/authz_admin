@@ -162,7 +162,7 @@ async def _encode(obj, stack):
         except web.HTTPException as e:
             _logger.error("Unexpected exception", exc_info=e, stack_info=True)
             obj = {
-                '_links': {'self': {'href': 'http://error.com/'}},
+                '_links': {'self': {'href': obj.canonical_rel_url}},
                 '_status': e.status_code
             }
             if e.text is not None:

@@ -1,11 +1,8 @@
 import asyncio
 import logging
-import math
 import os.path
 import sys
-import time
 
-import jwt
 import swagger_parser
 import uvloop
 from aiohttp import web
@@ -14,15 +11,6 @@ import rest_utils
 from . import handlers, database, config, authorization
 
 _logger = logging.getLogger(__name__)
-
-
-def access_token(scope: str, secret) -> bytes:
-    return jwt.encode({
-        'sub': 'dp:datapunt@amsterdam.nl',
-        'iat': math.floor(time.time()) - 5,
-        'exp': math.floor(time.time()) + 3600 * 12,
-        'scope': scope
-    }, secret)
 
 
 def add_routes(app: web.Application):
