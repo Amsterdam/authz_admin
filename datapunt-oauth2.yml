@@ -27,7 +27,7 @@ authz_admin:
           description: >
             Alle attributen van een kadastraal niet-natuurlijk subject, inclusief alle
             rechten op kadastrale objecten
-          included-by: RSN
+          included_by: RSN
         RO:
           name: Read Object
           description: >
