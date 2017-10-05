@@ -16,24 +16,27 @@ authz_admin:
     BRK:
       name: Kadaster
       scopes:
-        RS:
-          name: Bevragen niet-natuurlijke Kadastrale Subjecten
-          included_by: RSN
         RSN:
-          name: Bevragen alle Kadastrale Subjecten
+          name: Read Subject Natuurlijk
+          description: >
+            Alle atrributen van een kadastraal subject (natuurlijk en niet-natuurlijk),
+            inclusief alle rechten op kadastrale objecten
           includes: RS
-        RZR:
-          name: Zakelijke Rechten
-        RAT:
-          name: Aantekeningen
-        RW:
-          name: Lezen alle WKPB details van Kadastrale Objecten
-          description: >-
-            - koopsom
-            - koopsom_valuta_code
-            - koopjaar
-            - cultuurcode_onbebouwd
-            - cultuurcode_bebouwd
+        RS:
+          name: Read Subject
+          description: >
+            Alle attributen van een kadastraal niet-natuurlijk subject, inclusief alle
+            rechten op kadastrale objecten
+          included-by: RSN
+        RO:
+          name: Read Object
+          description: >
+            Alle attributen van een kadastraal object, inclusief koopsom, koopsom_valuta_code,
+            koopjaar, cultuurcode_onbebouwd, cultuurcode_bebouwd en zakelijke rechten van de
+            bijbehorende kadastrale subjecten
+        SSN:
+          name: Search Subject Natuurlijk
+          description: Natuurlijke Subjecten in zoekresultaten
     WKPB:
       name: Wet Kenbaarheid Publiekrechtelijke Beperkingen
       described_by: 'https://www.amsterdam.nl/stelselpedia/wkpb-index/'
@@ -114,9 +117,7 @@ authz_admin:
         - MON/RDM
         - WKPB/RBDU
         - BRK/RS
-        - BRK/RZR
-        - BRK/RAT
-        - BRK/RW
+        - BRK/RO
     SA_020:
       name: Superambtenaar
       description: |-
@@ -127,7 +128,7 @@ authz_admin:
       scopes:
         - TLLS/R
         - BRK/RSN
-
+        - BRK/SSN
   roles:
     CDE:
       name: medewerker
