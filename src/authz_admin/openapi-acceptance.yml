@@ -1,0 +1,676 @@
+swagger: '2.0'
+info:
+  title: Datapunt Authorization Management Service
+  contact:
+    name: Datapunt Amsterdam
+    url: 'https://data.amsterdam.nl/'
+    email: datapunt@amsterdam.nl
+  version: 1.0.0
+host: acc.api.data.amsterdam.nl
+basePath: /authz_admin
+schemes:
+  - https
+produces:
+  - application/hal+json
+  - application/json
+consumes:
+  - application/json
+  - application/hal+json
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    description: 'Authorization through our own Authorization Service.  Scope names all start with `AUR`, which stands for **ADW User Roles**.'
+    scopes:
+      AUR/R: Read account roles.
+      AUR/W: Create and edit account roles.
+    flow: implicit
+    authorizationUrl: 'https://acc.api.data.amsterdam.nl/oauth2/authorize'
+  AS:
+    type: apiKey
+    description: |-
+      This security definition should be used by the OAuth2 Authorization Service.
+      Use `apikey` as the authorization scheme. For example: `Authorization: apikey foo...bar`.
+    in: header
+    name: Authorization
+parameters:
+  page:
+    name: page
+    in: query
+    description: The page number to return. Requires the `items` parameter. The first page has number 1.
+    required: false
+    type: string
+    pattern: '^[1-9]\\d*$'
+  items:
+    name: page_items
+    in: query
+    description: The maximum number of items to return in one response.
+    required: false
+    type: string
+    pattern: '^(?:0|[1-9]\\d*)$'
+  embed:
+    name: embed
+    in: query
+    description: |-
+      Linked resources to embed.  For example: `foo(bar,baz())`.  This would embed all resources with link relation `foo`.
+      * In these `foo`-resources, all resources of link types `bar` and `baz`
+        will be embedded.
+
+      * In the `bar` resource(s), the default embedding will occur.
+      * In the `baz` resource(s), no embedding will occur.
+    type: string
+    pattern: '^(?:,?[a-z_]\\w*|,?\\)|\\()+$'
+    required: false
+  if-match-OPTIONAL:
+    name: If-Match
+    description: 'This request header is required if the client intends to *update* an existing `account` resource.  The value *must* be the current `ETag` of the account resource, as last seen by the client.  This prevents lost updates if multiple clients are concurrently editing the same resource.'
+    in: header
+    type: string
+    pattern: '^(?:W/)?"[^"]+"$'
+    required: false
+  if-match-REQUIRED:
+    name: If-Match
+    description: 'This request header is required if the client intends to *update* an existing `account` resource.  The value *must* be the current `ETag` of the account resource, as last seen by the client.  This prevents lost updates if multiple clients are concurrently editing the same resource.'
+    in: header
+    type: string
+    pattern: '^(?:W/)?"[^"]+"$'
+    required: true
+  if-none-match-GET:
+    name: If-None-Match
+    description: This request header can make the request conditional. You'll get a `304 Not Modified` if you're cached version is still up-to-date.
+    in: header
+    type: string
+    pattern: '^(?:W/)?"[^"]+"(?:\\s,\\s(?:W/)?"[^"]+")*$'
+    required: false
+  if-none-match-PUT:
+    name: If-None-Match
+    description: This request header is required if the client intends to *create* a new `account` resource.  This prevents lost updates if multiple clients are concurrently creating the same resource.
+    in: header
+    type: string
+    enum:
+      - '*'
+    required: false
+definitions:
+  Link:
+    title: Link Object
+    description: A Link Object represents a hyperlink from the containing resource to a URI.
+    type: object
+    required:
+      - href
+    properties:
+      href:
+        description: 'Its value is either a URI [RFC3986] or a URI Template [RFC6570]. If the value is a URI Template then the Link Object SHOULD have a "templated" attribute whose value is true.'
+        type: string
+        format: url
+        example: 'http://www.example.com/'
+      name:
+        description: Its value MAY be used as a secondary key for selecting Link Objects which share the same relation type.
+        type: string
+      templated:
+        description: Its value is boolean and SHOULD be true when the Link Object's "href" property is a URI Template. Its value SHOULD be considered false if it is undefined or any other value than true.
+        type: boolean
+        default: false
+      type:
+        description: Its value is a string used as a hint to indicate the media type expected when dereferencing the target resource.
+        type: string
+        pattern: '^[-+\w.]+/[-+\w.]+(?:;\s*\w+=(?:"(?:""|[^"])*"|[^;,"][^;,]*)?)*$'
+        example: application/hal+json
+      deprecation:
+        description: 'Its presence indicates that the link is to be deprecated (i.e. removed) at a future date. Its value is a URL that SHOULD provide further information about the deprecation. A client SHOULD provide some notification (for example, by logging a warning message) whenever it traverses over a link that has this property. The notification SHOULD include the deprecation property''s value so that a client maintainer can easily find information about the deprecation.'
+        type: string
+      profile:
+        description: 'Its value is a string which is a URI that hints about the profile [RFC6906] of the target resource.'
+        type: string
+        format: url
+      title:
+        description: 'Its value is a string and is intended for labelling the link with a human-readable identifier (as defined by [RFC5988]).'
+        type: string
+      hreflang:
+        description: 'Its value is a string and is intended for indicating the language of the target resource (as defined by [RFC5988]).'
+        type: string
+  Collection:
+    type: object
+    required:
+      - _links
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          item:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+  Accounts:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Account'
+  Account:
+    type: object
+    required:
+      - _links
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+          - role
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Role'
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+        description: Changes when the mapping between this account and its roles changes.
+  Datasets:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Dataset'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: |-
+              Changes when any of the datasets in this collection of datasets changes, including:
+              - changes to an individual dataset, including
+                - changes to which set of scopes are in this dataset
+                - changes to any of the scopes in this dataset, including
+                  - changes to which set of profiles contain this scope
+  Dataset:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        required:
+          - name
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Scope'
+          name:
+            type: string
+            maxLength: 120
+            minLength: 1
+          described_by:
+            type: string
+            format: url
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: |-
+              Changes when this dataset changes, including:
+              - changes to which set of scopes are in this dataset - changes to any of the scopes in this dataset, including
+                - changes to which set of profiles contain this scope
+  Profiles:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Profile'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+            description: 'Changes when any of the contained profiles changes, including changes in which set of roles are linked with this profile.'
+  Profile:
+    type: object
+    required:
+      - _links
+      - name
+      - description
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          scope:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          scope:
+            type: array
+            items:
+              $ref: '#/definitions/Scope'
+          role:
+            type: array
+            items:
+              $ref: '#/definitions/Role'
+      name:
+        type: string
+        minLength: 1
+        maxLength: 120
+      description:
+        type: string
+        format: rst
+        description: Volledige omschrijving van deze doelbinding.
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+        description: 'Changes when this profile changes, including changes in which set of roles are linked with this profile.'
+  Roles:
+    allOf:
+      - $ref: '#/definitions/Collection'
+      - type: object
+        properties:
+          _embedded:
+            type: object
+            properties:
+              item:
+                type: array
+                items:
+                  $ref: '#/definitions/Role'
+          _etag:
+            type: string
+            pattern: '^(?:W/)?"[^"]+"$'
+  Role:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          profile:
+            type: array
+            items:
+              $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+        properties:
+          profile:
+            type: array
+            items:
+              $ref: '#/definitions/Profile'
+      name:
+        type: string
+        minLength: 1
+        maxLength: 120
+      description:
+        type: string
+        format: rst
+        description: Volledige omschrijving van deze rol.
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+  Scope:
+    type: object
+    required:
+      - _links
+      - name
+    properties:
+      _links:
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            $ref: '#/definitions/Link'
+          includes:
+            $ref: '#/definitions/Link'
+          included_by:
+            $ref: '#/definitions/Link'
+      _embedded:
+        type: object
+      name:
+        type: string
+        maxLength: 120
+      description:
+        type: string
+        format: rst
+      _etag:
+        type: string
+        pattern: '^(?:W/)?"[^"]+"$'
+paths:
+  /:
+    get:
+      summary: The root resource
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            required:
+              - _links
+            properties:
+              _links:
+                type: object
+                required:
+                  - self
+                properties:
+                  self:
+                    $ref: '#/definitions/Link'
+                  accounts:
+                    $ref: '#/definitions/Link'
+                  datasets:
+                    $ref: '#/definitions/Link'
+                  profiles:
+                    $ref: '#/definitions/Link'
+                  roles:
+                    $ref: '#/definitions/Link'
+              _embedded:
+                type: object
+                properties:
+                  accounts:
+                    $ref: '#/definitions/Accounts'
+                  datasets:
+                    $ref: '#/definitions/Datasets'
+                  profiles:
+                    $ref: '#/definitions/Profiles'
+                  roles:
+                    $ref: '#/definitions/Roles'
+  /accounts:
+    get:
+      summary: Collection of all ADW accounts we know of
+      security:
+        - OAuth2:
+            - AUR/R
+      parameters:
+        - $ref: '#/parameters/embed'
+        - name: roles
+          in: query
+          type: string
+          description: A comma separated list of role identifiers.
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Accounts'
+  '/accounts/{account}':
+    parameters:
+      - name: account
+        in: path
+        required: true
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: |-
+          The unique ID of this account in ADW.
+          Unfortunately, TMA returns the email address as unique identifier, instead of ADW's true internal unique ID, which consists of the user's last name plus three digits.
+    get:
+      summary: One account in ADW
+      security:
+        - OAuth2:
+            - AUR/R
+        - AS: []
+      parameters:
+        - $ref: '#/parameters/embed'
+        - $ref: '#/parameters/if-none-match-GET'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Account'
+    delete:
+      summary: Remove an ADW account from the authorization database.
+      description: This does **not** remove an account from ADW.  It just removes the authorizations assigned to this occount.
+      security:
+        - OAuth2:
+            - AUR/R
+            - AUR/W
+      parameters:
+        - $ref: '#/parameters/if-match-REQUIRED'
+      responses:
+        '204':
+          description: No Content
+    put:
+      summary: Register or update an ADW account
+      security:
+        - OAuth2:
+            - AUR/R
+            - AUR/W
+      description: |-
+        When **registering a new account**, provide the `If-None-Match: *` request header. When **updating an existing account**, provide the `If-Match: "«etag»"` request header.
+        - The attributes allowed/required in the request body JSON object depend
+          on the IdP.  The client may send a list of associated roles when
+          creating or updating an account resource.
+
+        - The body doesn't have to be a valid HAL+JSON object: only top-level
+          attributes and the list of associated roles are relevant.
+
+        Example request body::
+
+            {
+              "_links": {
+                "roles": [
+                  { "href": "/roles/role1" },
+                  { "href": "/roles/role2" }
+                ]
+              },
+              "first_name": "Jane",
+              "last_name": "Doe"
+            }
+      parameters:
+        - $ref: '#/parameters/if-match-OPTIONAL'
+        - $ref: '#/parameters/if-none-match-PUT'
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/Account'
+      responses:
+        '201':
+          description: |-
+            **Created**
+            The `ETag` response header contains the ETag of the newly created resource.
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+        '204':
+          description: |-
+            **No Content**
+            The resource was updated successfully.  The `ETag` response header contains the new ETag.
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+        '412':
+          description: |-
+            **Precondition Failed**
+            - If the client sent an `If-Match` request header, this means the
+              client doesn't have the latest version of the resource it wants to
+              update.  The client should first `GET` the latest version, merge
+              if possible, and try again.
+
+            - If the client sent an `If-None-Match` request header, this means
+              that the resource already exists.
+        '428':
+          description: |-
+            **Precondition Required**
+            The client didn't provide an `If-None-Match` or `If-Match` request header.
+  /datasets:
+    get:
+      summary: Collection of all scopesets we connect with
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Datasets'
+  '/datasets/{dataset}':
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+    get:
+      summary: One of the datasets we shield
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Dataset'
+  '/datasets/{dataset}/{scope}':
+    parameters:
+      - name: dataset
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+      - name: scope
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,4}$'
+    get:
+      summary: 'One scope in dataset `{dataset}`'
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Scope'
+  /profiles:
+    get:
+      summary: All profiles we have defined
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Profile'
+  '/profiles/{profile}':
+    parameters:
+      - name: profile
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,32}$'
+    get:
+      summary: One of the profiles we have defined
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Profiles'
+  /roles:
+    get:
+      summary: All roles we have defined
+      security:
+        - OAuth2:
+            - AUR/R
+        - AS: []
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Roles'
+  '/roles/{role}':
+    parameters:
+      - name: role
+        in: path
+        required: true
+        type: string
+        pattern: '^\\w{1,32}$'
+    get:
+      summary: One of the roles we have defined
+      security:
+        - OAuth2:
+            - AUR/R
+        - AS: []
+      parameters:
+        - $ref: '#/parameters/embed'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              type: string
+              pattern: '^(?:W/)?"[^"]+"$'
+          schema:
+            $ref: '#/definitions/Role'
+

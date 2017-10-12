@@ -18,10 +18,16 @@ PYTEST_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --exitfirst
 PYTEST_COV_OPTS ?= --loop uvloop -p no:cacheprovider --verbose --cov=src --cov-report=term --no-cov-on-fail
 TESTS ?= tests
 
+ifeq ($(DATAPUNT_ENVIRONMENT),production)
+	OPENAPI_PATH=src/authz_admin/openapi.yml
+else
+	OPENAPI_PATH=src/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).yml
+endif
+
 
 run:
-	cp -af src/authz_admin/openapi-$(DATAPUNT_ENVIRONMENT).json \
-	       swagger-ui/dist/openapi.json && \
+	cp -af $(OPENAPI_PATH) \
+	       swagger-ui/dist/openapi.yml && \
 	authz_admin
 
 
