@@ -117,14 +117,20 @@ class Account(view.OAuth2View):
             ) from None
 
         if await self.data() is None:
-            log_id = await database.create_account(self.request, self['account'], new_roles)
+            try:
+                log_id = await database.create_account(self.request, self['account'], new_roles)
+            except database.PreconditionFailed:
+                raise web.HTTPPreconditionFailed() from None
             status = 201
             headers = {
                 'Location': self.rel_url.raw_path,
                 'ETag': etag_from_int(log_id)
             }
         else:
-            log_id = await database.update_account(self.request, self, new_roles)
+            try:
+                log_id = await database.update_account(self.request, self, new_roles)
+            except database.PreconditionFailed:
+                raise web.HTTPPreconditionFailed() from None
             status = 204
             headers = {'ETag': etag_from_int(log_id)}
         return web.Response(status=status, headers=headers)
@@ -135,5 +141,8 @@ class Account(view.OAuth2View):
             await self.etag(),
             require_if_match=True
         )
-        await database.delete_account(self.request, self)
+        try:
+            await database.delete_account(self.request, self)
+        except database.PreconditionFailed:
+            raise web.HTTPPreconditionFailed() from None
         return web.Response(status=204)

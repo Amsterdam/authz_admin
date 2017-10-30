@@ -23,6 +23,10 @@ from aiohttp import web
 _logger = logging.getLogger(__name__)
 
 
+class PreconditionFailed(BaseException):
+    pass
+
+
 @lru_cache()
 def metadata() -> sa.MetaData:
     result = sa.MetaData()
@@ -136,6 +140,14 @@ async def account(request, account_id):
 
 
 async def delete_account(request, account):
+    # language=rst
+    """
+
+    Raises:
+        PreconditionFailed: if the account doesn't exist or isn't in the
+            expected state.
+
+    """
     account_data = await account.data()
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
@@ -155,11 +167,19 @@ async def delete_account(request, account):
                 ))
             )
             if result_set.rowcount != 1:
-                raise web.HTTPPreconditionFailed()
+                raise PreconditionFailed()
     return log_id
 
 
 async def update_account(request, account, role_ids):
+    # language=rst
+    """
+
+    Raises:
+        PreconditionFailed: if the account doesn't exist or isn't in the
+            expected state.
+
+    """
     account_data = await account.data()
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
@@ -182,12 +202,18 @@ async def update_account(request, account, role_ids):
                 )
             )
             if result_set.rowcount != 1:
-                raise web.HTTPPreconditionFailed()
+                raise PreconditionFailed()
     return log_id
 
 
 async def create_account(request, account_id, role_ids):
-    accountroleslog = metadata().tables['AccountRolesLog']
+    # language=rst
+    """
+
+    Raises:
+        PreconditionFailed: if the account already exists.
+
+    """
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
         async with conn.begin():
@@ -208,12 +234,23 @@ async def create_account(request, account_id, role_ids):
                     )
                 )
             except sa_exceptions.IntegrityError:
-                raise web.HTTPPreconditionFailed()
+                raise PreconditionFailed()
 
     return log_id
 
 
-async def initialize_database(engine, required_accounts: T.Dict[str, T.Iterable[str]]):
+async def initialize_database(
+    engine,
+    required_accounts: T.Dict[str, T.Iterable[str]]
+):
+    # language=rst
+    """
+
+    Raises:
+        PreconditionFailed: if a race condition exists between this process and
+            another process trying to initialize the database at the same time.
+
+    """
     accountroles_table = metadata().tables['AccountRoles']
     async with engine.acquire() as conn:
         for account_id, role_ids in required_accounts.items():
@@ -243,4 +280,4 @@ async def initialize_database(engine, required_accounts: T.Dict[str, T.Iterable[
                             )
                         )
                     except sa_exceptions.IntegrityError:
-                        raise web.HTTPPreconditionFailed() from None
+                        raise PreconditionFailed() from None
