@@ -13,44 +13,29 @@ from . import handlers, database, config, authorization
 _logger = logging.getLogger(__name__)
 
 
-def add_routes(app: web.Application):
-    base_path = app['swagger'].base_path
-    app.router.add_static(base_path + '/swagger-ui', 'swagger-ui/dist', follow_symlinks=True)
-    #app.router.add_route('GET', base_path + '/authorization', handlers.authorization, name='authorization')
-    handlers.Root.add_to_router(app.router, base_path + '/')
-    handlers.Accounts.add_to_router(app.router, base_path + '/accounts')
-    handlers.Account.add_to_router(app.router, base_path + '/accounts/{account}')
-    handlers.Datasets.add_to_router(app.router, base_path + '/datasets')
-    handlers.Dataset.add_to_router(app.router, base_path + '/datasets/{dataset}')
-    handlers.Scope.add_to_router(app.router, base_path + '/datasets/{dataset}/{scope}')
-    handlers.Profiles.add_to_router(app.router, base_path + '/profiles')
-    handlers.Profile.add_to_router(app.router, base_path + '/profiles/{profile}')
-    handlers.Roles.add_to_router(app.router, base_path + '/roles')
-    handlers.Role.add_to_router(app.router, base_path + '/roles/{role}')
+def add_routes(base_path: str, router: web.UrlDispatcher):
+    router.add_static(base_path + '/swagger-ui', 'swagger-ui/dist', follow_symlinks=True)
+    #router.add_route('GET', base_path + '/authorization', handlers.authorization, name='authorization')
+    handlers.Root.add_to_router(router, base_path + '/')
+    handlers.Accounts.add_to_router(router, base_path + '/accounts')
+    handlers.Account.add_to_router(router, base_path + '/accounts/{account}')
+    handlers.Datasets.add_to_router(router, base_path + '/datasets')
+    handlers.Dataset.add_to_router(router, base_path + '/datasets/{dataset}')
+    handlers.Scope.add_to_router(router, base_path + '/datasets/{dataset}/{scope}')
+    handlers.Profiles.add_to_router(router, base_path + '/profiles')
+    handlers.Profile.add_to_router(router, base_path + '/profiles/{profile}')
+    handlers.Roles.add_to_router(router, base_path + '/roles')
+    handlers.Role.add_to_router(router, base_path + '/roles/{role}')
 
 
-# noinspection PyUnusedLocal
-async def on_response_prepare(request: web.Request, response: web.Response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-
-
-def build_application(loop=None):
-    # language=rst
-    """The entry point of the authorization administration service.
-
-    :returns int: the exit status of the process. See
-        also the ``console_scripts`` in :file:`setup.py`.
-
-    """
-
+def build_application() -> web.Application:
     # Build the application
     app = web.Application(
         middlewares=[
             rest_utils.middleware,
             web.normalize_path_middleware(),
             authorization.middleware
-        ],
-        loop=loop
+        ]
     )
     app['config'] = config.load()
     app['etag'] = rest_utils.ETagGenerator().update(app['config']['authz_admin']).etag()
@@ -60,8 +45,7 @@ def build_application(loop=None):
         swagger_path=swagger_path
     )
     app['metadata'] = database.metadata()
-    add_routes(app)
-    app.on_response_prepare.append(on_response_prepare)
+    add_routes(app['swagger'].base_path, app.router)
     app.on_startup.append(database.initialize_app)
     return app
 

@@ -1,9 +1,5 @@
 .. reference this page as :ref:`index` (from which it's included)
 
-
-.. todo:: Cleanup the :file:`README.rst`
-
-
 Datapunt OAuth2 Services
 ========================
 
@@ -13,7 +9,8 @@ Datapunt OAuth2 Services
 .. image:: https://img.shields.io/badge/license-MPLv2.0-blue.svg
    :target: https://www.mozilla.org/en-US/MPL/2.0/
 
-The latest published documentation for this project can be found *here*.
+The latest published documentation for this project can be found `here
+<https://amsterdam.github.io/authz_admin/>`_.
 
 .. todo::
 
@@ -71,26 +68,21 @@ Getting Started
     # To start a documentation server:
     make -C docs server
 
+After starting the server, the API can be accessed through
+http://localhost:8000/authz_admin/\. The Swagger UI front-end is available at
+http://localhost:8000/authz_admin/swagger-ui/index.html\.
 
-Starting the services
----------------------
 
-To be able to start up the services, you’ll need to set some environment
-variables. The services will complain if they’re missing.
+Starting the service
+--------------------
 
-This repository hosts 3 distinct services:
-
-*   `oauth2.authz_service`
-*   `oauth2.authz_admin`
-*   `oauth2.client_admin_service`
-
-Each of these services can be started in at least 3 ways:
+The service can be started in at least 2 ways:
 
 1.  Directly, like this:
 
     .. code-block:: shell
 
-        python -m oauth2.authz_admin.main
+        PYTHONPATH=${PROJECT_HOME:-.}/src python -m authz_admin.main
 
 2.  Through setuptools console script. This is functionally identical to the
     previous method, and only provided as a shortcut:
@@ -99,11 +91,13 @@ Each of these services can be started in at least 3 ways:
 
         authz_admin
 
-3.  Through the aiohttp command line client:
 
-    .. code-block:: shell
+Database Schema Management
+==========================
 
-        python -m aiohttp.web -H localhost -P 8080 oauth2.authz_admin.main:application
+We use `alembic <http://alembic.zzzcomputing.com/en/latest/index.html>` for
+database schema management. The configuration can be found in the
+:file:`alembic` subdirectory.
 
 
 About Scopes

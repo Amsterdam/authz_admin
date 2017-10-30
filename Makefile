@@ -43,7 +43,7 @@ jenkinstest: schema_jenkins
 	$(PYTEST) $(PYTEST_OPTS) $(TESTS)
 
 
-cov:
+cov: schema
 	$(PYTEST) $(PYTEST_COV_OPTS) $(TESTS)
 
 

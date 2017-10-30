@@ -3,6 +3,11 @@
 Configuration options
 =====================
 
+.. warning::
+    This page is outdated. But the page formatting is OK, so I'm
+    leaving it here. [--PvB]
+
+
 datasets
 --------
 
@@ -25,6 +30,7 @@ Example:
 +=======================+============+========================================+
 | [1-4 word characters] | object     | Dataset identifier.                    |
 +-----------------------+------------+----------------------------------------+
+
 
 authorization_service
 ---------------------

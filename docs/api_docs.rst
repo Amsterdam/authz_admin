@@ -7,5 +7,4 @@ API Docs
     :hidden:
 
     api/authz_admin
-    api/config_loader
     api/rest_utils

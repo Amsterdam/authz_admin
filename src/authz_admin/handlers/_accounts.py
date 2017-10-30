@@ -9,11 +9,6 @@ from rest_utils import etag_from_int, assert_preconditions
 from . import _roles
 
 _logger = logging.getLogger(__name__)
-_ACCOUNTS = {
-    'p.van.beek@amsterdam.nl': ['CDE', 'CDE_PLUS'],
-    'e.lammerts@amsterdam.nl': ['CDE'],
-    'loetje.hanglip@amsterdam.nl': []
-}
 
 
 class Accounts(view.OAuth2View):

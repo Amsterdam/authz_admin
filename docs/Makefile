@@ -1,22 +1,22 @@
 RM            = rm -rf
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-AUTOBUILD     = sphinx-autobuild
+AUTOBUILD     = sphinx-autobuild --watch ../src --port 8001
 SOURCEDIR     = .
 BUILDDIR      = _build
 
 
 # Put it first so that "make" without argument is like "make help".
 help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS)
+	@$(SPHINXBUILD) --help
 
 
 html:
-	$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS)
+	$(SPHINXBUILD) -b html $(SPHINXOPTS) "$(SOURCEDIR)" "$(BUILDDIR)"
 
 
 server:
-	@$(AUTOBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) --watch ../src
+	@$(AUTOBUILD) --watch ../src --port 8001 $(SPHINXOPTS) "$(SOURCEDIR)" "$(BUILDDIR)"
 
 
 clean:
@@ -29,4 +29,4 @@ invclean:
 
 publish: html
 	cd gh-pages && $(RM) *
-	cd _build/html && cp -a * ../../gh-pages/
+	cd _build && cp -a * ../gh-pages/

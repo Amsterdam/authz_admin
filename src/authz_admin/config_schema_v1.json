@@ -14,7 +14,16 @@
         "api_key": {"type": "string"},
         "access_secret": {"type": "string"},
         "bind_port": {"type": "integer"},
-
+        "required_accounts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\w{1,32}$"
+            }
+          }
+        },
 
         "datasets": {
           "type": "object",
@@ -26,7 +35,9 @@
               "required": ["name", "scopes"],
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
                 },
                 "described_by": {
                   "type": "string",
@@ -42,7 +53,9 @@
                       "additionalProperties": false,
                       "properties": {
                         "name": {
-                          "type": "string"
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
                         },
                         "description": {
                           "type": "string",

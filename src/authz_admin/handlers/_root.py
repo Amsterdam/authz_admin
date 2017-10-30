@@ -42,11 +42,3 @@ class Root(OAuth2View):
             'profiles': profiles,
             'roles': roles
         }
-
-    # _INSTANCE = None
-    #
-    # @classmethod
-    # def instance_for_request(cls, request: web.Request):
-    #     if cls._INSTANCE is None:
-    #         cls._INSTANCE = Root()
-    #     return cls._INSTANCE

@@ -24,11 +24,7 @@ setup(
     # Entry points:
     entry_points={
         'console_scripts': [
-            'authz_admin = authz_admin.main:main',
-            # 'authn_service = oauth2.authn_service.main:main',
-            # 'authz_service = oauth2.authz_service.main:start',
-            # 'client_admin_service = oauth2.client_admin_service.server:start',
-            # 'dummy_authz_service = oauth2.dummy_authz_service.main:main',
+            'authz_admin = authz_admin.main:main'
         ],
     },
 

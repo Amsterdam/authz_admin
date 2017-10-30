@@ -9,8 +9,8 @@
 """
 
 from functools import lru_cache
-
 import logging
+import typing as T
 
 import aiopg.sa
 import sqlalchemy as sa
@@ -51,6 +51,34 @@ def metadata() -> sa.MetaData:
     return result
 
 
+async def _accountroleslog_insert(
+    conn,
+    created_by: str,
+    request_info: str,
+    account_id: str,
+    action: str,
+    role_ids: T.Iterable[str]
+) -> int:
+    # language=rst
+    """
+
+    Insert an entry in the audit log, and return the *log id*.
+
+    """
+    accountroleslog_table = metadata().tables['AccountRolesLog']
+    result_set = await conn.execute(
+        accountroleslog_table.insert().values(
+            created_by='authz_admin_service',
+            request_info='Initialization',
+            account_id=account_id,
+            action='C',
+            role_ids=role_ids
+        ).returning(accountroleslog_table.c.id)
+    )
+    row = await result_set.fetchone()
+    return row[0]
+
+
 async def initialize_app(app):
     dbconf = app['config']['postgres']
     _logger.info("Connecting to database: postgres://%s:%i/%s",
@@ -64,7 +92,8 @@ async def initialize_app(app):
         client_encoding='utf8'
     )
     app['engine'] = await engine_context.__aenter__()
-    await initialize_database(app['engine'])
+    await initialize_database(app['engine'], required_accounts=app['config']['authz_admin']['required_accounts'])
+
     async def on_shutdown(app):
         await engine_context.__aexit__(None, None, None)
     app.on_shutdown.append(on_shutdown)
@@ -108,23 +137,17 @@ async def account(request, account_id):
 
 async def delete_account(request, account):
     account_data = await account.data()
-    accountroleslog = metadata().tables['AccountRolesLog']
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
         async with conn.begin():
-            result_set = await conn.execute(
-                accountroleslog.insert().values(
-                    created_by='p.van.beek@amsterdam.nl',
-                    request_info=str(request.headers),
-                    account_id=account['account'],
-                    action='D',
-                    role_ids=account_data['role_ids']
-                ).returning(
-                    accountroleslog.c.id
-                )
+            log_id = await _accountroleslog_insert(
+                conn,
+                created_by='p.van.beek@amsterdam.nl',
+                request_info=str(request.headers),
+                account_id=account['account'],
+                action='D',
+                role_ids=account_data['role_ids']
             )
-            row = await result_set.fetchone()
-            log_id = row[0]
             result_set = await conn.execute(
                 accountroles.delete().where(sa.and_(
                     accountroles.c.account_id == account['account'],
@@ -138,23 +161,17 @@ async def delete_account(request, account):
 
 async def update_account(request, account, role_ids):
     account_data = await account.data()
-    accountroleslog = metadata().tables['AccountRolesLog']
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
         async with conn.begin():
-            result_set = await conn.execute(
-                accountroleslog.insert().values(
-                    created_by='p.van.beek@amsterdam.nl',
-                    request_info=str(request.headers),
-                    account_id=account['account'],
-                    action='U',
-                    role_ids=role_ids
-                ).returning(
-                    accountroleslog.c.id
-                )
+            log_id = await _accountroleslog_insert(
+                conn,
+                created_by='p.van.beek@amsterdam.nl',
+                request_info=str(request.headers),
+                account_id=account['account'],
+                action='U',
+                role_ids=role_ids
             )
-            row = await result_set.fetchone()
-            log_id = row[0]
             result_set = await conn.execute(
                 accountroles.update().where(sa.and_(
                     accountroles.c.account_id == account['account'],
@@ -174,17 +191,14 @@ async def create_account(request, account_id, role_ids):
     accountroles = metadata().tables['AccountRoles']
     async with request.app['engine'].acquire() as conn:
         async with conn.begin():
-            result_set = await conn.execute(
-                accountroleslog.insert().values(
-                    created_by='p.van.beek@amsterdam.nl',
-                    request_info=str(request.headers),
-                    account_id=account_id,
-                    action='C',
-                    role_ids=role_ids
-                ).returning(accountroleslog.c.id)
+            log_id = await _accountroleslog_insert(
+                conn,
+                created_by='p.van.beek@amsterdam.nl',
+                request_info=str(request.headers),
+                account_id=account_id,
+                action='C',
+                role_ids=role_ids
             )
-            row = await result_set.fetchone()
-            log_id = row[0]
             try:
                 await conn.execute(
                     accountroles.insert().values(
@@ -199,12 +213,7 @@ async def create_account(request, account_id, role_ids):
     return log_id
 
 
-async def initialize_database(engine):
-    required_accounts = {
-        'p.van.beek@amsterdam.nl': {'DPB'},
-        'Medewerker': {'CDE'}
-    }
-    accountroleslog_table = metadata().tables['AccountRolesLog']
+async def initialize_database(engine, required_accounts: T.Dict[str, T.Iterable[str]]):
     accountroles_table = metadata().tables['AccountRoles']
     async with engine.acquire() as conn:
         for account_id, role_ids in required_accounts.items():
@@ -217,17 +226,14 @@ async def initialize_database(engine):
             if row[0] == 0:
                 _logger.info("Required account '%s' not found. Creating this account with roles %s", account_id, repr(role_ids))
                 async with conn.begin():
-                    result_set = await conn.execute(
-                        accountroleslog_table.insert().values(
-                            created_by='authz_admin_service',
-                            request_info='Initialization',
-                            account_id=account_id,
-                            action='C',
-                            role_ids=role_ids
-                        ).returning(accountroleslog_table.c.id)
+                    log_id = await _accountroleslog_insert(
+                        conn,
+                        created_by='authz_admin_service',
+                        request_info='Initialization',
+                        account_id=account_id,
+                        action='C',
+                        role_ids=role_ids
                     )
-                    row = await result_set.fetchone()
-                    log_id = row[0]
                     try:
                         await conn.execute(
                             accountroles_table.insert().values(

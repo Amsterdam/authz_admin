@@ -42,19 +42,15 @@ _logger = logging.getLogger(__name__)
 
 
 DEFAULT_CONFIG_PATHS = [
-    pathlib.Path('/etc') / 'datapunt-oauth2.yml',
-    pathlib.Path('datapunt-oauth2.yml'),
-    pathlib.Path('../datapunt-oauth2.yml')
+    pathlib.Path('/etc') / 'config.yml',
+    pathlib.Path('config.yml'),
+    pathlib.Path('../config.yml')
 ]
 
 
 CONFIG_SCHEMA_V1_PATH = pathlib.Path(
     os.path.dirname(os.path.abspath(__file__))
 ) / 'config_schema_v1.json'
-
-
-RE_DATASET_ID = re.compile(r'\w{1,4}')
-RE_SCOPE_ID = re.compile(r'\w{1,4}')
 
 
 def _config_path():
@@ -82,21 +78,6 @@ def _config_path():
     return filtered_config_paths[0]
 
 
-def _validate_datasets_and_scope_ids(config):
-    datasets = config['authz_admin']['datasets']
-    for dataset_id, dataset in datasets.items():
-        assert RE_DATASET_ID.fullmatch(dataset_id)
-        dataset_name = dataset['name']
-        assert len(dataset_name) > 0
-        assert len(dataset_name) <= 80
-        scopes = dataset['scopes']
-        for scope_id, scope in scopes.items():
-            assert RE_SCOPE_ID.fullmatch(scope_id)
-            scope_name = scope['name']
-            assert len(scope_name) > 0
-            assert len(scope_name) <= 80
-
-
 def _validate_scopes(config):
     # language=rst
     """
@@ -106,7 +87,7 @@ def _validate_scopes(config):
 
     """
     for ds_token, dataset in config['authz_admin']['datasets'].items():
-        for scope_token, scope in dataset.get('scopes', dict()).items():
+        for scope_token, scope in dataset['scopes'].items():
             includes = scope.get('includes')
             included_by = scope.get('included_by')
             try:
@@ -115,8 +96,47 @@ def _validate_scopes(config):
                 if included_by is not None:
                     assert dataset['scopes'][included_by]['includes'] == scope_token
             except Exception:
-                error_message = "'includes' or 'included_by' relation of scope '{}.{}' isn't reciprocated."
-                raise config_loader.ConfigError(error_message.format(ds_token, scope_token)) from None
+                error_message = f"'includes' or 'included_by' relation of scope '{ds_token}.{scope_token}' isn't reciprocated."
+                raise config_loader.ConfigError(error_message) from None
+
+
+def _validate_profiles(config):
+    # language=rst
+    """
+
+    Validate referential integrity between *scopes* and *profiles*.
+
+    :raises: config_loader.ConfigError
+
+    """
+    datasets = config['authz_admin']['datasets']
+    for profile_token, profile in config['authz_admin']['profiles'].items():
+        for fq_scope in profile['scopes']:
+            dataset_token, scope_token = fq_scope.split('/', 2)
+            try:
+                assert scope_token in datasets[dataset_token]['scopes'].keys()
+            except Exception:
+                error_message = f"Profile '{profile_token}' references non existing scope '{fq_scope}'."
+                raise config_loader.ConfigError(error_message) from None
+
+
+def _validate_roles(config):
+    # language=rst
+    """
+
+    Validate referential integrity between *profiles* and *roles*.
+
+    :raises: config_loader.ConfigError
+
+    """
+    profiles = set(config['authz_admin']['profiles'].keys())
+    for role_token, role in config['authz_admin']['roles'].items():
+        for profile in role['profiles']:
+            try:
+                assert profile in profiles
+            except Exception:
+                error_message = f"Role '{role_token}' references non existing profile '{profile}'."
+                raise config_loader.ConfigError(error_message) from None
 
 
 def load():
@@ -140,8 +160,9 @@ def load():
     # above) requires a MutableMapping as its input,
     # so we only freeze config *after* that call:
     config = frozen(config)
-    _validate_datasets_and_scope_ids(config)
     _validate_scopes(config)
+    _validate_profiles(config)
+    _validate_roles(config)
     return config
 
 
