@@ -1,6 +1,6 @@
 authz_admin:
   api_key: ${AUTHZ_ADMIN_API_KEY}
-  jwks: ${PUB_JWKS}
+  access_secret: ${JWT_ACCESS_SECRET}
   bind_port: 8000
   required_accounts:
     p.van.beek@amsterdam.nl:

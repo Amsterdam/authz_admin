@@ -6,7 +6,6 @@ import sys
 import swagger_parser
 import uvloop
 from aiohttp import web
-from authorization_django import jwks
 
 import rest_utils
 from . import handlers, database, config, authorization
@@ -48,8 +47,6 @@ def build_application() -> web.Application:
     app['metadata'] = database.metadata()
     add_routes(app['swagger'].base_path, app.router)
     app.on_startup.append(database.initialize_app)
-    jwks_string = app['config']['authz_admin']['jwks']
-    app['jwks'] = jwks.load(jwks_string)
     return app
 
 

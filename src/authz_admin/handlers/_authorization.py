@@ -12,14 +12,7 @@ from authz_admin import config
 _logger = logging.getLogger(__name__)
 
 
-def access_token(scope: str, jwks) -> bytes:
-    jwks_signers = jwks.signers
-    assert len(jwks_signers) > 0
-
-    list_signers = [(k, v) for k, v in jwks_signers.items()]
-    (kid, key) = list_signers[len(list_signers) - 1]
-    header = {"kid": kid}
-
+def access_token(scope: str, secret) -> bytes:
     scopes = scope.split(' ')
     _logger.debug("Added scopes: %s" % scopes)
     return jwt.encode({
@@ -27,11 +20,9 @@ def access_token(scope: str, jwks) -> bytes:
         'iat': math.floor(time.time()) - 5,
         'exp': math.floor(time.time()) + 3600 * 12,
         'scopes': scopes
-    }, key=key.key, alg=key.alg, headers=header)
+    }, secret)
 
 
-# If this method is used the JWKS key provide in PUB_JWKS environment should contain
-# a private key or be symmetric encoding
 async def authorization(request: web.Request) -> web.Response:
     if (request.query.get('response_type') != 'token' or
                 'redirect_uri' not in request.query):
@@ -51,7 +42,7 @@ async def authorization(request: web.Request) -> web.Response:
     location = location.update_query(
         access_token=access_token(
             scope,
-            request.app['jwks']
+            request.app['config']['authz_admin']['access_secret']
         ).decode(),
         token_type='bearer',
         scope=scope

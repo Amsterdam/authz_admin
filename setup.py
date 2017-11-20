@@ -48,7 +48,6 @@ setup(
         'aiohttp',
         'aiohttp-jinja2',
         'aiopg',
-        'datapunt-authorization-django==0.2.18', # Only for jwks module in this package
         'cchardet', # Recommended by aiohttp docs
         'datapunt-config-loader',
         'docutils',
