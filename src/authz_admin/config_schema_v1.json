@@ -9,10 +9,10 @@
     "authz_admin": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["api_key", "access_secret", "bind_port", "datasets", "roles", "profiles"],
+      "required": ["api_key", "jwks", "bind_port", "datasets", "roles", "profiles"],
       "properties": {
         "api_key": {"type": "string"},
-        "access_secret": {"type": "string"},
+        "jwks": {"type": "string"},
         "bind_port": {"type": "integer"},
         "required_accounts": {
           "type": "object",
