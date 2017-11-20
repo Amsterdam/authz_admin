@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.6
 MAINTAINER datapunt@amsterdam.nl
 
 ENV PYTHONUNBUFFERED 1
