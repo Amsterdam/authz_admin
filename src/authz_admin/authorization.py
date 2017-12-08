@@ -1,9 +1,12 @@
 import logging
 import re
 import typing as T
+import functools
 
 from aiohttp import web
 import jwt
+
+from rest_utils._view import View
 
 _logger = logging.getLogger(__name__)
 
@@ -80,6 +83,7 @@ async def middleware(app: web.Application, handler):
         swagger = app['swagger']
         security_definitions = swagger.specification['securityDefinitions']
         request['authz_info'] = await _extract_authz_info(request, security_definitions)
+
         return await handler(request)
     return middleware_handler
 
@@ -109,3 +113,31 @@ async def _enforce_all_of(request: web.Request,
             _logger.error('Unexpected security type: %s' % security_type)
             raise web.HTTPInternalServerError()
     return True
+
+
+def authorize(p_method=None):
+    def decorator(f: T.Callable):
+        @functools.wraps(f)
+        async def wrapper(self: View, *args, **kwargs):
+            swagger = self.request.app['swagger']
+            base_path = swagger.base_path
+            paths = swagger.specification['paths']
+            path, _ = swagger.get_path_spec(
+                self.rel_url.raw_path
+            )
+            assert path is not None
+            assert path.startswith(base_path)
+            path = path[len(base_path):]
+            method = p_method or self.request.method
+            if method.lower() not in paths[path]:
+                raise web.HTTPMethodNotAllowed(
+                    method, list([
+                        method.upper() for method in paths[path].keys()
+                    ])
+                )
+            method_info = paths[path][method.lower()]
+            if 'security' in method_info:
+                await enforce_one_of(self.request, method_info['security'])
+            return await f(self, *args, **kwargs)
+        return wrapper
+    return decorator

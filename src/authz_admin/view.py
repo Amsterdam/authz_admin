@@ -65,6 +65,7 @@ class OAuth2View(rest_utils.View, metaclass=abc.ABCMeta):
             }
         )
 
+    @authorization.authorize('GET')
     async def to_dict(self):
         swagger = self.request.app['swagger']
         base_path = swagger.base_path

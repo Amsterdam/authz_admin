@@ -1,12 +1,12 @@
 import logging
 
-from authz_admin.view import OAuth2View
+from authz_admin import view
 from . import _accounts, _scopes, _roles, _profiles
 
 _logger = logging.getLogger(__name__)
 
 
-class Root(OAuth2View):
+class Root(view.OAuth2View):
 
     async def etag(self):
         return True

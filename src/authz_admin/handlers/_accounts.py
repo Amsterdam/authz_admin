@@ -4,7 +4,7 @@ from json import loads as json_loads
 
 from aiohttp import web
 
-from authz_admin import database, view
+from authz_admin import database, view, authorization
 from rest_utils import etag_from_int, assert_preconditions
 from . import _roles
 
@@ -83,6 +83,7 @@ class Account(view.OAuth2View):
             ]
         }
 
+    @authorization.authorize()
     async def put(self):
         if_match = self.request.headers.get('if-match', '')
         if_none_match = self.request.headers.get('if-none-match', '')
@@ -135,6 +136,7 @@ class Account(view.OAuth2View):
             headers = {'ETag': etag_from_int(log_id)}
         return web.Response(status=status, headers=headers)
 
+    @authorization.authorize()
     async def delete(self) -> web.Response:
         assert_preconditions(
             self.request,
