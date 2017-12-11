@@ -42,9 +42,8 @@ _logger = logging.getLogger(__name__)
 
 
 DEFAULT_CONFIG_PATHS = [
-    pathlib.Path('/etc') / 'config.yml',
-    pathlib.Path('config.yml'),
-    pathlib.Path('../config.yml')
+    pathlib.Path('/etc') / 'datapunt-oauth2.yml',
+    pathlib.Path('config.yml')
 ]
 
 

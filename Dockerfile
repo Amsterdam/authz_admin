@@ -8,8 +8,8 @@ EXPOSE 8000
 RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /app
 COPY . /app
+WORKDIR /app
 
 # This is needed for the ./run.sh script, that copies the right swagger
 # definition file into swagger-ui.
