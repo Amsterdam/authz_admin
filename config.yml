@@ -120,6 +120,7 @@ authz_admin:
         - WKPB/RBDU
         - BRK/RS
         - BRK/RO
+        - TLLS/R
     SA_020:
       name: Superambtenaar
       description: |-
@@ -128,7 +129,6 @@ authz_admin:
         To Do
             vervangen door nauwkeuriger profiel
       scopes:
-        - TLLS/R
         - BRK/RSN
   roles:
     CDE:
