@@ -97,6 +97,14 @@ authz_admin:
             Geeft het recht om rollen aan een ADW account toe te voegen en
             rollen van een ADW account te verwijderen.
           includes: R
+    GREX:
+      name: Grondexploitatie
+      described_by: 'https://dokuwiki.datapunt.amsterdam.nl/'
+      scopes:
+        R:
+          name: Leesrechten
+          description: >-
+            De informatie in deze dataset is volgens bronhouder niet publiek.
   profiles:
     AZB:
       name: Autorisatiebeheer
@@ -121,6 +129,7 @@ authz_admin:
         - BRK/RS
         - BRK/RO
         - TLLS/R
+        - GREX/R
     SA_020:
       name: Superambtenaar
       description: |-
