@@ -10,7 +10,7 @@ setup(
     name='datapunt_authz_admin',
     description="User Role Management Service",
     # long_description="",
-    url='https://github.com/DatapuntAmsterdam/authz_admin',
+    url='https://github.com/Amsterdam/authz_admin',
     author='Amsterdam Datapunt',
     author_email='datapunt@amsterdam.nl',
     license='Mozilla Public License Version 2.0',
