@@ -56,6 +56,7 @@ setup(
         'mimeparse',
         'PyYaml',
         'PyJWT',
+        'psycopg2-binary',
         'SQLAlchemy==1.1',
         'swagger-parser',
         'uvloop', # Recommended by aiohttp docs
