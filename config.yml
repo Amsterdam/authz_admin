@@ -105,6 +105,14 @@ authz_admin:
           name: Leesrechten
           description: >-
             De informatie in deze dataset is volgens bronhouder niet publiek.
+    SIG:
+      name: Signals
+      described_by: 'https://dokuwiki.datapunt.amsterdam.nl/'
+      scopes:
+        ALL:
+          name: Alle signals authorisaties
+          description: >-
+            Signals admin rechten
   profiles:
     AZB:
       name: Autorisatiebeheer
@@ -139,6 +147,15 @@ authz_admin:
             vervangen door nauwkeuriger profiel
       scopes:
         - BRK/RSN
+    SIG_ADM:
+      name: Signals Admin
+      description: |-
+        Alle signals taken waarvoor authorisatie is vereist
+
+        To Do
+            Toevoegen scopes en profiles voor gewone Signals gebruikers
+      scopes:
+        - SIG/ALL
   roles:
     CDE:
       name: medewerker
@@ -168,7 +185,15 @@ authz_admin:
             vervangen door nauwkeuriger rolverdeling
       profiles:
         - AZB
+    SIG_ADM:
+      name: Signals Admin
+      description: |-
+        Alle Signals taken waarvoor authorisatie is vereist
 
+        To Do
+            Toevoegen rollen en profiles voor gewone Signals gebruikers
+      profiles:
+        - SIG_ADM
 
 postgres:
   host: ${DB_HOST:-localhost}
