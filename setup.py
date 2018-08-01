@@ -62,7 +62,7 @@ setup(
         'chardet==3.0.4',
         'click==6.7',
         'coverage==4.4.1',
-        'cryptography==2.1.2',
+        'cryptography==2.3',
         'datapunt-authorization-django==0.2.18',
         'datapunt-config-loader==1.0.0',
         'decorator==4.1.2',
