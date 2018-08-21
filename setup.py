@@ -92,7 +92,7 @@ setup(
         'multidict==3.2.0',
         'nbconvert==5.3.1',
         'nbformat==4.4.0',
-        'notebook==5.1.0',
+        'notebook==5.4.1',
         'pandocfilters==1.4.2',
         'parso==0.1.0',
         'pathtools==0.1.2',
