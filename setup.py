@@ -83,7 +83,7 @@ setup(
         'jupyter==1.0.0',
         'jupyter-client==5.1.0',
         'jupyter-console==5.2.0',
-        'jupyter-core==4.3.0',
+        'jupyter-core==4.4.0',
         'livereload==2.5.1',
         'Mako==1.0.7',
         'MarkupSafe==1.0',
