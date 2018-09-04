@@ -26,8 +26,7 @@ endif
 
 
 run:
-	cp -af $(OPENAPI_PATH) \
-	       swagger-ui/dist/openapi.yml && \
+	cp -af $(OPENAPI_PATH) swagger-ui/dist/openapi.yml
 	authz_admin
 
 

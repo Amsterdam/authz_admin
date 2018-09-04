@@ -1,5 +1,4 @@
 # Python ephemerals:
-*.pyc
 __pycache__
 *.egg-info
 .eggs
@@ -27,7 +26,3 @@ __pycache__
 # Downloaded intersphinx inventory files:
 /docs/*.inv
 /docs/*.inv.txt
-
-/swagger-ui/.git
-/alembic/alembic.ini
-/aiohttp_openapi_haljson
