@@ -7,7 +7,7 @@ cd "${0%/*}"
 UI_VERSION=$(node -p "require('../package.json').version")
 
 # Replace our version placeholder with UI's version
-sed -i "s|\$\$VERSION|$UI_VERSION|g" package.json
+sed -i '' "s|\$\$VERSION|$UI_VERSION|g" package.json
 
 # Copy UI's dist files to our directory
 cp ../dist/* .
@@ -18,4 +18,4 @@ else
   npm pack .
 fi
 
-find . -not -name .npmignore -not -name .npmrc -not -name deploy.sh -not -name index.js -not -name package.json -not -name README.md -not -name *.tgz -delete
+find . -not -name .npmignore -not -name .npmrc -not -name deploy.sh -not -name absolute-path.js -not -name index.js -not -name package.json -not -name README.md -not -name *.tgz -delete
