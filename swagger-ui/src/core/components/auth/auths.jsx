@@ -27,7 +27,6 @@ export default class Auths extends React.Component {
     e.preventDefault()
 
     let { authActions } = this.props
-
     authActions.authorize(this.state)
   }
 
@@ -42,10 +41,16 @@ export default class Auths extends React.Component {
     authActions.logout(auths)
   }
 
+  close =(e) => {
+    e.preventDefault()
+    let { authActions } = this.props
+
+    authActions.showDefinitions(false)
+  }
+
   render() {
     let { definitions, getComponent, authSelectors, errSelectors } = this.props
-    const ApiKeyAuth = getComponent("apiKeyAuth")
-    const BasicAuth = getComponent("basicAuth")
+    const AuthItem = getComponent("AuthItem")
     const Oauth2 = getComponent("oauth2", true)
     const Button = getComponent("Button")
 
@@ -64,33 +69,15 @@ export default class Auths extends React.Component {
           !!nonOauthDefinitions.size && <form onSubmit={ this.submitAuth }>
             {
               nonOauthDefinitions.map( (schema, name) => {
-                let type = schema.get("type")
-                let authEl
-
-                switch(type) {
-                  case "apiKey": authEl = <ApiKeyAuth key={ name }
-                                                    schema={ schema }
-                                                    name={ name }
-                                                    errSelectors={ errSelectors }
-                                                    authorized={ authorized }
-                                                    getComponent={ getComponent }
-                                                    onChange={ this.onAuthChange } />
-                    break
-                  case "basic": authEl = <BasicAuth key={ name }
-                                                  schema={ schema }
-                                                  name={ name }
-                                                  errSelectors={ errSelectors }
-                                                  authorized={ authorized }
-                                                  getComponent={ getComponent }
-                                                  onChange={ this.onAuthChange } />
-                    break
-                  default: authEl = <div key={ name }>Unknown security definition type { type }</div>
-                }
-
-                return (<div key={`${name}-jump`}>
-                  { authEl }
-                </div>)
-
+                return <AuthItem
+                  key={name}
+                  schema={schema}
+                  name={name}
+                  getComponent={getComponent}
+                  onAuthChange={this.onAuthChange}
+                  authorized={authorized}
+                  errSelectors={errSelectors}
+                  />
               }).toArray()
             }
             <div className="auth-btn-wrapper">
@@ -98,6 +85,7 @@ export default class Auths extends React.Component {
                 nonOauthDefinitions.size === authorizedAuth.size ? <Button className="btn modal-btn auth" onClick={ this.logoutClick }>Logout</Button>
               : <Button type="submit" className="btn modal-btn auth authorize">Authorize</Button>
               }
+              <Button className="btn modal-btn auth btn-done" onClick={ this.close }>Close</Button>
             </div>
           </form>
         }

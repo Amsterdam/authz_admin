@@ -1,7 +1,35 @@
+import { fromJS } from "immutable"
 import { createXMLExample, sampleFromSchema } from "corePlugins/samples/fn"
 import expect from "expect"
 
 describe("sampleFromSchema", function() {
+  it("handles Immutable.js objects for nested schemas", function () {
+    var definition = fromJS({
+      "type": "object",
+      "properties": {
+        "json": {
+          "type": "object",
+          "example": {
+            "a": "string"
+          },
+          "properties": {
+            "a": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    })
+
+    var expected = {
+      json: {
+        a: "string"
+      }
+    }
+
+    expect(sampleFromSchema(definition, { includeReadOnly: false })).toEqual(expected)
+  })
+
   it("returns object with no readonly fields for parameter", function () {
     var definition = {
       type: "object",
@@ -51,6 +79,30 @@ describe("sampleFromSchema", function() {
     expect(sampleFromSchema(definition, { includeReadOnly: true })).toEqual(expected)
   })
 
+  it("returns object without deprecated fields for parameter", function () {
+    var definition = {
+      type: "object",
+      properties: {
+        id: {
+          type: "integer"
+        },
+        deprecatedProperty: {
+          deprecated: true,
+          type: "string"
+        }
+      },
+      xml: {
+        name: "animals"
+      }
+    }
+
+    var expected = {
+      id: 0
+    }
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
   it("returns object without writeonly fields for parameter", function () {
     var definition = {
       type: "object",
@@ -98,6 +150,368 @@ describe("sampleFromSchema", function() {
     }
 
     expect(sampleFromSchema(definition, { includeWriteOnly: true })).toEqual(expected)
+  })
+
+  it("returns object without any $$ref fields at the root schema level", function () {
+    var definition = {
+    type: "object",
+    properties: {
+      message: {
+        type: "string"
+      }
+    },
+    example: {
+      value: {
+        message: "Hello, World!"
+      },
+      $$ref: "#/components/examples/WelcomeExample"
+    },
+    $$ref: "#/components/schemas/Welcome"
+  }
+
+    var expected = {
+      "value": {
+        "message": "Hello, World!"
+      }
+    }
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toEqual(expected)
+  })
+
+  it("returns object without any $$ref fields at nested schema levels", function () {
+    var definition = {
+      type: "object",
+      properties: {
+        message: {
+          type: "string"
+        }
+      },
+      example: {
+        a: {
+          value: {
+            message: "Hello, World!"
+          },
+          $$ref: "#/components/examples/WelcomeExample"
+        }
+      },
+      $$ref: "#/components/schemas/Welcome"
+    }
+
+    var expected = {
+      a: {
+        "value": {
+          "message": "Hello, World!"
+        }
+      }
+    }
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toEqual(expected)
+  })
+
+  it("returns object with any $$ref fields that appear to be user-created", function () {
+    var definition = {
+      type: "object",
+      properties: {
+        message: {
+          type: "string"
+        }
+      },
+      example: {
+        $$ref: {
+          value: {
+            message: "Hello, World!"
+          },
+          $$ref: "#/components/examples/WelcomeExample"
+        }
+      },
+      $$ref: "#/components/schemas/Welcome"
+    }
+
+    var expected = {
+      $$ref: {
+        "value": {
+          "message": "Hello, World!"
+        }
+      }
+    }
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toEqual(expected)
+  })
+
+  it("returns example value for date-time property", function() {
+    var definition = {
+      type: "string",
+      format: "date-time"
+    }
+
+    // 0-20 chops off milliseconds
+    // necessary because test latency can cause failures
+    // it would be better to mock Date globally and expect a string - KS 11/18
+    var expected = new Date().toISOString().substring(0, 20)
+
+    expect(sampleFromSchema(definition)).toInclude(expected)
+  })
+
+  it("returns example value for date property", function() {
+    var definition = {
+      type: "string",
+      format: "date"
+    }
+
+    var expected = new Date().toISOString().substring(0, 10)
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
+  it("returns a UUID for a string with format=uuid", function() {
+    var definition = {
+      type: "string",
+      format: "uuid"
+    }
+
+    var expected = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
+  it("returns a hostname for a string with format=hostname", function() {
+    var definition = {
+      type: "string",
+      format: "hostname"
+    }
+
+    var expected = "example.com"
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
+  it("returns an IPv4 address for a string with format=ipv4", function() {
+    var definition = {
+      type: "string",
+      format: "ipv4"
+    }
+
+    var expected = "198.51.100.42"
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
+  it("returns an IPv6 address for a string with format=ipv6", function() {
+    var definition = {
+      type: "string",
+      format: "ipv6"
+    }
+
+    var expected = "2001:0db8:5b96:0000:0000:426f:8e17:642a"
+
+    expect(sampleFromSchema(definition)).toEqual(expected)
+  })
+
+  describe("for array type", function() {
+    it("returns array with sample of array type", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "integer"
+        }
+      }
+
+      var expected = [ 0 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of examples for array that has example", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        example: "dog"
+      }
+
+      var expected = [ "dog" ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of examples for array that has examples", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        example: [ "dog", "cat" ]
+      }
+
+      var expected = [ "dog", "cat" ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for oneOf type", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          oneOf: [
+            {
+              type: "integer"
+            }
+          ]
+        }
+      }
+
+      var expected = [ 0 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for oneOf types", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          oneOf: [
+            {
+              type: "string"
+            },
+            {
+              type: "integer"
+            }
+          ]
+        }
+      }
+
+      var expected = [ "string", 0 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for oneOf examples", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          oneOf: [
+            {
+              type: "string",
+              example: "dog"
+            },
+            {
+              type: "integer",
+              example: 1
+            }
+          ]
+        }
+      }
+
+      var expected = [ "dog", 1 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for anyOf type", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          anyOf: [
+            {
+              type: "integer"
+            }
+          ]
+        }
+      }
+
+      var expected = [ 0 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for anyOf types", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          anyOf: [
+            {
+              type: "string"
+            },
+            {
+              type: "integer"
+            }
+          ]
+        }
+      }
+
+      var expected = [ "string", 0 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns array of samples for anyOf examples", function() {
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          anyOf: [
+            {
+              type: "string",
+              example: "dog"
+            },
+            {
+              type: "integer",
+              example: 1
+            }
+          ]
+        }
+      }
+
+      var expected = [ "dog", 1 ]
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns null for a null example", function() {
+      var definition = {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          }
+        }
+      }
+
+      var expected = {
+        foo: null
+      }
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
+
+    it("returns null for a null object-level example", function() {
+      var definition = {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "example": {
+          "foo": null
+        }
+      }
+
+      var expected = {
+        foo: null
+      }
+
+      expect(sampleFromSchema(definition)).toEqual(expected)
+    })
   })
 })
 
@@ -538,25 +952,62 @@ describe("createXMLExample", function () {
       expect(sut(definition)).toEqual(expected)
     })
 
-  it("returns array with example values  with wrapped=true", function () {
-    var expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<animals>\n\t<animal>1</animal>\n\t<animal>2</animal>\n</animals>"
-    var definition = {
-      type: "array",
-      items: {
-        type: "string",
+    it("returns array with example values  with wrapped=true", function () {
+      var expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<animals>\n\t<animal>1</animal>\n\t<animal>2</animal>\n</animals>"
+      var definition = {
+        type: "array",
+        items: {
+          type: "string",
+          xml: {
+            name: "animal"
+          }
+        },
+        "example": [ "1", "2" ],
         xml: {
-          name: "animal"
+          wrapped: true,
+          name: "animals"
         }
-      },
-      "example": [ "1", "2" ],
-      xml: {
-        wrapped: true,
-        name: "animals"
       }
-    }
 
-    expect(sut(definition)).toEqual(expected)
-  })
+      expect(sut(definition)).toEqual(expected)
+    })
+
+    it("returns array of objects with example values  with wrapped=true", function () {
+      var expected = `<?xml version="1.0" encoding="UTF-8"?>\n<users>\n\t<user>\n\t\t<id>1</id>\n\t\t<name>Arthur Dent</name>\n\t</user>\n\t<user>\n\t\t<id>2</id>\n\t\t<name>Ford Prefect</name>\n\t</user>\n</users>`
+      var definition = {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "xml": {
+            "name": "user"
+          }
+        },
+        "xml": {
+          "name": "users",
+          "wrapped": true
+        },
+        "example": [
+          {
+            "id": 1,
+            "name": "Arthur Dent"
+          },
+          {
+            "id": 2,
+            "name": "Ford Prefect"
+          }
+        ]
+      }
+
+      expect(sut(definition)).toEqual(expected)
+    })
 
 })
 

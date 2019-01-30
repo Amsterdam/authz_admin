@@ -11,7 +11,7 @@ let rules = [
           name: "[name].js"
         }
       },
-      { loader: "babel-loader" }
+      { loader: "babel-loader?retainLines=true" }
     ]
   }
 ]
@@ -20,6 +20,7 @@ module.exports = require("./make-webpack-config.js")(rules, {
   _special: {
     separateStylesheets: true,
     minimize: true,
+    mangle: true,
     sourcemaps: true,
   },
 

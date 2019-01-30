@@ -19,7 +19,9 @@ export default class Parameters extends Component {
     onTryoutClick: PropTypes.func,
     onCancelClick: PropTypes.func,
     onChangeKey: PropTypes.array,
-    pathMethod: PropTypes.array.isRequired
+    pathMethod: PropTypes.array.isRequired,
+    getConfigs: PropTypes.func.isRequired,
+    specPath: ImPropTypes.list.isRequired,
   }
 
 
@@ -29,15 +31,16 @@ export default class Parameters extends Component {
     tryItOutEnabled: false,
     allowTryItOut: true,
     onChangeKey: [],
+    specPath: [],
   }
 
   onChange = ( param, value, isXml ) => {
     let {
-      specActions: { changeParam },
+      specActions: { changeParamByIdentity },
       onChangeKey,
     } = this.props
 
-    changeParam( onChangeKey, param.get("name"), value, isXml)
+    changeParamByIdentity(onChangeKey, param, value, isXml)
   }
 
   onChangeConsumesWrapper = ( val ) => {
@@ -57,10 +60,13 @@ export default class Parameters extends Component {
       parameters,
       allowTryItOut,
       tryItOutEnabled,
+      specPath,
 
       fn,
       getComponent,
-      specSelectors,
+      getConfigs,
+      specSelectors, 
+      specActions,
       pathMethod
     } = this.props
 
@@ -90,14 +96,19 @@ export default class Parameters extends Component {
               </thead>
               <tbody>
                 {
-                  eachMap(parameters, (parameter) => (
-                    <ParameterRow fn={ fn }
+                  eachMap(parameters, (parameter, i) => (
+                    <ParameterRow
+                      fn={ fn }
+                      specPath={specPath.push(i.toString())}
                       getComponent={ getComponent }
-                      param={ parameter }
-                      key={ parameter.get( "name" ) }
+                      getConfigs={ getConfigs }
+                      rawParam={ parameter }
+                      param={ specSelectors.parameterWithMetaByIdentity(pathMethod, parameter) }
+                      key={ `${parameter.get( "in" )}.${parameter.get("name")}` }
                       onChange={ this.onChange }
                       onChangeConsumes={this.onChangeConsumesWrapper}
                       specSelectors={ specSelectors }
+                      specActions={specActions}
                       pathMethod={ pathMethod }
                       isExecute={ isExecute }/>
                   )).toArray()
