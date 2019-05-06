@@ -3,6 +3,9 @@ MAINTAINER datapunt@amsterdam.nl
 
 ENV PYTHONUNBUFFERED 1
 
+ARG https_proxy=http://10.240.2.1:8080/
+ENV https_proxy=$https_proxy
+
 EXPOSE 8000
 
 RUN apt-get clean \
