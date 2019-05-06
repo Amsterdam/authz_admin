@@ -3,7 +3,7 @@ version: '3'
 services:
 
   database:
-    image: postgres:9.5
+    image: amsterdam/postgres11
     ports:
       - "5432:5432"
     environment:
@@ -38,3 +38,5 @@ services:
       DB_HOST: database
       AUTHZ_ADMIN_API_KEY: apikey
       DATAPUNT_ENVIRONMENT: development
+      http_proxy:
+      https_proxy:
