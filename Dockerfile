@@ -15,6 +15,6 @@ WORKDIR /app
 # definition file into swagger-ui.
 RUN chown -R datapunt /app/swagger-ui/dist
 
-RUN pip install --no-cache-dir -e .[test]
+RUN pip install -e .[test]
 
 USER datapunt
