@@ -1,0 +1,66 @@
+diff --git a/dist/index.html b/dist/index.html
+index 32169e36..281e5dd1 100644
+--- a/dist/index.html
++++ b/dist/index.html
+@@ -39,8 +39,14 @@
+     window.onload = function() {
+       // Begin Swagger UI call region
+       const ui = SwaggerUIBundle({
+-        url: "https://petstore.swagger.io/v2/swagger.json",
++        //url: "https://petstore.swagger.io/v2/swagger.json",
++        url: "openapi.yml",
++        //oauth2RedirectUrl: "http://localhost:8000/authz_admin/swagger-ui/oauth2-redirect.html",
++        oauth2RedirectUrl: "https://acc.api.data.amsterdam.nl/authz_admin/swagger-ui/oauth2-redirect.html",
+         dom_id: '#swagger-ui',
++        validatorUrl: null,
++        docExpansion: 'list',
++        jsonEditor: true,
+         deepLinking: true,
+         presets: [
+           SwaggerUIBundle.presets.apis,
+@@ -51,6 +57,14 @@
+         ],
+         layout: "StandaloneLayout"
+       })
++
++      ui.initOAuth({
++        clientId: "swagger-ui",
++        client_id: "swagger-ui",
++        additionalQueryStringParams: {
++          'idp_id': 'datapunt'
++        }
++      })
+       // End Swagger UI call region
+ 
+       window.ui = ui
+diff --git a/swagger-ui-dist-package/deploy.sh b/swagger-ui-dist-package/deploy.sh
+index 7e488509..8fb27e67 100755
+--- a/swagger-ui-dist-package/deploy.sh
++++ b/swagger-ui-dist-package/deploy.sh
+@@ -7,7 +7,7 @@ cd "${0%/*}"
+ UI_VERSION=$(node -p "require('../package.json').version")
+ 
+ # Replace our version placeholder with UI's version
+-sed -i "s|\$\$VERSION|$UI_VERSION|g" package.json
++sed -i '' "s|\$\$VERSION|$UI_VERSION|g" package.json
+ 
+ # Copy UI's dist files to our directory
+ cp ../dist/* .
+@@ -18,4 +18,4 @@ else
+   npm pack .
+ fi
+ 
+-find . -not -name .npmignore -not -name .npmrc -not -name deploy.sh -not -name index.js -not -name package.json -not -name README.md -not -name *.tgz -delete
++find . -not -name .npmignore -not -name .npmrc -not -name deploy.sh -not -name absolute-path.js -not -name index.js -not -name package.json -not -name README.md -not -name *.tgz -delete
+diff --git a/swagger-ui-dist-package/package.json b/swagger-ui-dist-package/package.json
+index f4ddd7cf..eae24506 100644
+--- a/swagger-ui-dist-package/package.json
++++ b/swagger-ui-dist-package/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "swagger-ui-dist",
+-  "version": "$$VERSION",
++  "version": "3.20.0",
+   "main": "index.js",
+   "repository": "git@github.com:swagger-api/swagger-ui.git",
+   "contributors": [

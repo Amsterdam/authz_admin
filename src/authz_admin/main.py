@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def add_routes(base_path: str, router: web.UrlDispatcher):
-    router.add_static(base_path + '/swagger-ui', 'swagger-ui/dist', follow_symlinks=True)
+    router.add_static(base_path + '/swagger-ui', 'swagger-ui-dist', follow_symlinks=True)
     #router.add_route('GET', base_path + '/authorization', handlers.authorization, name='authorization')
     handlers.Root.add_to_router(router, base_path + '/')
     handlers.Accounts.add_to_router(router, base_path + '/accounts')
