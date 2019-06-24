@@ -38,5 +38,3 @@ services:
       DB_HOST: database
       AUTHZ_ADMIN_API_KEY: apikey
       DATAPUNT_ENVIRONMENT: development
-      http_proxy:
-      https_proxy:

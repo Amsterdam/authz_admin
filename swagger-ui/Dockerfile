@@ -2,9 +2,6 @@ FROM alpine:3.5
 
 MAINTAINER fehguy
 
-ARG https_proxy=http://10.240.2.1:8080/
-ENV https_proxy=$https_proxy
-
 ENV VERSION "v2.2.10"
 ENV FOLDER "swagger-ui-2.2.10"
 ENV API_URL "http://petstore.swagger.io/v2/swagger.json"
