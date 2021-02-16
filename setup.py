@@ -132,7 +132,7 @@ setup(
         'jsonschema',
         'mimeparse',
         'PyYaml',
-        'PyJWT',
+        'PyJWT==1.7.1',
         'psycopg2-binary',
         'SQLAlchemy==1.1',
         'swagger-parser',
