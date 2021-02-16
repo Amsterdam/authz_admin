@@ -136,7 +136,7 @@ setup(
         'psycopg2-binary',
         'SQLAlchemy==1.1',
         'swagger-parser',
-        'uvloop',  # Recommended by aiohttp docs
+        'uvloop==0.14.0',  # Recommended by aiohttp docs
         'yarl==0.12.0'
     ],
     extras_require={
