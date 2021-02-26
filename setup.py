@@ -45,7 +45,7 @@ setup(
     # ],
     install_requires=[
         # 'aiodns==1.1.1',
-        # 'aiohttp==2.2.5',
+        # 'aiohttp==3.7.4',
         # 'aiohttp-debugtoolbar==0.4.1',
         # 'aiohttp-jinja2==0.14.0',
         # 'aiopg==0.13.1',
@@ -122,7 +122,7 @@ setup(
         # 'yarl==0.12.0',
 
         'aiodns',  # Recommended by aiohttp docs
-        'aiohttp==2.2.5',
+        'aiohttp==3.7.4',
         'aiohttp-jinja2==0.14.0',
         'aiopg',
         'datapunt-authorization-django==0.2.18',  # Only for jwks module in this package
